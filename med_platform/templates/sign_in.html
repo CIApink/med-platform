@@ -80,8 +80,8 @@
         .nav-menu {
             display: flex;
             gap: 25px;
-            justify-content: center;
-            width: 50%;
+            justify-content: center; /* 水平居中 */
+            width: 50%; /* 分配更多宽度给菜单 */
         }
         
         .nav-item {
@@ -114,41 +114,42 @@
             text-decoration: none;
         }
 
-        /* 登录容器样式 */
+        /* 登录页面主体样式 */
         .login-container {
-            min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 80px 20px 20px;
+            align-items: center;
+            min-height: 100vh;
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f0f8f3, #e6f5ef);
         }
         
         .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
             width: 100%;
             max-width: 400px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 40px;
             text-align: center;
         }
-        
+
         .platform-logo {
+            margin-bottom: 24px;
+        }
+
+        .platform-icon {
             width: 60px;
             height: 60px;
-            background: var(--brand-green);
-            border-radius: 12px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--brand-green), var(--light-blue));
+            display: inline-flex;
             justify-content: center;
-        }
-        
-        .platform-icon {
+            align-items: center;
             color: white;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 16px;
         }
         
         .login-title {
@@ -203,67 +204,103 @@
             color: var(--light-blue);
             text-decoration: underline;
         }
-        
+
         .signin-button {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             font-size: 16px;
-            font-weight: 500;
-            color: white;
-            background: var(--brand-green);
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
         .signin-button:hover {
-            background: var(--light-blue);
+            opacity: 0.9;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .signin-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #aaa;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        .separator::before {
+            margin-right: .5em;
+        }
+        
+        .separator::after {
+            margin-left: .5em;
         }
         
         .register-link {
-            margin-top: 20px;
             font-size: 14px;
-            color: #666;
+            color: #555;
         }
         
         .register-link a {
             color: var(--brand-green);
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.2s;
         }
         
         .register-link a:hover {
+            color: var(--light-blue);
             text-decoration: underline;
         }
 
-        .messages {
-            margin-bottom: 20px;
+        .alt-signin {
+            margin-top: 20px;
         }
 
-        .messages .alert {
-            padding: 12px;
+        .alt-signin-button {
+            background-color: #f5f5f5;
+            border: 1px solid #e1e4e8;
+            color: #333;
+            padding: 10px;
+            width: 100%;
             border-radius: 6px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-
-        .messages .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .messages .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        
+        .alt-signin-button:hover {
+            background-color: #efefef;
         }
 
         /* 响应式设计 */
         @media (max-width: 500px) {
             .login-box {
-                margin: 0 20px;
-                padding: 30px 20px;
+                padding: 25px;
+                margin: 20px;
+            }
+            .nav-menu {
+                display: none;
+            }
+            .logo {
+                width: auto;
             }
         }
     </style>
@@ -305,29 +342,28 @@
                     {% endfor %}
                 </div>
             {% endif %}
-            
-            <form method="post">
+
+            <form method="post" action="{% url 'sign_in' %}">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" name="username" required autocomplete="username">
+                    <label for="email">电子邮箱</label>
+                    <input type="email" id="email" name="email" required>
                 </div>
-                
                 <div class="form-group">
                     <label for="password">密码</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <input type="password" id="password" name="password" required>
                 </div>
-                
                 <div class="forgot-password">
-                    <a href="#">忘记密码？</a>
+                    <a href="#">忘记密码?</a>
                 </div>
-                
                 <button type="submit" class="signin-button">登录</button>
             </form>
-            
-            <p class="register-link">
-                没有账号？ <a href="{% url 'sign_up' %}">创建账户</a>
-            </p>
+
+            <div class="separator">或</div>
+
+            <div class="register-link">
+                没有账号? <a href="{% url 'sign_up' %}">创建账户</a>
+            </div>
         </div>
     </div>
 </body>

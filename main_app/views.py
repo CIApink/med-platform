@@ -22,15 +22,15 @@ def index(request):
 def sign_in(request):
     """登录页面视图"""
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')  # 改为email
         password = request.POST.get('password')
         
         # 尝试通过邮箱查找用户
         try:
-            user = User.objects.get(email=username)
+            user = User.objects.get(email=email)
             username = user.username
         except User.DoesNotExist:
-            pass
+            username = email  # 如果没找到，也许用户输入的是用户名
         
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -54,8 +54,6 @@ def sign_in(request):
         else:
             messages.error(request, '用户名或密码错误')
             
-    return render(request, 'login.html')
-    
     return render(request, 'sign_in.html')
 
 
