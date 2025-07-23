@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - MED环境数据平台</title>
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Normal.woff" %}') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Semibold.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Semibold.woff" %}') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Medium.woff" %}') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color: #6fb8ed;
+            margin-right: 40px;
+            width: 32.5%;
+        }
+
+        .logo .main-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .logo .sub-title {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            width: 50%;
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        .user-auth {
+            margin-left: auto;
+            color: white;
+            width: 25%;
+            text-align: right;
+        }
+        
+        .user-auth a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* 登录容器样式 */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 80px 20px 20px;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .platform-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--brand-green);
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .platform-icon {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            background-color: #ffffff;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(74, 182, 164, 0.15);
+        }
+        
+        .forgot-password {
+            text-align: right;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .forgot-password a {
+            color: var(--brand-green);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .forgot-password a:hover {
+            color: var(--light-blue);
+            text-decoration: underline;
+        }
+        
+        .signin-button {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            background: var(--brand-green);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .signin-button:hover {
+            background: var(--light-blue);
+        }
+        
+        .register-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .register-link a {
+            color: var(--brand-green);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .messages .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .messages .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .messages .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 500px) {
+            .login-box {
+                margin: 0 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{% url 'index' %}" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">主页</a>
+            <a href="#" class="nav-item">模型介绍</a>
+            <a href="{% url 'data_download' %}" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="{% url 'data_echart' %}" class="nav-item">数据地图</a>
+            <a href="#" class="nav-item">用户服务</a>
+        </div>
+        <div class="user-auth">
+            <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
+        </div>
+    </nav>
+
+    <!-- 登录容器 -->
+    <div class="login-container">
+        <div class="login-box">
+            <div class="platform-logo">
+                <div class="platform-icon">M</div>
+            </div>
+            <h1 class="login-title">登录 MED 平台</h1>
+            
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <div class="forgot-password">
+                    <a href="#">忘记密码？</a>
+                </div>
+                
+                <button type="submit" class="signin-button">登录</button>
+            </form>
+            
+            <p class="register-link">
+                没有账号？ <a href="{% url 'sign_up' %}">创建账户</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

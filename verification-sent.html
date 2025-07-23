@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>验证邮件已发送 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+           url('./fonts/MiSans-Normal.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+           url('./fonts/MiSans-Medium.woff') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+    
+    /* 导航栏样式 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    
+    .logo {
+      display: flex;
+      flex-direction: column;
+      color: #6fb8ed;
+      margin-right: 40px;
+      width: 32.5%;
+    }
+
+    .logo .main-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .logo .sub-title {
+      font-size: 14px;
+      font-weight: normal;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 25px;
+      justify-content: center; /* 水平居中 */
+      width: 50%; /* 分配更多宽度给菜单 */
+    }
+    
+    .nav-item {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      position: relative;
+      padding: 5px 0;
+    }
+    
+    .nav-item:hover::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: white;
+    }
+    
+    .user-auth {
+      margin-left: auto;
+      color: white;
+      width: 25%;
+      text-align: right;
+    }
+    
+    .user-auth a {
+      color: white;
+      text-decoration: none;
+    }
+    
+    .user-auth .user-email {
+      display: none;
+      cursor: pointer;
+    }
+    
+    .user-auth .user-email:hover {
+      text-decoration: underline;
+    }
+    
+    .user-auth .login-signup {
+      display: block;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0f8f3, #e6f5ef);
+      padding-top: 60px;
+    }
+
+    .verification-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 40px 20px;
+    }
+
+    .verification-box {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .status-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      background: #dafbe1;
+      color: #1f883d;
+    }
+
+    .verification-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #333;
+    }
+
+    .verification-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 24px;
+    }
+
+    .verification-email {
+      padding: 12px 16px;
+      background: #f6f8fa;
+      border-radius: 6px;
+      font-weight: 500;
+      margin: 16px 0;
+      color: #1f883d;
+    }
+
+    .verification-action {
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 182, 164, 0.2);
+    }
+
+    .resend-link {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .resend-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .resend-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .check-spam {
+      margin-top: 16px;
+      padding: 12px;
+      background: #fff8e1;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #856404;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="main-title">MED 环境健康数据平台</div>
+        <div class="sub-title">Metrics of Environmental Data</div>
+      </a>
+    </div>
+    <div class="nav-menu">
+      <a href="index.html" class="nav-item">主页</a>
+      <a href="#" class="nav-item">模型介绍</a>
+      <a href="data-download.html" class="nav-item">数据下载</a>
+      <a href="#" class="nav-item">论文成果</a>
+      <a href="data-local-map.html" class="nav-item">数据地图</a>
+      <a href="#" class="nav-item">用户服务</a>
+    </div>
+    <div class="user-auth" id="userAuth">
+      <a href="sign in.html" class="login-signup">登录/注册</a>
+      <div class="user-email" onclick="logout()">邮箱 (点击注销)</div>
+    </div>
+  </nav>
+
+  <!-- 验证内容 -->
+  <div class="verification-container">
+    <div class="verification-box">
+      <div class="status-icon">✓</div>
+      <h2 class="verification-title">验证邮件已发送</h2>
+      <p class="verification-message">
+        我们已向您的邮箱发送了一封验证邮件。请点击邮件中的链接完成账户验证。
+      </p>
+      
+      <div class="verification-email" id="userEmail"></div>
+      
+      <div class="check-spam">
+        如果您没有收到邮件，请检查垃圾邮件文件夹，或点击下方按钮重新发送。
+      </div>
+      
+      <div class="verification-action">
+        <button class="btn btn-primary" id="resendBtn">重新发送验证邮件</button>
+      </div>
+      
+      <div class="resend-link">
+        <a href="index.html">返回首页</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      // 检查登录状态并更新UI
+      await updateAuthUI();
+      
+      // 获取URL参数中的邮箱地址
+      const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get('email');
+      
+      if (email) {
+        document.getElementById('userEmail').textContent = email;
+      } else {
+        // 如果没有邮箱参数，跳转到注册页面
+        window.location.href = 'sign up.html';
+      }
+      
+      // 重新发送验证邮件
+      document.getElementById('resendBtn').addEventListener('click', async function() {
+        if (email) {
+          try {
+            // 显示发送中状态
+            this.textContent = '发送中...';
+            this.disabled = true;
+            
+            // 调用重发验证邮件函数
+            const result = await resendVerificationEmail(email);
+            
+            // 恢复按钮状态
+            this.textContent = '重新发送验证邮件';
+            this.disabled = false;
+            
+            if (result.success) {
+              alert('验证邮件已重新发送，请查收');
+            } else {
+              alert('发送失败: ' + result.message);
+            }
+          } catch (error) {
+            this.textContent = '重新发送验证邮件';
+            this.disabled = false;
+            console.error('重发验证邮件出错:', error);
+            alert('重发验证邮件失败，请稍后重试');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

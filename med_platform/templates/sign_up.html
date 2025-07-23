@@ -1,0 +1,623 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Normal.woff" %}') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Medium.woff" %}') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      background: #0d1117;
+      position: relative;
+      font-family: 'MiSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    }
+
+    /* 背景装饰元素 */
+    .bg-decoration {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--brand-green), var(--light-blue));
+      opacity: 0.03;
+      animation: float 30s infinite ease-in-out;
+    }
+
+    .floating-shape:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+
+    .floating-shape:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      top: 60%;
+      right: -150px;
+      animation-delay: -10s;
+    }
+
+    .floating-shape:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      bottom: -125px;
+      left: 40%;
+      animation-delay: -20s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+      33% { transform: translateY(-50px) rotate(120deg) scale(1.1); }
+      66% { transform: translateY(30px) rotate(240deg) scale(0.9); }
+    }
+
+    /* 主容器 */
+    .container {
+      display: flex;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 左侧展示区域 */
+    .left-section {
+      flex: 1;
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+      padding: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 右侧注册表单 */
+    .right-section {
+      flex: 1;
+      background: #ffffff;
+      padding: 40px 60px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .top-login-link {
+      text-align: right;
+      margin-bottom: 40px;
+      font-size: 14px;
+      color: #656d76;
+    }
+
+    .top-login-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .top-login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+    }
+
+    .form-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 8px;
+    }
+
+    .login-link {
+      color: #656d76;
+      font-size: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: #24292f;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group label .required {
+      color: var(--brand-green);
+      margin-left: 2px;
+    }
+
+    .form-group.error input, 
+    .form-group.error select {
+      border-color: #d1242f;
+      box-shadow: 0 0 0 3px rgba(209, 36, 47, 0.1);
+    }
+
+    .form-group.success input, 
+    .form-group.success select {
+      border-color: #1f883d;
+      box-shadow: 0 0 0 3px rgba(31, 136, 61, 0.1);
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid #d1d9e0;
+      border-radius: 6px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+      color: #24292f;
+    }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .form-group select option {
+      padding: 8px 12px;
+      background: #ffffff;
+      color: #24292f;
+    }
+
+    .form-group select:disabled option:first-child {
+      color: #8b949e;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px rgba(74, 182, 164, 0.15);
+    }
+
+    .hint-text {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .hint-text.default {
+      color: #656d76;
+    }
+
+    .hint-text.success {
+      color: #1f883d;
+    }
+
+    .hint-text.warning {
+      color: #bf8700;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      background: linear-gradient(90deg, #4ab6a4, #6fb8ed);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(90deg, #6fb8ed, #4ab6a4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(74, 182, 164, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 消息提示 */
+    .message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      border: 1px solid;
+    }
+
+    .message.error {
+      background: #fff1f3;
+      color: #d1242f;
+      border-color: #fd2c37;
+    }
+
+    .message.success {
+      background: #dafbe1;
+      color: #1f883d;
+      border-color: #1f883d;
+    }
+
+    /* 底部条款 */
+    .terms-text {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #656d76;
+      line-height: 1.5;
+    }
+
+    .terms-text a {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .terms-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .left-section {
+        display: none;
+      }
+      
+      .right-section {
+        flex: none;
+        padding: 40px 30px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .right-section {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  <div class="container">
+    <!-- 左侧展示区域 -->
+    <div class="left-section">
+      <div class="hero-content">
+        <h1 style="font-size: 48px; font-weight: 700; color: #f0f6fc; margin-bottom: 24px; line-height: 1.2;">
+          MED 环境健康数据平台
+        </h1>
+        <p style="font-size: 18px; color: #7d8590; margin-bottom: 20px; line-height: 1.5;">
+          Metrics of Environmental Data
+        </p>
+        
+        <div style="margin-top: 60px;">
+          <h2 style="font-size: 32px; font-weight: 600; color: #f0f6fc; margin-bottom: 32px;">
+            创建您的免费账户
+          </h2>
+          <p style="font-size: 18px; color: #8b949e; margin-bottom: 40px; line-height: 1.6;">
+            成为环境数据平台用户以体验更多核心功能。
+          </p>
+          
+          <!-- 查看包含内容 -->
+          <div style="margin-top: 50px;">
+            <div style="display: flex; align-items: center; margin-bottom: 12px; color: #8b949e;">
+              <span style="margin-right: 15px; font-size: 18px;">▼</span>
+              <span style="font-size: 16px; font-weight: 500;">查看包含内容</span>
+            </div>
+            
+            <div style="margin-left: 33px; margin-top: 20px;">
+              <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <span style="color: #4ab6a4; margin-right: 12px; font-size: 16px;">✓</span>
+                <span style="color: #c9d1d9; font-size: 15px;">访问环境数据平台</span>
+              </div>
+              <div style="margin-left: 28px; margin-bottom: 12px;">
+                <p style="color: #7d8590; font-size: 13px; line-height: 1.5; margin: 0;">
+                  提供高分辨率的环境观测数据，用于环境健康研究和公共卫生的决策
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧注册表单 -->
+    <div class="right-section">
+      <!-- 右上角登录链接 -->
+      <div class="top-login-link">
+        已有账户？ <a href="{% url 'sign_in' %}">立即登录 →</a>
+      </div>
+
+      <div class="form-header">
+        <h2 class="form-title">注册 MED 平台</h2>
+        <p class="login-link">成为环境数据平台用户以体验更多核心功能</p>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" id="registerForm">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="email">电子邮箱 <span style="color: var(--brand-green);">*</span></label>
+          <input type="email" id="email" name="email" placeholder="您的邮箱地址" required>
+          <div id="eduHint" class="hint-text default">
+            <span>教育邮箱(@xxx.edu.cn)将自动通过审核</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">密码 <span style="color: var(--brand-green);">*</span></label>
+          <input type="password" id="password" name="password" placeholder="6-20位密码" required>
+          <div id="passwordHint" class="hint-text default">
+            <span>密码长度6-20位，至少包含数字、大写英文、小写英文和特殊字符中的两种</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="confirm_password">确认密码 <span style="color: var(--brand-green);">*</span></label>
+          <input type="password" id="confirm_password" name="confirm_password" placeholder="再次输入密码" required>
+          <div id="confirmHint" class="hint-text default">
+            <span></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="organization">机构名称 <span style="color: var(--brand-green);">*</span></label>
+          <input type="text" id="organization" name="organization" placeholder="请填写机构全称" required>
+          <div class="hint-text default">
+            <span>请输入您所在机构的全称</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="organization_type">机构类型 <span style="color: var(--brand-green);">*</span></label>
+          <select id="organization_type" name="organization_type" required>
+            <option value="">请选择机构类型</option>
+            <option value="university">高等院校</option>
+            <option value="research_institute">科研院所</option>
+            <option value="government">政府机构</option>
+            <option value="enterprise">企业单位</option>
+            <option value="ngo">非政府组织</option>
+            <option value="hospital">医疗机构</option>
+            <option value="other">其他机构</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="country">机构国家/地区 <span style="color: var(--brand-green);">*</span></label>
+          <select id="country" name="country" required>
+            <option value="">请选择国家/地区</option>
+            <option value="CN" selected>中国</option>
+            <option value="US">美国</option>
+            <option value="GB">英国</option>
+            <option value="JP">日本</option>
+            <option value="KR">韩国</option>
+            <option value="DE">德国</option>
+            <option value="FR">法国</option>
+            <option value="CA">加拿大</option>
+            <option value="AU">澳大利亚</option>
+            <option value="SG">新加坡</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span id="submitText">注册</span>
+          <span id="submitArrow" style="margin-left: 8px;">→</span>
+        </button>
+      </form>
+
+      <div class="terms-text">
+        点击"立即注册"即表示您同意我们的 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 实时检测邮箱类型 - 更新为中国教育域名格式
+    document.getElementById('email').addEventListener('input', function() {
+      const email = this.value;
+      const hint = document.getElementById('eduHint');
+      
+      // 检测中国教育域名格式：@xxx.edu.cn
+      if (email.match(/@\w+\.edu\.cn$/i)) {
+        hint.innerHTML = '<span>检测到教育邮箱，验证后自动通过审核</span>';
+        hint.className = 'hint-text success';
+      } else if (email.includes('@') && email.includes('.')) {
+        hint.innerHTML = '<span>非教育邮箱，验证后需人工审核</span>';
+        hint.className = 'hint-text warning';
+      } else {
+        hint.innerHTML = '<span>教育邮箱(@xxx.edu.cn)验证后自动通过审核</span>';
+        hint.className = 'hint-text default';
+      }
+    });
+
+    // 密码验证
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const passwordHint = document.getElementById('passwordHint');
+      
+      // 检测密码复杂度
+      const hasNumber = /\d/.test(password);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+      
+      // 计算满足的条件数
+      let conditionsMet = 0;
+      if (hasNumber) conditionsMet++;
+      if (hasUpperCase) conditionsMet++;
+      if (hasLowerCase) conditionsMet++;
+      if (hasSpecialChar) conditionsMet++;
+      
+      // 检查长度和复杂度
+      if (password.length < 6 || password.length > 20) {
+        passwordHint.innerHTML = '<span>密码长度必须在6-20位之间</span>';
+        passwordHint.className = 'hint-text warning';
+        this.style.borderColor = '#bf8700';
+      } else if (conditionsMet < 2) {
+        passwordHint.innerHTML = '<span>密码强度不足，至少包含数字、大写字母、小写字母和特殊字符中的两种</span>';
+        passwordHint.className = 'hint-text warning';
+        this.style.borderColor = '#bf8700';
+      } else {
+        passwordHint.innerHTML = '<span>密码强度符合要求</span>';
+        passwordHint.className = 'hint-text success';
+        this.style.borderColor = '#1f883d';
+      }
+    });
+
+    // 确认密码验证
+    document.getElementById('confirm_password').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      const confirmHint = document.getElementById('confirmHint');
+      
+      if (confirmPassword === '') {
+        confirmHint.innerHTML = '<span></span>';
+        confirmHint.className = 'hint-text default';
+        this.style.borderColor = '#d1d9e0';
+      } else if (password === confirmPassword) {
+        confirmHint.innerHTML = '<span>密码匹配</span>';
+        confirmHint.className = 'hint-text success';
+        this.style.borderColor = '#1f883d';
+      } else {
+        confirmHint.innerHTML = '<span>密码不匹配</span>';
+        confirmHint.className = 'hint-text warning';
+        this.style.borderColor = '#bf8700';
+      }
+    });
+
+    // 表单验证
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+      const email = document.getElementById('email').value;
+      const organization = document.getElementById('organization').value;
+      const organizationType = document.getElementById('organization_type').value;
+      const country = document.getElementById('country').value;
+      
+      // 验证密码匹配
+      if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('密码不匹配，请重新输入');
+        return;
+      }
+      
+      // 验证密码强度
+      const hasNumber = /\d/.test(password);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+      
+      let conditionsMet = 0;
+      if (hasNumber) conditionsMet++;
+      if (hasUpperCase) conditionsMet++;
+      if (hasLowerCase) conditionsMet++;
+      if (hasSpecialChar) conditionsMet++;
+      
+      if (password.length < 6 || password.length > 20 || conditionsMet < 2) {
+        e.preventDefault();
+        alert('密码不符合要求，请修改后重试');
+        return;
+      }
+      
+      // 验证必填字段
+      if (!email || !organization || !organizationType || !country) {
+        e.preventDefault();
+        alert('请填写所有必填字段');
+        return;
+      }
+      
+      // 显示提交状态
+      const submitBtn = document.querySelector('.submit-btn');
+      const submitText = document.getElementById('submitText');
+      const submitArrow = document.getElementById('submitArrow');
+      
+      submitBtn.disabled = true;
+      submitText.textContent = '注册中...';
+      submitArrow.style.display = 'none';
+    });
+
+    // 机构类型和国家选择的动画效果
+    document.getElementById('organization_type').addEventListener('change', function() {
+      if (this.value) {
+        this.style.color = '#24292f';
+      }
+    });
+    
+    document.getElementById('country').addEventListener('change', function() {
+      if (this.value) {
+        this.style.color = '#24292f';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邮箱验证 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+           url('./fonts/MiSans-Normal.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+           url('./fonts/MiSans-Medium.woff') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+    
+    /* 导航栏样式 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    
+    .logo {
+      display: flex;
+      flex-direction: column;
+      color: #6fb8ed;
+      margin-right: 40px;
+      width: 32.5%;
+    }
+
+    .logo .main-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .logo .sub-title {
+      font-size: 14px;
+      font-weight: normal;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 25px;
+      justify-content: center; /* 水平居中 */
+      width: 50%; /* 分配更多宽度给菜单 */
+    }
+    
+    .nav-item {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      position: relative;
+      padding: 5px 0;
+    }
+    
+    .nav-item:hover::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: white;
+    }
+    
+    .user-auth {
+      margin-left: auto;
+      color: white;
+      width: 25%;
+      text-align: right;
+    }
+    
+    .user-auth a {
+      color: white;
+      text-decoration: none;
+    }
+    
+    .user-auth .user-email {
+      display: none;
+      cursor: pointer;
+    }
+    
+    .user-auth .user-email:hover {
+      text-decoration: underline;
+    }
+    
+    .user-auth .login-signup {
+      display: block;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0f8f3, #e6f5ef);
+      padding-top: 60px;
+    }
+
+    .verification-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 40px 20px;
+    }
+
+    .verification-box {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .status-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .status-icon.pending {
+      background: #ffe8cc;
+      color: #f9a825;
+    }
+
+    .status-icon.success {
+      background: #dafbe1;
+      color: #1f883d;
+    }
+
+    .status-icon.error {
+      background: #fff1f3;
+      color: #d1242f;
+    }
+
+    .verification-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #333;
+    }
+
+    .verification-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 24px;
+    }
+
+    .verification-action {
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 182, 164, 0.2);
+    }
+
+    .resend-link {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .resend-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .resend-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="main-title">MED 环境健康数据平台</div>
+        <div class="sub-title">Metrics of Environmental Data</div>
+      </a>
+    </div>
+    <div class="nav-menu">
+      <a href="index.html" class="nav-item">主页</a>
+      <a href="#" class="nav-item">模型介绍</a>
+      <a href="data-download.html" class="nav-item">数据下载</a>
+      <a href="#" class="nav-item">论文成果</a>
+      <a href="data-local-map.html" class="nav-item">数据地图</a>
+      <a href="#" class="nav-item">用户服务</a>
+    </div>
+    <div class="user-auth" id="userAuth">
+      <a href="sign in.html" class="login-signup">登录/注册</a>
+      <div class="user-email" onclick="logout()">邮箱 (点击注销)</div>
+    </div>
+  </nav>
+
+  <!-- 验证内容 -->
+  <div class="verification-container">
+    <div class="verification-box" id="verificationBox">
+      <!-- 这里的内容将由JavaScript动态填充 -->
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script src="js/update-user-profile.js"></script>
+  <script>
+    let supabaseAuth;
+    
+    // 初始化SupabaseAuth对象
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('页面加载完成，开始初始化');
+      
+      if (typeof SupabaseAuth !== 'undefined') {
+        supabaseAuth = new SupabaseAuth();
+        console.log('Supabase Auth 初始化成功');
+        
+        // 在初始化完成后处理验证
+        processVerification();
+        
+        // 检查登录状态并更新UI
+        updateAuthUI();
+      } else {
+        console.error('SupabaseAuth 类未定义，请确保已加载 supabase-auth.js');
+        showError('系统初始化失败', '系统组件加载失败，请刷新页面或联系客服。');
+      }
+    });
+    
+    // 处理验证流程
+    async function processVerification() {
+      // 获取URL参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const email = urlParams.get('email');
+      const action = urlParams.get('action') || 'verify';
+      
+      const verificationBox = document.getElementById('verificationBox');
+      
+      // 显示加载状态
+      verificationBox.innerHTML = `
+        <div class="status-icon pending">⌛</div>
+        <h2 class="verification-title">正在验证...</h2>
+        <p class="verification-message">请稍候，我们正在处理您的请求。</p>
+      `;
+      
+      console.log('验证页面加载，参数:', { 
+        hash: window.location.hash ? '存在' : '不存在', 
+        action, 
+        email,
+        url: window.location.href
+      });
+      
+      // 检查是否是验证链接
+      if (window.location.hash && window.location.hash.includes("#access_token=")) {
+        await handleEmailVerification(email);
+      }
+      // 处理重发验证邮件请求
+      else if (action === 'resend' && email) {
+        await handleResendVerification(email);
+      }
+      // 无效的请求
+      else {
+        showError('无效的验证请求', '链接似乎不正确或已过期。请尝试重新注册或联系客服。', email);
+      }
+    }
+    
+    // 处理邮件验证
+    async function handleEmailVerification(email) {
+      try {
+        if (!supabaseAuth) {
+          console.error('Supabase Auth未初始化');
+          showError('系统错误', '认证系统未初始化，请刷新页面或联系客服。', email);
+          return;
+        }
+        
+        // 检查Supabase会话
+        const { data, error } = await supabaseAuth.supabase.auth.getSession();
+        
+        if (error) {
+          console.error('验证会话获取失败:', error);
+          showError('验证失败', '验证链接无效或已过期。请尝试重新注册或联系客服。', email);
+          return;
+        }
+        
+        // 验证成功，处理用户信息
+        if (data && data.session) {
+          const user = data.session.user;
+          console.log('验证成功，用户信息:', user);
+          
+          // 更新用户配置文件，设置为已验证
+          try {
+            if (typeof supabaseAuth.updateUserProfile === 'function') {
+              const profileResult = await supabaseAuth.updateUserProfile(user.id, {
+                verified: true
+              });
+              
+              if (profileResult && profileResult.success) {
+                console.log('用户验证状态已更新');
+              } else {
+                console.warn('更新用户验证状态失败:', profileResult ? profileResult.error : '未知错误');
+              }
+            } else {
+              console.warn('无法更新用户验证状态，updateUserProfile方法不存在');
+            }
+          } catch (updateError) {
+            console.error('更新用户验证状态时出错:', updateError);
+          }
+          
+          // 根据邮箱类型显示不同的成功消息
+          const isEduEmail = user.email && user.email.match(/@\w+\.edu\.cn$/i);
+          
+          if (isEduEmail) {
+            // 教育邮箱自动通过审核
+            showSuccess('邮箱验证成功！', `您的教育邮箱已验证成功并自动通过审核。现在您可以登录平台了。`, 'sign in.html');
+          } else {
+            // 非教育邮箱需要人工审核
+            showSuccess('邮箱验证成功！', `您的邮箱已验证成功。由于不是教育邮箱，需要等待人工审核，我们会尽快处理。`, 'index.html');
+          }
+        } else {
+          showError('验证状态未知', '您的验证状态未知，请尝试登录或联系客服。', email);
+        }
+      } catch (error) {
+        console.error('处理验证时出错:', error);
+        showError('验证处理出错', '处理您的验证请求时出现错误，请稍后重试或联系客服。', email);
+      }
+    }
+    
+    // 处理重发验证邮件
+    async function handleResendVerification(email) {
+      if (!email) {
+        showError('无效的请求', '未提供电子邮件地址', null);
+        return;
+      }
+      
+      try {
+        if (supabaseAuth && typeof supabaseAuth.resendVerificationEmail === 'function') {
+          console.log('使用SupabaseAuth重发验证邮件:', email);
+          const resendResult = await supabaseAuth.resendVerificationEmail(email);
+          
+          if (resendResult.success) {
+            showSuccess('验证邮件已重发', `我们已向 ${email} 重新发送了验证邮件，请查收并点击邮件中的链接完成验证。`, null);
+          } else {
+            let errorMessage = resendResult.message || '重发验证邮件失败，请稍后重试';
+            
+            // 特殊处理频率限制错误
+            if (resendResult.emailLimitExceeded) {
+              errorMessage = '邮件发送频率超出限制，请等待几分钟后再试';
+            }
+            
+            showError('重发验证邮件失败', errorMessage, email);
+          }
+        } else {
+          console.warn('无法使用SupabaseAuth重发验证邮件，尝试回退方法');
+          // 回退到旧方法
+          if (typeof resendVerificationEmail === 'function') {
+            await resendVerificationEmail(email);
+            showSuccess('验证邮件已重发', `我们已向 ${email} 重新发送了验证邮件，请查收并点击邮件中的链接完成验证。`, null);
+          } else {
+            showError('重发功能不可用', '重发验证邮件功能暂时不可用，请稍后重试或联系客服。', email);
+          }
+        }
+      } catch (error) {
+        console.error('重发验证邮件时出错:', error);
+        showError('重发验证邮件失败', '处理您的请求时出现错误，请稍后重试或联系客服。', email);
+      }
+    }
+    
+    // 显示成功信息
+    function showSuccess(title, message, redirectUrl) {
+      const verificationBox = document.getElementById('verificationBox');
+      
+      verificationBox.innerHTML = `
+        <div class="status-icon success">✓</div>
+        <h2 class="verification-title">${title}</h2>
+        <p class="verification-message">${message}</p>
+        ${redirectUrl ? `
+          <div class="verification-action">
+            <button class="btn btn-primary" onclick="window.location.href='${redirectUrl}'">继续</button>
+          </div>
+        ` : ''}
+      `;
+    }
+    
+    // 显示错误信息
+    function showError(title, message, email) {
+      const verificationBox = document.getElementById('verificationBox');
+      
+      verificationBox.innerHTML = `
+        <div class="status-icon error">✗</div>
+        <h2 class="verification-title">${title}</h2>
+        <p class="verification-message">${message}</p>
+        ${email ? `
+          <div class="resend-link">
+            <a href="verify-email.html?action=resend&email=${encodeURIComponent(email)}">重新发送验证邮件</a>
+          </div>
+        ` : ''}
+        <div class="verification-action">
+          <button class="btn btn-primary" onclick="window.location.href='index.html'">返回首页</button>
+        </div>
+      `;
+    }
+    
+    // 检查登录状态并更新UI
+    async function updateAuthUI() {
+      try {
+        if (supabaseAuth) {
+          const user = await supabaseAuth.getCurrentUser();
+          const userAuth = document.getElementById('userAuth');
+          
+          if (user) {
+            // 用户已登录
+            const loginSignup = userAuth.querySelector('.login-signup');
+            const userEmail = userAuth.querySelector('.user-email');
+            
+            if (loginSignup) loginSignup.style.display = 'none';
+            if (userEmail) {
+              userEmail.textContent = user.email + ' (点击注销)';
+              userEmail.style.display = 'block';
+            }
+          }
+        }
+      } catch (error) {
+        console.error('更新认证UI出错:', error);
+      }
+    }
+    
+    // 退出登录
+    async function logout() {
+      try {
+        if (supabaseAuth) {
+          await supabaseAuth.signOut();
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        console.error('注销失败:', error);
+        alert('注销失败，请刷新页面后重试');
+      }
+    }
+  </script>
+</body>
+</html>

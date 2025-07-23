@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空气质量数据 - MED环境数据平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+            @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+                url('./fonts/MiSans-Normal.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Semibold.woff2') format('woff2'),
+                url('./fonts/MiSans-Semibold.woff') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+                url('./fonts/MiSans-Medium.woff') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        /* 加载状态样式 */
+        #data-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 4px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color: #6fb8ed;
+            margin-right: 40px;
+            width: 32.5%;
+        }
+
+        .logo .main-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .logo .sub-title {
+            font-size: 14px;
+            font-weight: normal;
+        }    
+
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center; /* 水平居中 */
+            width: 50%; /* 分配更多宽度给菜单 */
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        .user-auth {
+            margin-left: auto;
+            color: white;
+            width: 25%;
+            text-align: right;
+        }
+        
+        /* 主要内容样式 */
+        .main-content {
+            margin-top: 60px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .data-header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.6));
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-meta {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .data-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .control-btn {
+            padding: 6px 12px;
+            border: 2px solid var(--brand-green);
+            background: white;
+            color: var(--brand-green);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        /* 地图容器样式 */
+        .map-container {
+            position: relative;
+            height: 70vh;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        #airqualityMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 更新时间信息 */
+        .update-info {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        /* 图例样式 */
+        .legend {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gradient-bar {
+            width: 300px;
+            height: 20px;
+            background: linear-gradient(to right, 
+                #00E400 0%, #FFFF00 16.67%, #FF7E00 33.33%, 
+                #FF0000 50%, #99004C 66.67%, #7E0023 100%);
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .legend-labels {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 弹出窗口样式 */
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border: none;
+        }
+
+        .custom-popup .leaflet-popup-content {
+            margin: 0;
+            padding: 0;
+        }
+
+        .popup-content {
+            padding: 16px;
+            min-width: 200px;
+        }
+
+        .popup-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f4fd;
+        }
+
+        .popup-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .data-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .data-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .aqi-level {
+            text-align: center;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* 错误提示样式 */
+        .error-message {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #ff4757;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(255,71,87,0.3);
+            z-index: 2000;
+            max-width: 300px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                width: auto;
+                margin-right: 20px;
+            }
+            
+            .logo .main-title {
+                font-size: 20px;
+            }
+            
+            .nav-menu {
+                gap: 15px;
+            }
+            
+            .data-meta {
+                font-size: 24px;
+            }
+            
+            .gradient-bar {
+                width: 250px;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-item">主页</a>
+            <a href="#" class="nav-item">模型介绍</a>
+            <a href="data-download.html" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="data_echart_apikey.html" class="nav-item" style="color: #83c8dc;">数据地图</a>
+            <a href="#" class="nav-item">用户服务</a>
+        </div>
+        <div class="user-auth">
+            <a href="sign in.html" style="text-decoration: none; color: white;">登录/注册</a>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 数据头部 -->
+        <div class="data-header">
+            <div class="data-meta">实时PM2.5</div>
+            
+            <div class="data-controls">
+                <button class="control-btn active" data-pollutant="pm2p5">PM2.5</button>
+                <button class="control-btn" data-pollutant="pm10">PM10</button>
+                <button class="control-btn" data-pollutant="aqi">AQI</button>
+                <button class="control-btn" data-pollutant="so2">SO₂</button>
+                <button class="control-btn" data-pollutant="no2">NO₂</button>
+                <button class="control-btn" data-pollutant="co">CO</button>
+                <button class="control-btn" data-pollutant="o3">O₃</button>
+            </div>
+            
+            <!-- 更新时间信息 -->
+            <div class="update-info">
+                最后更新: <span id="update-time">-</span>
+                <div id="loading-status" style="margin-top: 5px; font-size: 12px; color: #666;">
+                    正在加载数据...
+                </div>
+            </div>
+        </div>
+
+        <!-- 地图容器 -->
+        <div class="map-container">
+            <div id="airqualityMap"></div>
+            <div id="data-loading" style="display: none;">
+                正在加载数据...
+            </div>
+        </div>
+
+        <!-- 图例 -->
+        <div class="legend">
+            <div class="gradient-bar"></div>
+            <div class="legend-labels">
+                <div>优&nbsp;&nbsp;&nbsp;&nbsp;良&nbsp;&nbsp;&nbsp;&nbsp;轻度&nbsp;&nbsp;&nbsp;&nbsp;中度&nbsp;&nbsp;&nbsp;&nbsp;重度&nbsp;&nbsp;&nbsp;严重</div>
+                <div id="legend-pollutant-name">PM2.5浓度 (μg/m³)</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 全局变量
+        let airQualityMap = null;
+        let localAirQualityData = null;
+        let currentPollutant = 'pm2p5';
+        let markersGroup = null;
+        
+        console.log('脚本开始执行...');
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始初始化...');
+            
+            // 初始化地图和数据
+            initAirQualityMap();
+            
+            // 初始化事件监听
+            initEventListeners();
+            
+            // 加载本地数据
+            loadLocalData();
+        });
+
+        /**
+         * 初始化空气质量地图
+         */
+        function initAirQualityMap() {
+            console.log('开始初始化地图...');
+            
+            try {
+                // 创建地图实例，设置中心点为中国
+                airQualityMap = L.map('airqualityMap').setView([35.8617, 104.1954], 5);
+                
+                console.log('地图实例创建成功');
+                
+                // 定义不同的瓦片图层
+                const tileLayers = {
+                    '高德地图': L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                        attribution: '&copy; 高德地图',
+                        maxZoom: 18
+                    }),
+                    
+                    '天地图': L.tileLayer('https://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=2e2c3dda99bfd0d5d9d8cd0c2bdc0be7', {
+                        subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
+                        attribution: '&copy; 天地图',
+                        maxZoom: 18
+                    }),
+                    
+                    'CartoDB': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '&copy; CartoDB',
+                        maxZoom: 19
+                    }),
+                    
+                    'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors',
+                        maxZoom: 19
+                    })
+                };
+                
+                // 默认使用高德地图
+                tileLayers['高德地图'].addTo(airQualityMap);
+                
+                // 添加图层控制器
+                L.control.layers(tileLayers).addTo(airQualityMap);
+                
+                // 创建标记图层组
+                markersGroup = L.layerGroup().addTo(airQualityMap);
+                
+                console.log('地图初始化完成');
+                return true;
+                
+            } catch (error) {
+                console.error('地图初始化失败:', error);
+                showError('地图初始化失败: ' + error.message);
+                return false;
+            }
+        }
+
+        /**
+         * 初始化事件监听器
+         */
+        function initEventListeners() {
+            console.log('初始化事件监听器...');
+            
+            // 污染物选择按钮事件
+            const pollutantButtons = document.querySelectorAll('.control-btn[data-pollutant]');
+            pollutantButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const pollutant = this.getAttribute('data-pollutant');
+                    console.log('切换污染物:', pollutant);
+                    
+                    // 更新当前污染物
+                    currentPollutant = pollutant;
+                    
+                    // 更新按钮状态
+                    pollutantButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新地图显示
+                    if (localAirQualityData) {
+                        displayDataOnMap();
+                    }
+                    
+                    // 更新图例
+                    updateLegend(pollutant);
+                });
+            });
+        }
+
+        /**
+         * 加载本地空气质量数据
+         */
+        async function loadLocalData() {
+            try {
+                console.log('开始加载本地数据...');
+                updateStatus('正在加载数据...');
+                
+                const response = await fetch('airquality.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                localAirQualityData = data;
+                
+                console.log('本地数据加载成功:', data);
+                console.log('城市数量:', data.cities?.length || 0);
+                
+                // 更新页面信息
+                if (data.updateTime) {
+                    document.getElementById('update-time').textContent = new Date(data.updateTime).toLocaleString('zh-CN');
+                }
+                
+                updateStatus(`数据加载完成，共 ${data.cities.length} 个城市`);
+                
+                // 等待地图初始化完成后再显示数据
+                if (airQualityMap) {
+                    displayDataOnMap();
+                } else {
+                    console.error('地图还未初始化');
+                    setTimeout(() => {
+                        if (airQualityMap) {
+                            displayDataOnMap();
+                        }
+                    }, 1000);
+                }
+                
+            } catch (error) {
+                console.error('加载本地数据失败:', error);
+                showError(`无法加载本地空气质量数据: ${error.message}`);
+                updateStatus('数据加载失败');
+            }
+        }
+
+        /**
+         * 在地图上显示空气质量数据
+         */
+        function displayDataOnMap() {
+            console.log('开始显示数据到地图...');
+            
+            if (!airQualityMap) {
+                console.error('地图对象不存在');
+                return;
+            }
+            
+            if (!localAirQualityData || !localAirQualityData.cities) {
+                console.error('没有可用的数据');
+                return;
+            }
+            
+            console.log(`准备显示 ${localAirQualityData.cities.length} 个城市的数据`);
+            
+            // 清除现有标记
+            if (markersGroup) {
+                markersGroup.clearLayers();
+            }
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            // 为每个城市添加标记
+            localAirQualityData.cities.forEach((cityData, index) => {
+                try {
+                    console.log(`处理城市 ${index + 1}/${localAirQualityData.cities.length}: ${cityData.city}`);
+                    
+                    if (!cityData.lat || !cityData.lon) {
+                        console.error(`城市 ${cityData.city} 缺少坐标信息`);
+                        errorCount++;
+                        return;
+                    }
+                    
+                    const marker = createCityMarker(cityData);
+                    if (marker) {
+                        markersGroup.addLayer(marker);
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error(`处理城市 ${cityData.city} 时出错:`, error);
+                    errorCount++;
+                }
+            });
+            
+            console.log(`标记显示完成: 成功 ${successCount} 个，失败 ${errorCount} 个`);
+            updateStatus(`显示完成: ${successCount} 个城市，${errorCount} 个错误`);
+        }
+
+        /**
+         * 创建单个城市标记
+         */
+        function createCityMarker(cityData) {
+            try {
+                const value = getPollutantValue(cityData, currentPollutant);
+                const color = getAQIColor(value, currentPollutant);
+                
+                console.log(`创建标记: ${cityData.city} - ${currentPollutant}: ${value}, 颜色: ${color}`);
+                
+                // 计算标记大小
+                let radius = Math.max(12, Math.min(25, 12 + value / 8));
+                
+                // 创建带数值的圆形标记
+                const divIcon = L.divIcon({
+                    html: `<div class="marker-circle" style="
+                        background: ${color}; 
+                        color: white; 
+                        border: 2px solid #333; 
+                        border-radius: 50%; 
+                        width: ${radius * 2}px; 
+                        height: ${radius * 2}px; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: ${Math.max(10, radius * 0.6)}px; 
+                        font-weight: bold;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                        line-height: 1;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    ">${Math.round(value)}</div>`,
+                    className: 'air-quality-marker-div',
+                    iconSize: [radius * 2, radius * 2],
+                    iconAnchor: [radius, radius]
+                });
+                
+                const marker = L.marker([cityData.lat, cityData.lon], { icon: divIcon });
+                
+                // 添加弹出信息
+                const popupContent = createPopupContent(cityData);
+                marker.bindPopup(popupContent, {
+                    maxWidth: 300,
+                    closeButton: true,
+                    autoClose: true,
+                    className: 'custom-popup'
+                });
+                
+                // 修复悬停效果 - 不使用transform，使用box-shadow和边框变化
+                marker.on('mouseover', function() {
+                    const element = this.getElement();
+                    if (element) {
+                        const circle = element.querySelector('.marker-circle');
+                        if (circle) {
+                            circle.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+                            circle.style.borderWidth = '3px';
+                            circle.style.borderColor = '#fff';
+                        }
+                    }
+                });
+                
+                marker.on('mouseout', function() {
+                    const element = this.getElement();
+                    if (element) {
+                        const circle = element.querySelector('.marker-circle');
+                        if (circle) {
+                            circle.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+                            circle.style.borderWidth = '2px';
+                            circle.style.borderColor = '#333';
+                        }
+                    }
+                });
+                
+                // 添加点击事件处理
+                marker.on('click', function(e) {
+                    console.log(`点击了城市: ${cityData.city}`);
+                    // 确保弹窗能正常打开
+                    this.openPopup();
+                });
+                
+                return marker;
+                
+            } catch (error) {
+                console.error(`创建城市标记失败 ${cityData.city}:`, error);
+                return null;
+            }
+        }
+
+        /**
+         * 创建弹出窗口内容
+         */
+        function createPopupContent(cityData) {
+            const aqiLevel = getAQILevel(cityData.aqi);
+            const aqiColor = getAQIColor(cityData.aqi, 'aqi');
+            
+            return `
+                <div class="popup-content">
+                    <div class="popup-title">${cityData.city}</div>
+                    <div class="popup-data">
+                        <div class="data-item">
+                            <span class="data-label">AQI</span>
+                            <span class="data-value">${cityData.aqi}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">PM2.5</span>
+                            <span class="data-value">${cityData.pm2p5}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">PM10</span>
+                            <span class="data-value">${cityData.pm10}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">O₃</span>
+                            <span class="data-value">${cityData.o3}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">SO₂</span>
+                            <span class="data-value">${cityData.so2}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">NO₂</span>
+                            <span class="data-value">${cityData.no2}</span>
+                        </div>
+                    </div>
+                    <div class="aqi-level" style="background-color: ${aqiColor}">
+                        ${aqiLevel}
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 获取污染物数值
+         */
+        function getPollutantValue(cityData, pollutant) {
+            switch(pollutant) {
+                case 'pm2p5': return parseFloat(cityData.pm2p5) || 0;
+                case 'pm10': return parseFloat(cityData.pm10) || 0;
+                case 'o3': return parseFloat(cityData.o3) || 0;
+                case 'so2': return parseFloat(cityData.so2) || 0;
+                case 'no2': return parseFloat(cityData.no2) || 0;
+                case 'co': return parseFloat(cityData.co) || 0;
+                default: return parseFloat(cityData.aqi) || 0;
+            }
+        }
+
+        /**
+         * 根据数值获取颜色
+         */
+        function getAQIColor(value, pollutant) {
+            if (pollutant === 'pm2p5' || pollutant === 'pm10') {
+                if (value <= 35) return '#00E400';      // 优 - 绿色
+                if (value <= 75) return '#FFFF00';      // 良 - 黄色
+                if (value <= 115) return '#FF7E00';     // 轻度污染 - 橙色
+                if (value <= 150) return '#FF0000';     // 中度污染 - 红色
+                if (value <= 250) return '#99004C';     // 重度污染 - 紫色
+                return '#7E0023';                       // 严重污染 - 棕红色
+            } else {
+                // 对于其他污染物，使用AQI通用标准
+                if (value <= 50) return '#00E400';
+                if (value <= 100) return '#FFFF00';
+                if (value <= 150) return '#FF7E00';
+                if (value <= 200) return '#FF0000';
+                if (value <= 300) return '#99004C';
+                return '#7E0023';
+            }
+        }
+
+        /**
+         * 获取AQI等级
+         */
+        function getAQILevel(aqi) {
+            const value = parseInt(aqi) || 0;
+            if (value <= 50) return '优';
+            if (value <= 100) return '良';
+            if (value <= 150) return '轻度污染';
+            if (value <= 200) return '中度污染';
+            if (value <= 300) return '重度污染';
+            return '严重污染';
+        }
+
+        /**
+         * 更新图例
+         */
+        function updateLegend(pollutant) {
+            const pollutantNames = {
+                'pm2p5': 'PM2.5浓度 (μg/m³)',
+                'pm10': 'PM10浓度 (μg/m³)',
+                'aqi': 'AQI指数',
+                'so2': 'SO₂浓度 (μg/m³)',
+                'no2': 'NO₂浓度 (μg/m³)',
+                'co': 'CO浓度 (mg/m³)',
+                'o3': 'O₃浓度 (μg/m³)'
+            };
+            
+            const legendElement = document.getElementById('legend-pollutant-name');
+            if (legendElement && pollutantNames[pollutant]) {
+                legendElement.textContent = pollutantNames[pollutant];
+            }
+            
+            // 更新页面标题
+            const dataMetaElement = document.querySelector('.data-meta');
+            if (dataMetaElement && pollutantNames[pollutant]) {
+                dataMetaElement.textContent = `实时${pollutantNames[pollutant]}`;
+            }
+        }
+
+        /**
+         * 显示错误信息
+         */
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        /**
+         * 更新状态信息
+         */
+        function updateStatus(message) {
+            const statusElement = document.getElementById('loading-status');
+            if (statusElement) {
+                statusElement.textContent = message;
+            }
+        }
+    </script>
+</body>
+</html>

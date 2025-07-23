@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+           url('./fonts/MiSans-Normal.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+           url('./fonts/MiSans-Medium.woff') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      background: #0d1117;
+      position: relative;
+      font-family: 'MiSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    }
+
+    /* 背景装饰元素 */
+    .bg-decoration {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--brand-green), var(--light-blue));
+      opacity: 0.03;
+      animation: float 30s infinite ease-in-out;
+    }
+
+    .floating-shape:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+
+    .floating-shape:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      top: 60%;
+      right: -150px;
+      animation-delay: -10s;
+    }
+
+    .floating-shape:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      bottom: -125px;
+      left: 40%;
+      animation-delay: -20s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+      33% { transform: translateY(-50px) rotate(120deg) scale(1.1); }
+      66% { transform: translateY(30px) rotate(240deg) scale(0.9); }
+    }
+
+    /* 主容器 */
+    .container {
+      display: flex;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* 左侧内容区 */
+    .left-section {
+      flex: 1;
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      color: white;
+      width: 50%; /* 明确设置为50%宽度 */
+      position: relative;
+    }
+
+    .brand-logo {
+      margin-bottom: 50px;
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: white;
+    }
+
+    .brand-subtitle {
+      font-size: 18px;
+      opacity: 0.8;
+      margin-bottom: 60px;
+      color: #8b949e;
+    }
+
+    .welcome-title {
+      font-size: 48px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      line-height: 1.1;
+      color: white;
+    }
+
+    .welcome-description {
+      font-size: 20px;
+      opacity: 0.8;
+      line-height: 1.5;
+      margin-bottom: 40px;
+      color: #8b949e;
+    }
+
+    /* 可折叠功能展示 */
+    .features-expandable {
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .features-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 16px 0;
+      border-bottom: 1px solid #30363d;
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .features-toggle:hover {
+      color: var(--primary-blue);
+    }
+
+    .features-toggle .arrow {
+      margin-right: 12px;
+      transition: transform 0.3s ease;
+      font-size: 14px;
+    }
+
+    .features-toggle.expanded .arrow {
+      transform: rotate(90deg);
+    }
+
+    .features-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      padding-left: 26px;
+    }
+
+    .features-content.expanded {
+      max-height: 500px;
+      padding: 20px 0 0 26px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      color: #8b949e;
+    }
+
+    .feature-icon {
+      color: var(--brand-green);
+      margin-right: 16px;
+      font-size: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .feature-content {
+      flex: 1;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .feature-description {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #8b949e;
+    }
+
+    /* 装饰元素 */
+    .decorative-elements {
+      position: absolute;
+      bottom: 60px;
+      right: 60px;
+      width: 200px;
+      height: 200px;
+      opacity: 0.1;
+    }
+
+    .decorative-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--brand-green), var(--light-blue));
+      animation: pulse 4s infinite ease-in-out;
+    }
+
+    .decorative-shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 0;
+      left: 0;
+      animation-delay: 0s;
+    }
+
+    .decorative-shape:nth-child(2) {
+      width: 60px;
+      height: 60px;
+      top: 50px;
+      right: 20px;
+      animation-delay: 1s;
+    }
+
+    .decorative-shape:nth-child(3) {
+      width: 40px;
+      height: 40px;
+      bottom: 0;
+      left: 60px;
+      animation-delay: 2s;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.1); }
+    }
+
+    /* 右侧注册表单区 */
+    .right-section {
+      flex: 1;
+      background: white;
+      padding: 80px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 50%; /* 明确设置为50%宽度 */
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      position: relative;
+    }
+
+    /* 右上角登录链接 */
+    .top-login-link {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: 14px;
+      color: #656d76;
+    }
+
+    .top-login-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .top-login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .form-title {
+      font-size: 32px;
+      font-weight: 600;
+      color: #4ab6a4c8;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .login-link {
+      font-size: 16px;
+      color: #656d76;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .login-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d9e0;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+      background: #ffffff;
+      color: #1f2328;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px rgba(74, 182, 164, 0.12);
+    }
+
+    .hint-text {
+      font-size: 12px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .hint-text.success {
+      color: #1f883d;
+    }
+
+    .hint-text.warning {
+      color: #bf8700;
+    }
+
+    .hint-text.default {
+      color: #656d76;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(74, 182, 164, 0.25);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* 消息提示 */
+    .message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+      border: 1px solid;
+    }
+
+    .message.error {
+      background: #fff1f3;
+      color: #d1242f;
+      border-color: #fd2c37;
+      display: block;
+    }
+
+    .message.success {
+      background: #dafbe1;
+      color: #1f883d;
+      border-color: #1f883d;
+      display: block;
+    }
+
+    /* 底部条款 */
+    .terms-text {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #656d76;
+      line-height: 1.5;
+    }
+
+    .terms-text a {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .terms-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* 复选框样式 */
+    .checkbox-group {
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 400;
+      font-size: 14px;
+      color: #656d76;
+      line-height: 1.4;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin: 2px 0 0 0;
+      flex-shrink: 0;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .left-section {
+        width: 100%; /* 移动端占满宽度 */
+        padding: 40px 20px;
+        text-align: center;
+      }
+      
+      .right-section {
+        width: 100%; /* 移动端占满宽度 */
+        margin: 0 20px 20px 20px;
+        padding: 40px 30px;
+      }
+      
+      .welcome-title {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  <div class="container">
+    <!-- 左侧欢迎区域 -->
+    <div class="left-section">
+      <div class="brand-logo">
+        <div class="brand-title">MED 环境健康数据平台</div>
+        <div class="brand-subtitle">Metrics of Environmental Data</div>
+      </div>
+      
+      <h1 class="welcome-title">创建您的免费账户</h1>
+      <p class="welcome-description">
+        成为环境数据平台用户以体验更多核心功能。
+      </p>
+      
+      <!-- 可折叠功能展示 -->
+      <div class="features-expandable">
+        <div class="features-toggle" onclick="toggleFeatures()">
+          <span class="arrow">▶</span>
+          <span>查看包含内容</span>
+        </div>
+        <div class="features-content" id="featuresContent">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">访问环境数据平台</div>
+              <div class="feature-description">提供高分辨率的环境暴露数据，用于环境健康研究和公共机构决策</div>
+            </div>
+          </div>
+          <!-- <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">无限数据仓库</div>
+              <div class="feature-description">在公共和私有项目上安全协作环境监测数据</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">集成数据审查</div>
+              <div class="feature-description">通过内置审查工具提高数据质量</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">自动化工作流程</div>
+              <div class="feature-description">使用CI/CD集成和数据平台行动节省时间</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">社区支持</div>
+              <div class="feature-description">与全球开发者连接，获得即时反馈和见解</div>
+            </div>
+          </div> -->
+        </div>
+      </div>
+
+      <!-- 装饰元素 -->
+      <div class="decorative-elements">
+        <div class="decorative-shape"></div>
+        <div class="decorative-shape"></div>
+        <div class="decorative-shape"></div>
+      </div>
+    </div>
+
+    <!-- 右侧注册表单 -->
+    <div class="right-section">
+      <!-- 右上角登录链接 -->
+      <div class="top-login-link">
+        已有账户？ <a href="sign in.html" onclick="goToLogin()">立即登录 →</a>
+      </div>
+
+      <div class="form-header">
+        <h2 class="form-title">注册 MED 平台</h2>
+        <p class="login-link">成为环境数据平台用户以体验更多核心功能</p>
+      </div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="email">电子邮箱 <span style="color: var(--brand-green);">*</span></label>
+          <input type="email" id="email" placeholder="您的邮箱地址" required>
+          <div id="eduHint" class="hint-text default">
+            <span>教育邮箱(@xxx.edu.cn)将自动通过审核</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">密码 <span style="color: var(--brand-green);">*</span></label>
+          <input type="password" id="password" placeholder="6-20位密码" required>
+          <div id="passwordHint" class="hint-text default">
+            <span>密码长度6-20位，至少包含数字、大写英文、小写英文和特殊字符中的两种</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="confirmPassword">确认密码 <span style="color: var(--brand-green);">*</span></label>
+          <input type="password" id="confirmPassword" placeholder="再次输入密码" required>
+        </div>
+
+        <div class="form-group">
+          <label for="organization">机构名称 <span style="color: var(--brand-green);">*</span></label>
+          <input type="text" id="organization" placeholder="请填写机构全称" required>
+          <div class="hint-text default">
+            <span>请填写您所在机构的全称</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="orgType">机构类型 <span style="color: var(--brand-green);">*</span></label>
+          <select id="orgType" required>
+            <option value="">请选择机构类型</option>
+            <option value="university">高校/科研院所</option>
+            <option value="government">政府机构</option>
+            <option value="hospital">医疗机构</option>
+            <option value="company">企业</option>
+            <option value="ngo">非政府组织</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="country">机构国家/地区 <span style="color: var(--brand-green);">*</span></label>
+          <select id="country" required>
+            <option value="China">中国</option>
+            <option value="United States">美国</option>
+            <option value="United Kingdom">英国</option>
+            <option value="Japan">日本</option>
+            <option value="Other">其他</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>继续 →</span>
+        </button>
+
+        <div id="message" class="message"></div>
+
+        <div class="terms-text">
+          通过创建账户，您同意 <a href="#">服务条款</a>。
+          有关我们的隐私政策的更多信息，请参阅 <a href="#">MED 隐私声明</a>。
+          我们偶尔会向您发送账户相关的电子邮件。
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- 确保加载顺序：先加载supabase库，再加载auth.js，最后加载supabase-auth.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 检查Supabase库是否正确加载
+    console.log('Supabase库加载状态:', {
+      hasSupabase: typeof supabase !== 'undefined',
+      version: typeof supabase !== 'undefined' ? '已加载' : '未加载'
+    });
+  </script>
+  <script src="js/auth.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script src="js/update-user-profile.js"></script>
+  <script>
+    // Supabase 认证对象
+    let supabaseAuth;
+    
+    // 初始化 Supabase Auth
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof SupabaseAuth !== 'undefined') {
+        supabaseAuth = new SupabaseAuth();
+        console.log('Supabase Auth 初始化成功');
+      } else {
+        console.error('SupabaseAuth 类未定义，请确保已加载 supabase-auth.js');
+      }
+    });
+    
+    // 折叠功能切换
+    function toggleFeatures() {
+      const toggle = document.querySelector('.features-toggle');
+      const content = document.getElementById('featuresContent');
+      
+      toggle.classList.toggle('expanded');
+      content.classList.toggle('expanded');
+    }
+
+    // 实时检测邮箱类型 - 更新为中国教育域名格式
+    document.getElementById('email').addEventListener('input', function() {
+      const email = this.value;
+      const hint = document.getElementById('eduHint');
+      
+      // 检测中国教育域名格式：@xxx.edu.cn
+      if (email.match(/@\w+\.edu\.cn$/i)) {
+        hint.innerHTML = '<span>检测到教育邮箱，验证后自动通过审核</span>';
+        hint.className = 'hint-text success';
+      } else if (email.includes('@') && email.includes('.')) {
+        hint.innerHTML = '<span>非教育邮箱，验证后需人工审核</span>';
+        hint.className = 'hint-text warning';
+      } else {
+        hint.innerHTML = '<span>教育邮箱(@xxx.edu.cn)验证后自动通过审核</span>';
+        hint.className = 'hint-text default';
+      }
+    });
+
+    // 密码验证
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const passwordHint = document.getElementById('passwordHint');
+      
+      // 检测密码复杂度
+      const hasNumber = /\d/.test(password);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+      
+      // 计算满足的条件数
+      let conditionsMet = 0;
+      if (hasNumber) conditionsMet++;
+      if (hasUpperCase) conditionsMet++;
+      if (hasLowerCase) conditionsMet++;
+      if (hasSpecialChar) conditionsMet++;
+      
+      // 检查长度和复杂度
+      if (password.length < 6 || password.length > 20) {
+        passwordHint.innerHTML = '<span>密码长度必须在6-20位之间</span>';
+        passwordHint.className = 'hint-text warning';
+        this.style.borderColor = '#bf8700';
+      } else if (conditionsMet < 2) {
+        passwordHint.innerHTML = '<span>密码强度不足，至少包含数字、大写字母、小写字母和特殊字符中的两种</span>';
+        passwordHint.className = 'hint-text warning';
+        this.style.borderColor = '#bf8700';
+      } else {
+        passwordHint.innerHTML = '<span>密码强度符合要求</span>';
+        passwordHint.className = 'hint-text success';
+        this.style.borderColor = '#1f883d';
+      }
+    });
+
+    // 表单提交处理
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      register();
+    });
+    
+    async function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const organization = document.getElementById('organization').value;
+      const orgType = document.getElementById('orgType').value;
+      const country = document.getElementById('country').value;
+      const message = document.getElementById('message');
+      
+      // 记录注册开始
+      console.log('===== 开始注册流程 =====');
+      console.log('浏览器环境:', navigator.userAgent);
+      console.log('当前页面URL:', window.location.href);
+      
+      // 检查Supabase初始化状态
+      if (typeof supabaseAuth === 'undefined' || supabaseAuth === null) {
+        console.error('Supabase认证对象未初始化');
+        showMessage('系统初始化失败，请刷新页面后重试', 'error');
+        return;
+      } else {
+        console.log('Supabase认证对象状态:', {
+          initialized: !!supabaseAuth,
+          hasSupabase: !!supabaseAuth.supabase
+        });
+      }
+      
+      // 重置消息
+      message.style.display = 'none';
+      message.textContent = '';
+      message.className = 'message';
+      
+      // 前端验证
+      if (!email || !password || !organization || !orgType || !country) {
+        showMessage('邮箱、密码、机构信息和国家/地区不能为空', 'error');
+        return;
+      }
+      
+      // 验证密码长度
+      if (password.length < 6 || password.length > 20) {
+        showMessage('密码长度必须在6-20位之间', 'error');
+        return;
+      }
+      
+      // 验证密码复杂度
+      const hasNumber = /\d/.test(password);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+      
+      let conditionsMet = 0;
+      if (hasNumber) conditionsMet++;
+      if (hasUpperCase) conditionsMet++;
+      if (hasLowerCase) conditionsMet++;
+      if (hasSpecialChar) conditionsMet++;
+      
+      if (conditionsMet < 2) {
+        showMessage('密码强度不足，至少包含数字、大写字母、小写字母和特殊字符中的两种', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showMessage('两次输入的密码不一致', 'error');
+        return;
+      }
+
+      // 验证邮箱格式
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage('请输入有效的邮箱地址', 'error');
+        return;
+      }
+      
+      try {
+        // 注册用户并发送验证邮件
+        const userData = {
+          email,
+          password,
+          organization,
+          orgType,
+          country
+        };
+        
+        // 显示加载中...
+        showMessage('正在提交注册信息，请稍候...', 'info');
+        
+        let result;
+        
+        // 使用 Supabase 进行注册
+        if (typeof supabaseAuth !== 'undefined' && supabaseAuth !== null) {
+          console.log('使用 Supabase 注册');
+          
+          // 记录注册参数和环境信息
+          console.log('注册信息:', {
+            email: email,
+            organization: organization,
+            orgType: orgType,
+            country: country,
+            origin: window.location.origin,
+            host: window.location.host
+          });
+          
+          result = await supabaseAuth.signUp(email, password, {
+            organization: organization,
+            orgType: orgType,
+            country: country,
+            fullName: '', // 可选参数
+            role: 'user',
+            verified: false, // 通过邮箱验证后设置为true
+            approved: false // 对于教育邮箱，验证后自动设置为true
+          });
+          
+          // 检查是否是邮件发送频率限制错误
+          if (result && !result.success && result.emailLimitExceeded) {
+            console.warn('邮件发送频率限制错误');
+            showMessage('❌ 邮件发送频率超出限制，请等待几分钟后再试，或使用其他邮箱地址', 'error');
+            return;
+          }
+        } else {
+          // 降级使用本地存储的注册逻辑
+          console.log('使用本地注册');
+          result = await registerUser(userData);
+        }
+        
+        if (result.success) {
+          console.log('注册结果:', result);
+          showMessage('✅ ' + result.message, 'success');
+          
+          // 显示验证提示页面
+          setTimeout(() => {
+            window.location.href = `verification-sent.html?email=${encodeURIComponent(email)}`;
+          }, 2000);
+        } else {
+          console.error('注册失败:', result);
+          
+          // 根据错误类型提供不同的错误消息
+          let errorMessage = result.message || '请稍后重试';
+          
+          // 检查是否是邮件已存在错误
+          if (result.error && result.error.message && result.error.message.includes('already')) {
+            errorMessage = '该邮箱已被注册，请使用其他邮箱或尝试找回密码';
+          }
+          
+          showMessage('❌ 注册失败: ' + errorMessage, 'error');
+        }
+      } catch (error) {
+        console.error('注册过程中发生异常:', error);
+        showMessage('❌ 注册失败: ' + (error.message || '请稍后重试'), 'error');
+      }
+    }
+
+    function showMessage(text, type) {
+      const message = document.getElementById('message');
+      message.textContent = text;
+      message.className = `message ${type}`;
+      message.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

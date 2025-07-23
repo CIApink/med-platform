@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新邮箱验证 - MED环境数据平台</title>
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .verify-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .verify-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--brand-green);
+        }
+
+        .verify-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .verify-description {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            background: var(--brand-green);
+            color: white;
+            border: none;
+        }
+
+        .btn:hover {
+            background: var(--light-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-icon">📧</div>
+        <h1 class="verify-title">新邮箱验证</h1>
+        <p class="verify-description">
+            您的新邮箱地址需要验证，我们已发送验证邮件到您的新邮箱。
+            请检查邮箱并点击验证链接。
+        </p>
+        <a href="{% url 'user_status' %}" class="btn">返回用户中心</a>
+    </div>
+</body>
+</html>

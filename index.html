@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MED 环境数据平台</title>
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+                url('./fonts/MiSans-Normal.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Semibold.woff2') format('woff2'),
+                url('./fonts/MiSans-Semibold.woff') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+                url('./fonts/MiSans-Medium.woff') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color: #6fb8ed;
+            margin-right: 40px;
+            width: 32.5%;
+        }
+
+        .logo .main-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .logo .sub-title {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center; /* 水平居中 */
+            width: 50%; /* 分配更多宽度给菜单 */
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        .user-auth {
+            margin-left: auto;
+            color: white;
+            width: 25%;
+            text-align: right;
+        }
+        
+        .user-auth a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .user-auth .user-email {
+            display: none;
+            cursor: pointer;
+        }
+        
+        .user-auth .user-email:hover {
+            text-decoration: underline;
+        }
+        
+        .user-auth .login-signup {
+            display: block;
+        }
+
+        /* 主横幅区域 */
+        .hero-banner {
+            width: 100%;
+            height: 500px;
+            background-image: url('./image/indeximage3.jpg');
+            background-size: cover;
+            background-position: center 20%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            margin-top: 100px; /* 从60px修改为80px，增加了20px的间距 */
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.1); /* 降低透明度使图片更亮 */
+            z-index: 1;
+        }
+
+        /* 修改横幅内容区域，避免文字换行 */
+        .hero-content {
+            z-index: 2;
+            padding: 0 20px;
+            width: 90%; /* 增加宽度 */
+            max-width: 1200px; /* 设置最大宽度 */
+        }
+
+        .hero-title {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            white-space: nowrap; /* 防止标题换行 */
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            max-width: none; /* 移除最大宽度限制 */
+            line-height: 1.5;
+            white-space: nowrap; /* 防止副标题换行 */
+        }
+
+        .hero-button {
+            padding: 12px 30px;
+            background-color: #6eb2e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .hero-button:hover {
+            background-color: #619ac3;
+        }
+
+        /* 产品卡片区域 */
+        .product-section {
+            padding: 60px 30px;
+            background-color: #f8f9fa;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #4ab6a4c8; 
+        }
+
+        .product-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+
+        .product-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            color: var(--brand-green);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .data-description {
+            margin-top: 5px;
+            margin-left: 10px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* 修改 data-item 样式，使点符号和链接在同一行 */
+        .data-item {
+            margin: 15px 0;
+            display: block; /* 从flex改为block */
+            position: relative;
+            padding-left: 15px; /* 为点符号留出空间 */
+        }
+
+        .data-item:before {
+            content: "• ";
+            color: var(--brand-green);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .data-description {
+            margin-top: 5px;
+            margin-left: 0; /* 不再需要左边距 */
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .data-link {
+            color: #4ab6a4;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .data-link:hover {
+            color: var(--brand-green);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .product-container {
+                flex-direction: column;
+            }
+            .hero-title {
+                font-size: 30px;
+            }
+            .hero-subtitle {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-item">主页</a>
+            <a href="#" class="nav-item">模型介绍</a>
+            <a href="data-download.html" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="data_echart_apikey.html" class="nav-item">数据地图</a>
+            <a href="#" class="nav-item">用户服务</a>
+            <!-- <a href="#" class="nav-item">技术团队</a> -->
+            <!-- <a href="#" class="nav-item">友情链接</a> -->
+        </div>
+        <div class="user-auth" id="userAuth">
+            <a href="sign in.html" class="login-signup">登录/注册</a>
+            <div class="user-email" onclick="logout()">邮箱 (点击注销)</div>
+        </div>
+    </nav>
+
+    <!-- 主横幅区域 -->
+    <section class="hero-banner">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">为您提供更专业的全球环境数据与专题资料</h1>
+            <p class="hero-subtitle">To provide you with more professional global environmental data and thematic materials</p>
+            <button class="hero-button">了解更多</button>
+        </div>
+    </section>
+
+    <!-- 三列产品区域 -->
+    <section class="product-section">
+        <h2 class="section-title">我们的数据产品</h2>
+        <div class="product-container">
+            <!-- 中国环境数据 -->
+            <div class="product-card">
+                <div class="card-icon">📊</div>
+                <h3 class="card-title">中国环境数据</h3>
+                <div class="data-item">
+                    <a href="data-download.html" class="data-link">中国大气污染数据</a>
+                    <p class="data-description">包括PM<sub>2.5</sub>、粗颗粒物（PM<sub>2.5</sub>-PM<sub>10</sub>）、PM<sub>10</sub>、
+                        NO<sub>2</sub>、O<sub>3</sub>、SO<sub>2</sub>等要素。</p>
+                </div>
+                <div class="data-item">
+                    <a href="#" class="data-link">中国气象数据</a>
+                    <p class="data-description">包括温度、紫外辐射等要素。</p>
+                </div>
+                <div class="data-item">
+                    <a href="#" class="data-link">中国建设环境数据</a>
+                    <p class="data-description">包括NDVI、夜光等要素。</p>
+                </div>
+            </div>
+
+            <!-- 英国环境数据 -->
+            <div class="product-card">
+                <div class="card-icon">🛰️</div>
+                <h3 class="card-title">英国环境数据</h3>
+                <div class="data-item">
+                    <a href="#" class="data-link">英国大气污染数据</a>
+                    <p class="data-description">包括PM<sub>2.5</sub>、PM<sub>10</sub>、NO<sub>2</sub>、O<sub>3</sub>等要素。</p>
+                </div>
+                <div class="data-item">
+                    <a href="#" class="data-link">英国地表紫外辐射数据</a>
+                    <p class="data-description">数据包含栅格化地表紫外辐射年均数据。</p>
+                </div>
+            </div>
+
+            <!-- 全球产品 -->
+            <!-- <div class="product-card">
+                <div class="card-icon">🌐</div>
+                <h3 class="card-title">全球数据产品</h3>
+                <div class="data-item">
+                    <a href="#" class="data-link">全球10km分辨率PM<sub>2.5</sub>数据</a>
+                </div>
+                <div class="data-item">
+                    <a href="#" class="data-link">全球10km分辨率PM<sub>10</sub>数据</a>
+                </div>
+                <div class="data-item">
+                    <a href="#" class="data-link">全球10km分辨率温度数据</a>
+                </div>
+            </div> -->
+        </div>
+    </section>
+    
+    <!-- JavaScript -->
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航栏用户认证UI
+            updateAuthUI();
+        });
+    </script>
+</body>
+</html>

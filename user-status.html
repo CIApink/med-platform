@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户状态查询 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+           url('./fonts/MiSans-Normal.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+           url('./fonts/MiSans-Medium.woff') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+    
+    /* 导航栏样式 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    
+    .logo {
+      display: flex;
+      flex-direction: column;
+      color: #6fb8ed;
+      margin-right: 40px;
+      width: 32.5%;
+    }
+
+    .logo .main-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .logo .sub-title {
+      font-size: 14px;
+      font-weight: normal;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 25px;
+      justify-content: center; /* 水平居中 */
+      width: 50%; /* 分配更多宽度给菜单 */
+    }
+    
+    .nav-item {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      position: relative;
+      padding: 5px 0;
+    }
+    
+    .nav-item:hover::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: white;
+    }
+    
+    .user-auth {
+      margin-left: auto;
+      color: white;
+      width: 25%;
+      text-align: right;
+    }
+    
+    .user-auth a {
+      color: white;
+      text-decoration: none;
+    }
+    
+    .user-auth .user-email {
+      display: none;
+      cursor: pointer;
+    }
+    
+    .user-auth .user-email:hover {
+      text-decoration: underline;
+    }
+    
+    .user-auth .login-signup {
+      display: block;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0f8f3, #e6f5ef);
+      padding-top: 60px;
+    }
+
+    .user-status-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 40px 20px;
+    }
+
+    .user-status-box {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .status-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: #333;
+      text-align: center;
+    }
+
+    .not-logged-in {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .login-btn {
+      background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.2s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 182, 164, 0.2);
+    }
+
+    .user-info {
+      display: none;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 16px;
+    }
+
+    .info-label {
+      width: 30%;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .info-value {
+      width: 70%;
+      color: #333;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-badge.verified {
+      background-color: #dafbe1;
+      color: #1f883d;
+    }
+
+    .status-badge.not-verified {
+      background-color: #fff1f3;
+      color: #d1242f;
+    }
+
+    .status-badge.approved {
+      background-color: #dafbe1;
+      color: #1f883d;
+    }
+
+    .status-badge.not-approved {
+      background-color: #ffe8cc;
+      color: #f9a825;
+    }
+
+    .action-buttons {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .primary-btn {
+      background: linear-gradient(90deg, var(--brand-green), var(--light-blue));
+      color: white;
+    }
+
+    .secondary-btn {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(74, 182, 164, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--brand-green);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="main-title">MED 环境健康数据平台</div>
+        <div class="sub-title">Metrics of Environmental Data</div>
+      </a>
+    </div>
+    <div class="nav-menu">
+      <a href="index.html" class="nav-item">主页</a>
+      <a href="#" class="nav-item">模型介绍</a>
+      <a href="data-download.html" class="nav-item">数据下载</a>
+      <a href="#" class="nav-item">论文成果</a>
+      <a href="data-local-map.html" class="nav-item">数据地图</a>
+      <a href="#" class="nav-item">用户服务</a>
+    </div>
+    <div class="user-auth" id="userAuth">
+      <a href="sign in.html" class="login-signup">登录/注册</a>
+      <div class="user-email" onclick="logout()">邮箱 (点击注销)</div>
+    </div>
+  </nav>
+
+  <!-- 用户状态内容 -->
+  <div class="user-status-container">
+    <div class="user-status-box" id="userStatusBox">
+      <!-- 这里的内容将由JavaScript动态填充 -->
+      <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <p>正在加载用户信息...</p>
+      </div>
+      
+      <div class="not-logged-in" id="notLoggedIn" style="display: none;">
+        <h2>未登录</h2>
+        <p>请先登录以查看您的账户状态信息</p>
+        <button class="login-btn" onclick="window.location.href='sign in.html'">去登录</button>
+      </div>
+      
+      <div class="user-info" id="userInfo">
+        <h2 class="status-title">账户状态信息</h2>
+        
+        <div class="info-row">
+          <div class="info-label">电子邮箱</div>
+          <div class="info-value" id="userEmail"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">姓名</div>
+          <div class="info-value" id="userName"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">单位/组织</div>
+          <div class="info-value" id="userOrg"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">单位类型</div>
+          <div class="info-value" id="userOrgType"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">国家/地区</div>
+          <div class="info-value" id="userCountry"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">邮箱验证状态</div>
+          <div class="info-value" id="verificationStatus"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">审核状态</div>
+          <div class="info-value" id="approvalStatus"></div>
+        </div>
+        
+        <div class="info-row">
+          <div class="info-label">注册时间</div>
+          <div class="info-value" id="createdAt"></div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="action-btn primary-btn" id="resendVerificationBtn" style="display: none;">重新发送验证邮件</button>
+          <button class="action-btn secondary-btn" onclick="window.location.href='index.html'">返回首页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script>
+    let supabaseAuth;
+    
+    // 初始化SupabaseAuth对象
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('页面加载完成，开始初始化');
+      
+      if (typeof SupabaseAuth !== 'undefined') {
+        supabaseAuth = new SupabaseAuth();
+        console.log('Supabase Auth 初始化成功');
+        
+        // 加载用户状态
+        loadUserStatus();
+        
+        // 检查登录状态并更新UI
+        updateAuthUI();
+      } else {
+        console.error('SupabaseAuth 类未定义，请确保已加载 supabase-auth.js');
+        showError('系统初始化失败', '系统组件加载失败，请刷新页面或联系客服。');
+      }
+    });
+    
+    // 加载用户状态
+    async function loadUserStatus() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const notLoggedIn = document.getElementById('notLoggedIn');
+      const userInfo = document.getElementById('userInfo');
+      
+      try {
+        // 获取当前用户
+        const user = await supabaseAuth.getCurrentUser();
+        
+        if (!user) {
+          console.log('用户未登录');
+          loadingIndicator.style.display = 'none';
+          notLoggedIn.style.display = 'block';
+          return;
+        }
+        
+        console.log('获取到用户信息:', user);
+        
+        // 获取用户资料
+        const userProfile = await supabaseAuth.fetchUserData(user.id);
+        console.log('获取到用户资料:', userProfile);
+        
+        // 显示用户信息
+        document.getElementById('userEmail').textContent = user.email;
+        
+        if (userProfile) {
+          document.getElementById('userName').textContent = userProfile.full_name || '未设置';
+          document.getElementById('userOrg').textContent = userProfile.organization || '未设置';
+          document.getElementById('userOrgType').textContent = userProfile.org_type || '未设置';
+          document.getElementById('userCountry').textContent = userProfile.country || '未设置';
+          
+          // 设置验证状态
+          const verificationStatus = document.getElementById('verificationStatus');
+          if (userProfile.verified) {
+            verificationStatus.innerHTML = '<span class="status-badge verified">已验证</span>';
+          } else {
+            verificationStatus.innerHTML = '<span class="status-badge not-verified">未验证</span>';
+            // 显示重发验证邮件按钮
+            document.getElementById('resendVerificationBtn').style.display = 'block';
+            document.getElementById('resendVerificationBtn').onclick = () => resendVerification(user.email);
+          }
+          
+          // 设置审核状态
+          const approvalStatus = document.getElementById('approvalStatus');
+          if (userProfile.approved) {
+            approvalStatus.innerHTML = '<span class="status-badge approved">已通过</span>';
+          } else {
+            approvalStatus.innerHTML = '<span class="status-badge not-approved">等待审核</span>';
+          }
+          
+          // 格式化创建时间
+          const createdDate = userProfile.created_at ? new Date(userProfile.created_at) : null;
+          document.getElementById('createdAt').textContent = createdDate ? 
+            createdDate.toLocaleString('zh-CN', { 
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '未知';
+        } else {
+          console.warn('未找到用户资料');
+          
+          // 默认未设置
+          document.getElementById('userName').textContent = '未设置';
+          document.getElementById('userOrg').textContent = '未设置';
+          document.getElementById('userOrgType').textContent = '未设置';
+          document.getElementById('userCountry').textContent = '未设置';
+          document.getElementById('verificationStatus').innerHTML = '<span class="status-badge not-verified">未验证</span>';
+          document.getElementById('approvalStatus').innerHTML = '<span class="status-badge not-approved">等待审核</span>';
+          document.getElementById('createdAt').textContent = '未知';
+          
+          // 显示重发验证邮件按钮
+          document.getElementById('resendVerificationBtn').style.display = 'block';
+          document.getElementById('resendVerificationBtn').onclick = () => resendVerification(user.email);
+        }
+        
+        // 显示用户信息，隐藏加载提示
+        loadingIndicator.style.display = 'none';
+        userInfo.style.display = 'block';
+      } catch (error) {
+        console.error('加载用户状态失败:', error);
+        loadingIndicator.style.display = 'none';
+        notLoggedIn.style.display = 'block';
+      }
+    }
+    
+    // 重发验证邮件
+    async function resendVerification(email) {
+      if (!email) {
+        alert('无效的邮箱地址');
+        return;
+      }
+      
+      try {
+        const resendButton = document.getElementById('resendVerificationBtn');
+        resendButton.disabled = true;
+        resendButton.textContent = '发送中...';
+        
+        if (supabaseAuth && typeof supabaseAuth.resendVerificationEmail === 'function') {
+          console.log('使用SupabaseAuth重发验证邮件:', email);
+          const resendResult = await supabaseAuth.resendVerificationEmail(email);
+          
+          if (resendResult.success) {
+            alert(`验证邮件已重发到 ${email}，请查收并点击邮件中的链接完成验证。`);
+            resendButton.textContent = '已发送';
+          } else {
+            let errorMessage = resendResult.message || '重发验证邮件失败，请稍后重试';
+            
+            // 特殊处理频率限制错误
+            if (resendResult.emailLimitExceeded) {
+              errorMessage = '邮件发送频率超出限制，请等待几分钟后再试';
+            }
+            
+            alert(errorMessage);
+            resendButton.disabled = false;
+            resendButton.textContent = '重新发送验证邮件';
+          }
+        } else {
+          console.warn('无法使用SupabaseAuth重发验证邮件');
+          alert('重发功能暂时不可用，请稍后重试');
+          resendButton.disabled = false;
+          resendButton.textContent = '重新发送验证邮件';
+        }
+      } catch (error) {
+        console.error('重发验证邮件时出错:', error);
+        alert('处理您的请求时出现错误，请稍后重试');
+        document.getElementById('resendVerificationBtn').disabled = false;
+        document.getElementById('resendVerificationBtn').textContent = '重新发送验证邮件';
+      }
+    }
+    
+    // 检查登录状态并更新UI
+    async function updateAuthUI() {
+      try {
+        if (supabaseAuth) {
+          const user = await supabaseAuth.getCurrentUser();
+          const userAuth = document.getElementById('userAuth');
+          
+          if (user) {
+            // 用户已登录
+            const loginSignup = userAuth.querySelector('.login-signup');
+            const userEmail = userAuth.querySelector('.user-email');
+            
+            if (loginSignup) loginSignup.style.display = 'none';
+            if (userEmail) {
+              userEmail.textContent = user.email + ' (点击注销)';
+              userEmail.style.display = 'block';
+            }
+          }
+        }
+      } catch (error) {
+        console.error('更新认证UI出错:', error);
+      }
+    }
+    
+    // 退出登录
+    async function logout() {
+      try {
+        if (supabaseAuth) {
+          await supabaseAuth.signOut();
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        console.error('注销失败:', error);
+        alert('注销失败，请刷新页面后重试');
+      }
+    }
+  </script>
+</body>
+</html>

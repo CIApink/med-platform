@@ -1,0 +1,729 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 练习</title>
+</head>
+<body>
+    <h1>一级标签</h1>
+    <ul>
+        <li>二级标签1</li>
+        <li>二级标签2</li>
+        <li>二级标签3</li>
+        <li>二级标签4</li>
+        <li>二级标签5</li>
+    </ul>
+    <ol>
+        <li>有序列表项1</li>
+        <li>有序列表项2</li>
+        <li>有序列表项3</li>
+        <li>有序列表项4</li>
+        <li>有序列表项5</li>
+    </ol>
+    <a href="https://baidu.com" target="_blank">
+        百度知道
+    </a>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据选择 - MED环境数据平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* :root {
+            --primary-blue: #abcbe0;
+            --brand-green: #459d2e;
+            --accent-blue: #5facdf;
+            --light-blue: #87CEEB;
+        } */
+        /* :root {
+        --primary-blue: #3eb489;
+        --brand-green: #fce80d;
+        --light-blue: #16982b;
+        } */
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Normal.woff2') format('woff2'),
+                url('./fonts/MiSans-Normal.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Semibold.woff2') format('woff2'),
+                url('./fonts/MiSans-Semibold.woff') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('./fonts/MiSans-Medium.woff2') format('woff2'),
+                url('./fonts/MiSans-Medium.woff') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400; /* 确保默认字重为 regular */
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            /* 修改这里：使用自定义颜色值创建从左到右的渐变，不再使用变量 */
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color:  #6fb8ed;
+            font-weight: bold;
+            margin-right: 40px;
+            width: 32.5%; /* 为logo分配固定宽度 */
+        }
+
+        .logo .main-title {
+            font-size: 24px; /* 第一行字体较大 */
+            font-weight: 600; /* 使用 MiSans 的 Semibold 字体 */
+        }
+
+        .logo .sub-title {
+            font-size: 14px; /* 第二行字体较小 */
+            font-weight: normal; /* 明确指定使用普通字重 */
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center; /* 水平居中 */
+            width: 50%; /* 分配更多宽度给菜单 */
+        }
+        
+        .nav-item {
+            color: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            font-size: 16px;
+            position: relative; /* 添加相对定位，用于下划线定位 */
+            padding: 5px 0; /* 添加内边距，为下划线提供空间 */
+            transition: none; /* 移除颜色过渡效果 */
+        }
+        /* 添加下划线效果 */
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        /* .nav-item:hover {
+            color: var(--brand-green);
+        }
+         */
+        .user-auth {
+            margin-left: auto;
+            color: rgba(255, 255, 255, 1);
+            width: 25%; /* 为用户认证区域分配固定宽度 */
+            text-align: right; /* 文字右对齐 */
+        }
+        
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            margin-top: 60px; /* 与导航栏高度匹配 */
+            height: calc(100vh - 60px);
+        }
+        
+        /* 左侧操作区 */
+        .control-panel {
+            width: 25%;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #eaeaea;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+            border-left: 4px solid var(--brand-green);
+            padding-left: 10px;
+            font-weight: 500 !important; /* 使用 MiSans 的 Semibold 字体 */
+        }
+        
+        .pollutant-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .pollutant-btn {
+            padding: 8px 5px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pollutant-btn.active {
+            background: var(--brand-green);
+            color: rgba(255, 255, 255, 1);
+            border-color: var(--brand-green);
+        }
+        
+        .date-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center; /* 添加这行使所有子元素垂直居中对齐 */
+        }
+
+        .date-group {
+            display: flex;
+            align-items: center; /* 保证年月选择器内部的元素也垂直居中 */
+            gap: 5px;
+        }
+        
+        .date-range {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        /* 右侧内容区 */
+        .content-area {
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .map-container {
+            height: 60%;
+            position: relative;
+            border-bottom: 1px solid #eee;
+        }
+        
+        #data-map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .data-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-title {
+            font-size: 20px;
+            color: var(--accent-blue);
+            margin-bottom: 5px;
+            font-weight: 500 !important; /* 使用 MiSans 的 Semibold 字体 */
+        }
+        
+        .data-meta {
+            color: rgba(102, 102, 102, 1);
+            font-size: 14px;
+        }
+        
+        .chart-container {
+            height: 40%;
+            padding: 20px;
+        }
+        
+        #contribution-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 图例样式 */
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 1);
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .gradient-bar {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(90deg, var(--brand-green), var(--light-blue), var(--primary-blue));
+            margin-right: 15px;
+            border-radius: 3px;
+        }
+        
+        .legend-labels {
+            font-size: 12px;
+            color: rgba(85, 85, 85, 1);
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-item">主页</a>
+            <a href="#" class="nav-item">模型介绍</a>
+            <a href="data-download.html" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="#" class="nav-item">用户服务</a>
+            <!-- <a href="#" class="nav-item">技术团队</a> -->
+            <!-- <a href="#" class="nav-item">友情链接</a> -->
+        </div>
+        <div class="user-auth">登录/注册</div>
+    </nav>
+
+    <!-- 主体内容区 -->
+    <div class="main-container">
+        <!-- 左侧操作面板 -->
+        <div class="control-panel">
+            <div class="control-section">
+                <h3 class="section-title">污染物选择</h3>
+                <div class="pollutant-selector">
+                    <div class="pollutant-btn">PM<sub>2.5</sub></div>
+                    <div class="pollutant-btn">PM<sub>10</sub></div>
+                    <div class="pollutant-btn">O<sub>3</sub></div>
+                    <div class="pollutant-btn">SO<sub>2</sub></div>
+                    <div class="pollutant-btn">NO<sub>2</sub></div>
+                    <div class="pollutant-btn active">CO</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3 class="section-title">时间范围</h3>
+                <select class="date-range">
+                    <option>年均</option>
+                    <option>月均</option>
+                    <option selected>日均</option>
+                </select>
+            </div>
+            
+            <div class="control-section">
+                <h3 class="section-title">日期选择</h3>
+                <div class="date-controls">
+                    <input type="date" class="date-range" value="2025-06-07">
+                    <span>至</span>
+                    <input type="date" class="date-range" value="2025-07-06">
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3 class="section-title">区域对比</h3>
+                <select class="date-range">
+                    <option selected>全国</option>
+                    <option>京津冀</option>
+                    <option>江苏</option>
+                    <option>长三角</option>
+                    <option>珠三角</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="content-area">
+            <div class="data-header">
+                <h2 class="data-title">近实时空气污染物浓度</h2>
+                <div class="data-meta">2025-07-06日均PM2.5浓度（单位：微克/立方米）</div>
+            </div>
+            
+            <div class="map-container">
+                <div id="data-map"></div>
+                <!-- 图例 -->
+                <div class="legend">
+                    <div class="gradient-bar"></div>
+                    <div class="legend-labels">
+                        <div>&lt;15 &nbsp; 35 &nbsp; 75 &nbsp; 115 &nbsp; 150 &nbsp; 250+</div>
+                        <div>PM₂.₅浓度 (µg/m³)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="section-title">气象条件对空气污染物浓度的影响</h3>
+                <div id="contribution-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 在现有脚本之前添加时间范围联动功能，可以依据年均、月均、日均自动调整日期选择控件
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeRangeSelect = document.querySelector('.control-section:nth-child(2) .date-range');
+            const dateControlsDiv = document.querySelector('.date-controls');
+            const originalDateControls = dateControlsDiv.innerHTML; // 保存原始的日期选择HTML
+            
+            // 初始化时根据默认选择的日均设置日期控件
+            updateDateControls(timeRangeSelect.value);
+            
+            // 监听时间范围变化
+            timeRangeSelect.addEventListener('change', function() {
+                updateDateControls(this.value);
+            });
+            
+            // 更新日期控件的函数
+            function updateDateControls(timeRange) {
+                let today = new Date();
+                let html = '';
+                
+                switch(timeRange) {
+                    case '年均':
+                        // 年份范围选择器，可以选择起始年和结束年
+                        let defaultStartYear = today.getFullYear() - 1;
+                        html = `
+                            <select class="date-range year-selector start-year">
+                                ${generateYearOptions(2015, today.getFullYear(), defaultStartYear)}
+                            </select>
+                            <span>至</span>
+                            <select class="date-range year-selector end-year">
+                                ${generateYearOptions(2015, today.getFullYear(), today.getFullYear())}
+                            </select>
+                        `;
+                        break;
+                        
+                    case '月均':
+                        // 年月范围选择器
+                        let defaultStartMonth = new Date();
+                        defaultStartMonth.setMonth(today.getMonth() - 12); // 默认前12个月
+                        
+                        html = `
+                            <div class="date-group">
+                                <select class="date-range year-selector start-year">
+                                    ${generateYearOptions(2015, today.getFullYear(), defaultStartMonth.getFullYear())}
+                                </select>
+                                <span>年</span>
+                                <select class="date-range month-selector start-month">
+                                    ${generateMonthOptions(defaultStartMonth.getMonth() + 1)}
+                                </select>
+                                <span>月</span>
+                            </div>
+                            <span>至</span>
+                            <div class="date-group">
+                                <select class="date-range year-selector end-year">
+                                    ${generateYearOptions(2015, today.getFullYear(), today.getFullYear())}
+                                </select>
+                                <span>年</span>
+                                <select class="date-range month-selector end-month">
+                                    ${generateMonthOptions(today.getMonth() + 1)}
+                                </select>
+                                <span>月</span>
+                            </div>
+                        `;
+                        break;
+                        
+                    case '日均':
+                    default:
+                        // 使用日期选择器
+                        let lastMonth = new Date();
+                        lastMonth.setMonth(today.getMonth() - 1);
+                        
+                        html = `
+                            <input type="date" class="date-range start-date" 
+                                value="${formatDate(lastMonth)}" 
+                                min="2015-01-01" 
+                                max="${formatDate(today)}">
+                            <span>至</span>
+                            <input type="date" class="date-range end-date" 
+                                value="${formatDate(today)}" 
+                                min="2015-01-01" 
+                                max="${formatDate(today)}">
+                        `;
+                        break;
+                }
+                
+                dateControlsDiv.innerHTML = html;
+                
+        // 添加验证和联动
+        if (timeRange === '年均') {
+            const startYearSelect = dateControlsDiv.querySelector('.start-year');
+            const endYearSelect = dateControlsDiv.querySelector('.end-year');
+            
+            // 初始设置：结束年份不能早于开始年份
+            updateYearConstraint();
+            
+            // 当开始年份改变时，更新结束年份的最小值
+            startYearSelect.addEventListener('change', function() {
+                updateYearConstraint();
+            });
+            
+            function updateYearConstraint() {
+                // 获取所有结束年份的选项
+                const endOptions = endYearSelect.querySelectorAll('option');
+                const startYear = parseInt(startYearSelect.value);
+                
+                // 遍历所有选项，禁用早于开始年份的选项
+                endOptions.forEach(option => {
+                    const optionYear = parseInt(option.value);
+                    option.disabled = optionYear < startYear;
+                });
+                
+                // 如果当前选中的结束年份早于开始年份，则自动调整
+                if (parseInt(endYearSelect.value) < startYear) {
+                    endYearSelect.value = startYear;
+                }
+            }
+        } 
+        else if (timeRange === '月均') {
+            const startYearSelect = dateControlsDiv.querySelector('.start-year');
+            const startMonthSelect = dateControlsDiv.querySelector('.start-month');
+            const endYearSelect = dateControlsDiv.querySelector('.end-year');
+            const endMonthSelect = dateControlsDiv.querySelector('.end-month');
+            
+            // 初始设置：更新结束日期约束
+            updateMonthConstraints();
+            
+            // 验证日期范围并更新约束
+            function updateMonthConstraints() {
+                const startYear = parseInt(startYearSelect.value);
+                const startMonth = parseInt(startMonthSelect.value);
+                const endYear = parseInt(endYearSelect.value);
+                const endMonth = parseInt(endMonthSelect.value);
+                
+                // 遍历结束年份选项
+                endYearSelect.querySelectorAll('option').forEach(option => {
+                    const optionYear = parseInt(option.value);
+                    // 禁用早于开始年份的选项
+                    option.disabled = optionYear < startYear;
+                });
+                
+                // 如果开始年份等于结束年份，那么结束月份不能早于开始月份
+                if (startYear === endYear) {
+                    endMonthSelect.querySelectorAll('option').forEach(option => {
+                        const optionMonth = parseInt(option.value);
+                        option.disabled = optionMonth < startMonth;
+                    });
+                } else {
+                    // 如果年份不同，则所有月份都可选
+                    endMonthSelect.querySelectorAll('option').forEach(option => {
+                        option.disabled = false;
+                    });
+                }
+                
+                // 如果结束日期早于开始日期，调整结束日期
+                if (endYear < startYear || (endYear === startYear && endMonth < startMonth)) {
+                    endYearSelect.value = startYear;
+                    endMonthSelect.value = startMonth;
+                }
+            }
+            
+            // 监听变化事件
+            startYearSelect.addEventListener('change', updateMonthConstraints);
+            startMonthSelect.addEventListener('change', updateMonthConstraints);
+            endYearSelect.addEventListener('change', updateMonthConstraints);
+        }
+        else if (timeRange === '日均') {
+            const startDateInput = dateControlsDiv.querySelector('.start-date');
+            const endDateInput = dateControlsDiv.querySelector('.end-date');
+            
+            // 初始设置：结束日期的最小值为开始日期
+            endDateInput.min = startDateInput.value;
+            
+            // 监听开始日期变化，更新结束日期的最小值
+            startDateInput.addEventListener('change', function() {
+                // 更新结束日期的最小值
+                endDateInput.min = startDateInput.value;
+                
+                // 如果结束日期早于开始日期，将结束日期设为开始日期
+                if (endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+            });
+        }
+            }
+
+            // 更新生成年份选项的函数，添加默认选中值参数
+            function generateYearOptions(startYear, endYear, selectedYear) {
+                let options = '';
+                for (let year = endYear; year >= startYear; year--) {
+                    options += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}</option>`;
+                }
+                return options;
+            }
+
+            // 更新生成月份选项的函数，添加默认选中值参数
+            function generateMonthOptions(selectedMonth) {
+                const months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+                
+                let options = '';
+                months.forEach((month, index) => {
+                    options += `<option value="${index+1}" ${(index+1) === selectedMonth ? 'selected' : ''}>${month}</option>`;
+                });
+                return options;
+            }
+                        
+            // 格式化日期为YYYY-MM-DD
+            function formatDate(date) {
+                let year = date.getFullYear();
+                let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                let day = date.getDate().toString().padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+        });
+        // 初始化地图
+        const map = L.map('data-map', {
+            center: [35, 105],
+            zoom: 4,
+            minZoom: 3,
+            maxBounds: [[3, 73], [54, 136]]
+        });
+
+        // 添加基础地图（实际应用时需更换为专用底图）
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // 添加国界图层
+        fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000.json')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        fillColor: '#06D6A0',
+                        weight: 2,
+                        opacity: 1,
+                        color: '#2E86AB',
+                        dashArray: '',
+                        fillOpacity: 0.2
+                    }
+                }).addTo(map);
+            });
+
+        // ECharts图表初始化
+        const chart = echarts.init(document.getElementById('contribution-chart'));
+        chart.setOption({
+            title: {
+                text: '月尺度气象条件变化对污染物浓度的贡献（相比于上一年同期，单位：%）',
+                left: 'center',
+                textStyle: {
+                    fontSize: 14,
+                    fontWeight: 'normal',
+                    color: 'rgba(27, 111, 140, 1)'
+                }
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['温度', '湿度', '风速', '降水'],
+                bottom: 0,
+                textStyle: {
+                    color: 'rgba(27, 111, 140, 1)'
+                }
+            },
+            grid: {
+                top: '15%',
+                right: '3%',
+                bottom: '15%',
+                left: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: ['全国', '京津冀', '江苏', '长三角', '珠三角'],
+                axisLabel: {
+                    color: 'rgba(27, 111, 140, 1)'
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}%',
+                    color: 'rgba(27, 111, 140, 1)'
+                },
+                nameTextStyle: {
+                    color: 'rgba(27, 111, 140, 1)'
+                }
+            },
+            series: [
+                {
+                    name: '温度',
+                    type: 'bar',
+                    data: [12, 18, -5, 8, 15],
+                    itemStyle: { color: '#2E86AB' }
+                },
+                {
+                    name: '湿度',
+                    type: 'bar',
+                    data: [-8, 5, 12, -3, 7],
+                    itemStyle: { color: '#06D6A0' }
+                },
+                {
+                    name: '风速',
+                    type: 'bar',
+                    data: [-15, -8, 3, -12, -5],
+                    itemStyle: { color: '#1B6F8C' }
+                },
+                {
+                    name: '降水',
+                    type: 'bar',
+                    data: [20, 10, -8, 15, -2],
+                    itemStyle: { color: '#87CEEB' }
+                }
+            ]
+        });
+        
+        // 污染物选择按钮交互
+        document.querySelectorAll('.pollutant-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.pollutant-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // 响应式调整
+        window.addEventListener('resize', () => {
+            map.invalidateSize();
+            chart.resize();
+        });
+    </script>
+</body>
+</html>

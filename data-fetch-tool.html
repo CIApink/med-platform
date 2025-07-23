@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空气质量数据获取工具</title>
+    <style>
+        body {
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #4ab6a4;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4ab6a4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #3a9080;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(74, 182, 164, 0.3);
+            border-radius: 50%;
+            border-top-color: #4ab6a4;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        .city-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .city-item {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .city-item:hover {
+            background-color: #e0e0e0;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .api-url {
+            color: #0066cc;
+            word-break: break-all;
+        }
+        #api-response {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .download-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>空气质量数据获取工具</h1>
+    <p>这个工具可以帮助您获取特定城市的实时空气质量数据，并保存到本地文件，以便在地图上显示。</p>
+    
+    <div class="input-group">
+        <label for="api-key">和风天气 API Key:</label>
+        <input type="text" id="api-key" placeholder="请输入您的和风天气API Key">
+    </div>
+    
+    <div class="input-group">
+        <label>选择城市或输入坐标:</label>
+        <div class="city-list">
+            <div class="city-item" data-lat="39.90" data-lng="116.40">北京</div>
+            <div class="city-item" data-lat="31.23" data-lng="121.47">上海</div>
+            <div class="city-item" data-lat="23.13" data-lng="113.26">广州</div>
+            <div class="city-item" data-lat="22.54" data-lng="114.06">深圳</div>
+            <div class="city-item" data-lat="30.67" data-lng="104.06">成都</div>
+            <div class="city-item" data-lat="30.26" data-lng="120.19">杭州</div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="text" id="latitude" placeholder="纬度" style="width: 45%;">
+            <input type="text" id="longitude" placeholder="经度" style="width: 45%;">
+        </div>
+    </div>
+    
+    <button id="fetch-button" onclick="fetchAirQualityData()">获取数据</button>
+    <button id="fetch-all-button" onclick="fetchAllCities()">获取所有城市数据</button>
+    <button id="save-button" onclick="saveToLocalFile()" disabled>保存到本地文件</button>
+    
+    <div class="result">
+        <h2>API 请求信息</h2>
+        <div id="api-info"></div>
+        
+        <h2>API 响应</h2>
+        <div id="api-response">
+            <p>结果将显示在这里...</p>
+        </div>
+        
+        <div class="download-section" id="download-section" style="display: none;">
+            <h2>下载数据</h2>
+            <p>点击下方按钮下载JSON数据文件：</p>
+            <a id="download-link" href="#" class="button" style="display: inline-block; margin-top: 10px; text-decoration: none; background-color: #4ab6a4; color: white; padding: 8px 15px; border-radius: 4px;">下载数据文件</a>
+        </div>
+    </div>
+    
+    <script>
+        // 存储获取到的数据
+        let airQualityData = null;
+        let allCitiesData = [];
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从localStorage加载API Key
+            const savedApiKey = localStorage.getItem('hefengAPIKey');
+            if (savedApiKey) {
+                document.getElementById('api-key').value = savedApiKey;
+            }
+            
+            // 城市点击事件
+            document.querySelectorAll('.city-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.getElementById('latitude').value = this.getAttribute('data-lat');
+                    document.getElementById('longitude').value = this.getAttribute('data-lng');
+                });
+            });
+        });
+        
+        // 获取空气质量数据
+        async function fetchAirQualityData() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            const lat = document.getElementById('latitude').value.trim();
+            const lng = document.getElementById('longitude').value.trim();
+            const apiInfoDiv = document.getElementById('api-info');
+            const apiResponseDiv = document.getElementById('api-response');
+            const fetchButton = document.getElementById('fetch-button');
+            const saveButton = document.getElementById('save-button');
+            
+            if (!apiKey) {
+                apiInfoDiv.innerHTML = '<p class="error">请输入API Key</p>';
+                return;
+            }
+            
+            if (!lat || !lng) {
+                apiInfoDiv.innerHTML = '<p class="error">请选择城市或输入有效坐标</p>';
+                return;
+            }
+            
+            // 保存API Key到localStorage
+            localStorage.setItem('hefengAPIKey', apiKey);
+            
+            // 显示加载状态
+            fetchButton.disabled = true;
+            fetchButton.innerHTML = '<span class="loading"></span> 请求中...';
+            apiInfoDiv.innerHTML = '<p>正在发送请求...</p>';
+            
+            try {
+                // 构建API URL
+                const apiUrl = `https://api.qweather.com/v7/air/now?location=${lng},${lat}&key=${apiKey}`;
+                apiInfoDiv.innerHTML = `<p>请求URL: <span class="api-url">${apiUrl}</span></p>`;
+                
+                // 发送请求
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                // 显示结果
+                apiInfoDiv.innerHTML += `<p>状态码: ${response.status} ${response.statusText}</p>`;
+                apiResponseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // 检查是否成功
+                if (data.code === "200") {
+                    apiInfoDiv.innerHTML += '<p class="success">数据获取成功!</p>';
+                    
+                    // 转换数据为应用需要的格式
+                    airQualityData = transformData(data, lat, lng);
+                    
+                    // 启用保存按钮
+                    saveButton.disabled = false;
+                    
+                    // 显示转换后的数据
+                    apiResponseDiv.innerHTML += `<h3>转换后的数据格式 (用于应用):</h3>`;
+                    apiResponseDiv.innerHTML += `<pre>${JSON.stringify(airQualityData, null, 2)}</pre>`;
+                } else {
+                    apiInfoDiv.innerHTML += `<p class="error">API返回错误: ${data.code}</p>`;
+                }
+            } catch (error) {
+                apiInfoDiv.innerHTML = `<p class="error">请求失败: ${error.message}</p>`;
+            } finally {
+                fetchButton.disabled = false;
+                fetchButton.textContent = '获取数据';
+            }
+        }
+        
+        // 获取所有预设城市的数据
+        async function fetchAllCities() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            const apiInfoDiv = document.getElementById('api-info');
+            const apiResponseDiv = document.getElementById('api-response');
+            const fetchAllButton = document.getElementById('fetch-all-button');
+            const saveButton = document.getElementById('save-button');
+            
+            if (!apiKey) {
+                apiInfoDiv.innerHTML = '<p class="error">请输入API Key</p>';
+                return;
+            }
+            
+            // 保存API Key到localStorage
+            localStorage.setItem('hefengAPIKey', apiKey);
+            
+            // 显示加载状态
+            fetchAllButton.disabled = true;
+            fetchAllButton.innerHTML = '<span class="loading"></span> 请求中...';
+            apiInfoDiv.innerHTML = '<p>正在获取所有城市数据...</p>';
+            
+            // 预设城市列表
+            const cities = [
+                { name: '北京', latitude: 39.90, longitude: 116.40 },
+                { name: '上海', latitude: 31.23, longitude: 121.47 },
+                { name: '广州', latitude: 23.13, longitude: 113.26 },
+                { name: '深圳', latitude: 22.54, longitude: 114.06 },
+                { name: '成都', latitude: 30.67, longitude: 104.06 },
+                { name: '杭州', latitude: 30.26, longitude: 120.19 },
+                { name: '南京', latitude: 32.05, longitude: 118.78 },
+                { name: '武汉', latitude: 30.59, longitude: 114.31 },
+                { name: '西安', latitude: 34.34, longitude: 108.94 },
+                { name: '重庆', latitude: 29.56, longitude: 106.55 }
+            ];
+            
+            try {
+                allCitiesData = [];
+                let successCount = 0;
+                let table = '<table><tr><th>城市</th><th>结果</th><th>AQI</th><th>空气质量</th></tr>';
+                
+                // 逐个请求每个城市的数据
+                for (const city of cities) {
+                    const { name, latitude, longitude } = city;
+                    
+                    // 构建API URL
+                    const apiUrl = `https://api.qweather.com/v7/air/now?location=${longitude},${latitude}&key=${apiKey}`;
+                    
+                    try {
+                        // 发送请求，每次请求等待一小段时间，避免频率过高
+                        await new Promise(r => setTimeout(r, 300));
+                        const response = await fetch(apiUrl);
+                        const data = await response.json();
+                        
+                        // 检查是否成功
+                        if (data.code === "200") {
+                            // 转换数据
+                            const transformedData = transformData(data, latitude, longitude);
+                            transformedData.location.name = name;
+                            allCitiesData.push(transformedData);
+                            
+                            // 添加到表格
+                            table += `<tr>
+                                <td>${name}</td>
+                                <td class="success">成功</td>
+                                <td>${data.now.aqi}</td>
+                                <td>${data.now.category}</td>
+                            </tr>`;
+                            
+                            successCount++;
+                        } else {
+                            table += `<tr>
+                                <td>${name}</td>
+                                <td class="error">失败 (${data.code})</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>`;
+                        }
+                    } catch (error) {
+                        table += `<tr>
+                            <td>${name}</td>
+                            <td class="error">失败 (${error.message})</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>`;
+                    }
+                }
+                
+                table += '</table>';
+                
+                // 显示结果
+                apiInfoDiv.innerHTML = `<p>总计请求: ${cities.length}, 成功: ${successCount}, 失败: ${cities.length - successCount}</p>`;
+                if (successCount > 0) {
+                    apiInfoDiv.innerHTML += '<p class="success">已成功获取部分或全部城市数据!</p>';
+                    saveButton.disabled = false;
+                } else {
+                    apiInfoDiv.innerHTML += '<p class="error">所有请求都失败了</p>';
+                }
+                
+                apiResponseDiv.innerHTML = `<div class="table-container">${table}</div>`;
+                
+                // 如果有成功的数据，显示预览
+                if (allCitiesData.length > 0) {
+                    apiResponseDiv.innerHTML += `<h3>数据预览 (第一个城市):</h3>`;
+                    apiResponseDiv.innerHTML += `<pre>${JSON.stringify(allCitiesData[0], null, 2)}</pre>`;
+                }
+            } catch (error) {
+                apiInfoDiv.innerHTML = `<p class="error">请求过程中出错: ${error.message}</p>`;
+            } finally {
+                fetchAllButton.disabled = false;
+                fetchAllButton.textContent = '获取所有城市数据';
+            }
+        }
+        
+        // 转换API返回的数据为应用需要的格式
+        function transformData(data, lat, lng) {
+            const now = data.now;
+            
+            // 构建返回数据结构
+            return {
+                requestedLat: lat,
+                requestedLng: lng,
+                updateTime: data.updateTime,
+                location: { 
+                    name: data.fxLink ? data.fxLink.split('/').pop() : `位置(${lat},${lng})`,
+                    latitude: lat,
+                    longitude: lng
+                },
+                indexes: [
+                    {
+                        code: "aqi",
+                        name: "AQI",
+                        aqi: parseInt(now.aqi),
+                        aqiDisplay: now.aqi,
+                        level: now.level,
+                        category: now.category,
+                        color: getColorFromLevel(now.level),
+                        primaryPollutant: {
+                            code: now.primary,
+                            name: getPollutantName(now.primary),
+                            fullName: getPollutantFullName(now.primary)
+                        }
+                    }
+                ],
+                pollutants: [
+                    {
+                        code: "pm2p5",
+                        name: "PM2.5",
+                        fullName: "Fine particulate matter (<2.5µm)",
+                        concentration: {
+                            value: parseInt(now.pm2p5),
+                            unit: "μg/m³"
+                        }
+                    },
+                    {
+                        code: "pm10",
+                        name: "PM10",
+                        fullName: "Inhalable particulate matter (<10µm)",
+                        concentration: {
+                            value: parseInt(now.pm10),
+                            unit: "μg/m³"
+                        }
+                    },
+                    {
+                        code: "o3",
+                        name: "O3",
+                        fullName: "Ozone",
+                        concentration: {
+                            value: parseInt(now.o3),
+                            unit: "μg/m³"
+                        }
+                    },
+                    {
+                        code: "no2",
+                        name: "NO2",
+                        fullName: "Nitrogen dioxide",
+                        concentration: {
+                            value: parseInt(now.no2),
+                            unit: "μg/m³"
+                        }
+                    },
+                    {
+                        code: "so2",
+                        name: "SO2",
+                        fullName: "Sulfur dioxide",
+                        concentration: {
+                            value: parseInt(now.so2),
+                            unit: "μg/m³"
+                        }
+                    },
+                    {
+                        code: "co",
+                        name: "CO",
+                        fullName: "Carbon monoxide",
+                        concentration: {
+                            value: parseFloat(now.co),
+                            unit: "mg/m³"
+                        }
+                    }
+                ],
+                stations: [],
+                metadata: {
+                    source: "HeWeather",
+                    apiVersion: "v7",
+                    realData: true
+                }
+            };
+        }
+        
+        // 根据空气质量级别获取颜色
+        function getColorFromLevel(level) {
+            const levelNum = parseInt(level);
+            switch (levelNum) {
+                case 1:
+                    return { red: 0, green: 228, blue: 0, alpha: 1 }; // 优
+                case 2:
+                    return { red: 255, green: 255, blue: 0, alpha: 1 }; // 良
+                case 3:
+                    return { red: 255, green: 126, blue: 0, alpha: 1 }; // 轻度污染
+                case 4:
+                    return { red: 255, green: 0, blue: 0, alpha: 1 }; // 中度污染
+                case 5:
+                    return { red: 153, green: 0, blue: 76, alpha: 1 }; // 重度污染
+                case 6:
+                    return { red: 126, green: 0, blue: 35, alpha: 1 }; // 严重污染
+                default:
+                    return { red: 128, green: 128, blue: 128, alpha: 1 }; // 未知
+            }
+        }
+        
+        // 获取污染物名称
+        function getPollutantName(code) {
+            const pollutantMap = {
+                'pm2.5': 'PM2.5',
+                'pm25': 'PM2.5',
+                'pm2p5': 'PM2.5',
+                'pm10': 'PM10',
+                'o3': 'O3',
+                'no2': 'NO2',
+                'so2': 'SO2',
+                'co': 'CO'
+            };
+            
+            return pollutantMap[code?.toLowerCase()] || code || '未知';
+        }
+        
+        // 获取污染物全称
+        function getPollutantFullName(code) {
+            const pollutantMap = {
+                'pm2.5': 'Fine particulate matter (<2.5µm)',
+                'pm25': 'Fine particulate matter (<2.5µm)',
+                'pm2p5': 'Fine particulate matter (<2.5µm)',
+                'pm10': 'Inhalable particulate matter (<10µm)',
+                'o3': 'Ozone',
+                'no2': 'Nitrogen dioxide',
+                'so2': 'Sulfur dioxide',
+                'co': 'Carbon monoxide'
+            };
+            
+            return pollutantMap[code?.toLowerCase()] || '未知污染物';
+        }
+        
+        // 保存数据到本地文件
+        function saveToLocalFile() {
+            if (!airQualityData && (!allCitiesData || allCitiesData.length === 0)) {
+                alert('没有可保存的数据，请先获取数据');
+                return;
+            }
+            
+            // 确定要保存的数据
+            const dataToSave = allCitiesData.length > 0 ? allCitiesData : [airQualityData];
+            
+            // 创建Blob对象
+            const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+            
+            // 创建下载链接
+            const url = URL.createObjectURL(blob);
+            const downloadLink = document.getElementById('download-link');
+            downloadLink.href = url;
+            downloadLink.download = 'air-quality-data.json';
+            
+            // 显示下载区域
+            document.getElementById('download-section').style.display = 'block';
+            
+            // 添加保存完成提示
+            const apiInfoDiv = document.getElementById('api-info');
+            apiInfoDiv.innerHTML += '<p class="success">数据已准备好，点击下载按钮保存文件</p>';
+        }
+    </script>
+</body>
+</html>
