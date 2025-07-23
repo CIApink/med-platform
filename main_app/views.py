@@ -16,7 +16,7 @@ import uuid
 
 def index(request):
     """主页视图"""
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'user': request.user})
 
 
 def sign_in(request):
@@ -39,6 +39,7 @@ def sign_in(request):
                 profile = user.userprofile
                 if profile.status == 'approved':
                     login(request, user)
+                    # 始终重定向到首页
                     return redirect('index')
                 elif profile.status == 'pending':
                     messages.warning(request, '您的账户正在审核中，请稍后再试')
@@ -48,9 +49,12 @@ def sign_in(request):
                     messages.error(request, '您的账户已被暂停，请联系管理员')
             except UserProfile.DoesNotExist:
                 login(request, user)
+                # 始终重定向到首页
                 return redirect('index')
         else:
             messages.error(request, '用户名或密码错误')
+            
+    return render(request, 'login.html')
     
     return render(request, 'sign_in.html')
 
@@ -143,6 +147,12 @@ def sign_up(request):
 def user_logout(request):
     """注销视图"""
     logout(request)
+    
+    # 如果是AJAX请求，返回JSON响应
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True})
+    
+    # 否则重定向到首页
     return redirect('index')
 
 
@@ -199,13 +209,23 @@ def resend_verification(request):
 
 @login_required
 def user_status(request):
-    """用户状态页面视图"""
-    try:
-        profile = request.user.userprofile
-        return render(request, 'user_status.html', {'profile': profile})
-    except UserProfile.DoesNotExist:
-        messages.error(request, '用户资料不存在')
-        return redirect('index')
+    """返回用户状态的JSON视图"""
+    data = {
+        'is_authenticated': request.user.is_authenticated,
+    }
+    
+    if request.user.is_authenticated:
+        data['username'] = request.user.username
+        data['email'] = request.user.email
+        try:
+            profile = request.user.userprofile
+            data['status'] = profile.status
+            data['is_approved'] = profile.is_approved
+            data['organization'] = profile.organization
+        except UserProfile.DoesNotExist:
+            pass
+    
+    return JsonResponse(data)
 
 
 # 以下是管理员相关视图函数
@@ -369,7 +389,12 @@ def admin_user_detail(request, user_id):
 
 def data_download(request):
     """数据下载页面视图"""
-    return render(request, 'data_download.html')
+    return render(request, 'data_download.html', {'user': request.user})
+
+
+def data_download_original(request):
+    """数据下载页面视图（原版样式）"""
+    return render(request, 'data_download_original.html', {'user': request.user})
 
 
 def data_echart(request):

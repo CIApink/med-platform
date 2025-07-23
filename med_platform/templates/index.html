@@ -319,7 +319,7 @@
         </div>
         <div class="user-auth" id="userAuth">
             {% if user.is_authenticated %}
-                <div class="user-email" onclick="logout()">{{ user.email }} (点击注销)</div>
+                <div class="user-email" style="display: block;" onclick="logout()">{{ user.email }} (点击注销)</div>
             {% else %}
                 <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
             {% endif %}

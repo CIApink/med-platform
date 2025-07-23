@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MED 环境数据平台{% endblock %}</title>
+    <!-- 基本样式 -->
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{% url 'index' %}" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">主页</a>
+            <a href="#" class="nav-item">模型介绍</a>
+            <a href="{% url 'data_download' %}" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="{% url 'data_echart_fixed' %}" class="nav-item">数据地图</a>
+            <a href="#" class="nav-item">用户服务</a>
+        </div>
+        <div class="user-auth" id="userAuth">
+            <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
+            <div class="user-email" onclick="logout()">{{ user.email }} (点击注销)</div>
+        </div>
+    </nav>
+
+    <!-- 页面内容 -->
+    {% block content %}{% endblock %}
+
+    <!-- 基本脚本 -->
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航栏用户认证UI
+            updateAuthUI();
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
