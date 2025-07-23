@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('data-download/', views.data_download, name='data_download'),
     path('data-download-original/', views.data_download_original, name='data_download_original'),
+    path('data-download-single/', views.data_download_single, name='data_download_single'),
     path('data-echart/', views.data_echart, name='data_echart'),
     path('data-echart-fixed/', views.data_echart_fixed, name='data_echart_fixed'),
     path('data-fetch-tool/', views.data_fetch_tool, name='data_fetch_tool'),

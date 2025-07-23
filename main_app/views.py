@@ -389,6 +389,8 @@ def data_download(request):
     """数据下载页面视图"""
     return render(request, 'data_download.html', {'user': request.user})
 
+def data_download_single(request):
+    return render(request, 'data_download-single.html')
 
 def data_download_original(request):
     """数据下载页面视图（原版样式）"""
