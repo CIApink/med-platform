@@ -1,0 +1,521 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户状态 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+      --bg-gray: #f6f8fa;
+      --border-color: #d1d9e0;
+      --text-dark: #24292f;
+      --text-gray: #57606a;
+      --text-light: #6e7781;
+      --success-green: #1f883d;
+      --warning-yellow: #bf8700;
+      --error-red: #d1242f;
+      --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Normal.woff" %}') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Medium.woff" %}') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gray);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部导航栏 */
+    .header {
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .logo {
+      color: var(--brand-green);
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      color: var(--text-gray);
+      text-decoration: none;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background-color: var(--bg-gray);
+    }
+
+    .nav-link.active {
+      color: var(--brand-green);
+      font-weight: 500;
+    }
+
+    /* 主体内容区 */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-dark);
+    }
+
+    /* 卡片组件 */
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* 用户信息列表 */
+    .info-list {
+      list-style: none;
+    }
+
+    .info-item {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .info-label {
+      width: 140px;
+      font-size: 0.875rem;
+      color: var(--text-gray);
+      padding-right: 1rem;
+    }
+
+    .info-value {
+      flex: 1;
+      min-width: 200px;
+      font-size: 0.9375rem;
+      word-break: break-word;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 0.625rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-green);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #3d9f8f;
+    }
+
+    /* 状态标签 */
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+    }
+
+    .status-approved {
+      background-color: #dafbe1;
+      color: var(--success-green);
+    }
+
+    .status-rejected {
+      background-color: #ffebe9;
+      color: var(--error-red);
+    }
+
+    .status-suspended {
+      background-color: #f6f8fa;
+      color: var(--text-light);
+    }
+
+    /* 消息提示 */
+    .message {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .message.success {
+      background-color: #dafbe1;
+      color: var(--success-green);
+      border: 1px solid rgba(31, 136, 61, 0.2);
+    }
+
+    .message.error {
+      background-color: #ffebe9;
+      color: var(--error-red);
+      border: 1px solid rgba(209, 36, 47, 0.2);
+    }
+
+    .message.warning {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+      border: 1px solid rgba(191, 135, 0, 0.2);
+    }
+
+    /* 状态卡片 */
+    .status-card {
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .status-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .status-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-description {
+      font-size: 1rem;
+      color: var(--text-gray);
+      margin-bottom: 1.5rem;
+      max-width: 500px;
+    }
+
+    .status-pending-card {
+      background-color: #fff8e618;
+      border: 1px solid #fff8e6;
+    }
+
+    .status-pending-icon {
+      background-color: #fff8e6;
+    }
+
+    .status-approved-card {
+      background-color: #dafbe118;
+      border: 1px solid #dafbe1;
+    }
+
+    .status-approved-icon {
+      background-color: #dafbe1;
+    }
+
+    .status-rejected-card {
+      background-color: #ffebe918;
+      border: 1px solid #ffebe9;
+    }
+
+    .status-rejected-icon {
+      background-color: #ffebe9;
+    }
+
+    .status-suspended-card {
+      background-color: #f6f8fa18;
+      border: 1px solid #f6f8fa;
+    }
+
+    .status-suspended-icon {
+      background-color: #f6f8fa;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .content {
+        padding: 1.5rem;
+      }
+
+      .info-label {
+        width: 100%;
+        margin-bottom: 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header class="header">
+    <a href="{% url 'index' %}" class="logo">
+      MED环境数据平台
+    </a>
+    
+    <nav class="nav-menu">
+      <a href="{% url 'index' %}" class="nav-link">首页</a>
+      <a href="{% url 'data_download' %}" class="nav-link">数据下载</a>
+      <a href="{% url 'data_echart_fixed' %}" class="nav-link">数据可视化</a>
+      <a href="{% url 'user_status' %}" class="nav-link active">用户状态</a>
+      {% if request.user.is_authenticated %}
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" class="nav-link">管理面板</a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="nav-link">退出</a>
+      {% else %}
+        <a href="{% url 'sign_in' %}" class="nav-link">登录</a>
+        <a href="{% url 'sign_up' %}" class="nav-link">注册</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <!-- 主体内容区 -->
+  <main class="content">
+    <h1 class="page-title">用户状态</h1>
+    
+    <!-- 消息提示 -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    
+    {% if profile.status == 'pending' %}
+    <!-- 待审核状态 -->
+    <div class="status-card status-pending-card">
+      <div class="status-icon status-pending-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="#bf8700" stroke-width="2"/>
+          <path d="M12 6V12L16 14" stroke="#bf8700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="status-title">账户审核中</h2>
+      <p class="status-description">
+        您的账户正在等待管理员审核。这个过程通常需要1-2个工作日，请耐心等待。
+        {% if not profile.is_email_verified %}
+        <br>您的邮箱尚未验证，请先验证邮箱以加快审核流程。
+        {% endif %}
+      </p>
+      {% if not profile.is_email_verified %}
+      <form method="post" action="{% url 'resend_verification' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">重新发送验证邮件</button>
+      </form>
+      {% endif %}
+    </div>
+    {% elif profile.status == 'approved' %}
+    <!-- 已审核通过状态 -->
+    <div class="status-card status-approved-card">
+      <div class="status-icon status-approved-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18457 2.99721 7.13633 4.39828 5.49707C5.79935 3.85782 7.69279 2.71538 9.79619 2.24015C11.8996 1.76491 14.1003 1.98234 16.07 2.86" stroke="#1f883d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 4L12 14.01L9 11.01" stroke="#1f883d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="status-title">账户已激活</h2>
+      <p class="status-description">
+        您的账户已经通过审核并成功激活。您现在可以使用平台的所有功能。
+        {% if not profile.is_email_verified %}
+        <br>您的邮箱尚未验证，建议您尽快验证邮箱以确保账户安全。
+        {% endif %}
+      </p>
+      {% if not profile.is_email_verified %}
+      <form method="post" action="{% url 'resend_verification' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">发送验证邮件</button>
+      </form>
+      {% endif %}
+    </div>
+    {% elif profile.status == 'rejected' %}
+    <!-- 已拒绝状态 -->
+    <div class="status-card status-rejected-card">
+      <div class="status-icon status-rejected-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="#d1242f" stroke-width="2"/>
+          <path d="M15 9L9 15" stroke="#d1242f" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 9L15 15" stroke="#d1242f" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="status-title">账户申请被拒绝</h2>
+      <p class="status-description">
+        很遗憾，您的账户申请未通过审核。
+        {% if profile.rejection_reason %}
+        拒绝原因：{{ profile.rejection_reason }}
+        {% else %}
+        如需了解具体原因，请联系管理员。
+        {% endif %}
+      </p>
+    </div>
+    {% elif profile.status == 'suspended' %}
+    <!-- 已暂停状态 -->
+    <div class="status-card status-suspended-card">
+      <div class="status-icon status-suspended-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="#57606a" stroke-width="2"/>
+          <path d="M8 12H16" stroke="#57606a" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="status-title">账户已暂停</h2>
+      <p class="status-description">
+        您的账户已被暂停使用。如有疑问，请联系管理员。
+      </p>
+    </div>
+    {% endif %}
+    
+    <!-- 用户基本信息 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">基本信息</h2>
+      </div>
+      
+      <div class="card-body">
+        <ul class="info-list">
+          <li class="info-item">
+            <div class="info-label">用户名</div>
+            <div class="info-value">{{ request.user.username }}</div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">电子邮箱</div>
+            <div class="info-value">{{ request.user.email }}</div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">邮箱验证状态</div>
+            <div class="info-value">
+              {% if profile.is_email_verified %}
+              <span class="status-badge status-approved">已验证</span>
+              {% else %}
+              <span class="status-badge status-rejected">未验证</span>
+              {% endif %}
+            </div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">账户状态</div>
+            <div class="info-value">
+              {% if profile.status == 'pending' %}
+              <span class="status-badge status-pending">待审核</span>
+              {% elif profile.status == 'approved' %}
+              <span class="status-badge status-approved">已通过</span>
+              {% elif profile.status == 'rejected' %}
+              <span class="status-badge status-rejected">已拒绝</span>
+              {% elif profile.status == 'suspended' %}
+              <span class="status-badge status-suspended">已暂停</span>
+              {% endif %}
+            </div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">注册时间</div>
+            <div class="info-value">{{ profile.created_at|date:"Y-m-d H:i:s" }}</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- 机构信息 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">机构信息</h2>
+      </div>
+      
+      <div class="card-body">
+        <ul class="info-list">
+          <li class="info-item">
+            <div class="info-label">机构名称</div>
+            <div class="info-value">{{ profile.organization }}</div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">机构类型</div>
+            <div class="info-value">{{ profile.get_organization_type_display }}</div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">所在国家/地区</div>
+            <div class="info-value">{{ profile.get_country_display }}</div>
+          </li>
+          <li class="info-item">
+            <div class="info-label">联系电话</div>
+            <div class="info-value">{{ profile.phone|default:"未提供" }}</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -28,8 +28,15 @@ class UserProfile(models.Model):
         ('other', '其他'),
     ]
     
+    STATUS_CHOICES = [
+        ('pending', '待审核'),
+        ('approved', '已通过'),
+        ('rejected', '已拒绝'),
+        ('suspended', '已暂停'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="电话")
     organization = models.CharField(max_length=200, blank=True, null=True, verbose_name="机构名称")
     organization_type = models.CharField(
         max_length=50, 
@@ -47,8 +54,18 @@ class UserProfile(models.Model):
     )
     is_edu_email = models.BooleanField(default=False, verbose_name="是否教育邮箱")
     is_approved = models.BooleanField(default=False, verbose_name="是否审核通过")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="审核状态"
+    )
+    verification_code = models.CharField(max_length=64, blank=True, null=True, verbose_name="验证码")
+    is_email_verified = models.BooleanField(default=False, verbose_name="邮箱是否已验证")
+    rejection_reason = models.TextField(blank=True, null=True, verbose_name="拒绝原因")
+    admin_notes = models.TextField(blank=True, null=True, verbose_name="管理员备注")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     
     def __str__(self):
         return f"{self.user.username} Profile"
@@ -58,21 +75,44 @@ class UserProfile(models.Model):
         if self.user.email and '@' in self.user.email:
             self.is_edu_email = self.user.email.lower().endswith('.edu.cn')
             # 教育邮箱自动审核通过
-            if self.is_edu_email:
+            if self.is_edu_email and not self.id:  # 只在创建时自动审核
                 self.is_approved = True
+                self.status = 'approved'
+            elif not self.id:  # 非教育邮箱且是新用户
+                self.status = 'pending'
         super().save(*args, **kwargs)
 
 
-class DataDownload(models.Model):
-    """数据下载记录模型"""
+class UserVerification(models.Model):
+    """用户邮箱验证模型"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    dataset_name = models.CharField(max_length=200)
-    download_time = models.DateTimeField(auto_now_add=True)
-    file_size = models.BigIntegerField(default=0)
-    download_url = models.URLField()
+    code = models.CharField(max_length=64, verbose_name="验证码")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    expires_at = models.DateTimeField(verbose_name="过期时间")
+    is_used = models.BooleanField(default=False, verbose_name="是否已使用")
     
     def __str__(self):
-        return f"{self.user.username} - {self.dataset_name}"
+        return f"{self.user.username} - {self.code}"
+
+
+class AuditLog(models.Model):
+    """审核日志模型"""
+    ACTION_CHOICES = [
+        ('approve', '审核通过'),
+        ('reject', '拒绝申请'),
+        ('suspend', '暂停账户'),
+        ('reactivate', '重新激活'),
+        ('other', '其他操作'),
+    ]
+    
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="用户资料")
+    admin_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="audit_logs", verbose_name="管理员")
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES, verbose_name="操作类型")
+    notes = models.TextField(blank=True, null=True, verbose_name="备注")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="操作时间")
+    
+    def __str__(self):
+        return f"{self.admin_user} - {self.action} - {self.user_profile.user.username}"
     
     class Meta:
-        ordering = ['-download_time']
+        ordering = ['-created_at']

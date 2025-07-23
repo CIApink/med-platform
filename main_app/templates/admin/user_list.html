@@ -1,0 +1,537 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户管理 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+      --bg-gray: #f6f8fa;
+      --border-color: #d1d9e0;
+      --text-dark: #24292f;
+      --text-gray: #57606a;
+      --text-light: #6e7781;
+      --success-green: #1f883d;
+      --warning-yellow: #bf8700;
+      --error-red: #d1242f;
+      --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Normal.woff" %}') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Medium.woff" %}') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gray);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部导航栏 */
+    .header {
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      color: var(--brand-green);
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      font-size: 0.875rem;
+      color: var(--text-gray);
+    }
+
+    .admin-label {
+      background-color: var(--primary-blue);
+      color: var(--brand-green);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-left: 0.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-gray);
+      text-decoration: none;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background-color: var(--bg-gray);
+    }
+
+    /* 主体内容布局 */
+    .main-container {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* 侧边导航 */
+    .sidebar {
+      width: 240px;
+      background-color: white;
+      border-right: 1px solid var(--border-color);
+      padding: 1.5rem 0;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-gray);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background-color: var(--bg-gray);
+    }
+
+    .sidebar-link.active {
+      background-color: var(--primary-blue);
+      color: var(--brand-green);
+      font-weight: 500;
+      border-right: 3px solid var(--brand-green);
+    }
+
+    /* 主体内容区 */
+    .content {
+      flex: 1;
+      padding: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-dark);
+    }
+
+    /* 卡片组件 */
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* 筛选表单 */
+    .filter-form {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .form-control {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      background-color: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px rgba(74, 182, 164, 0.15);
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-green);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #3d9f8f;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-gray);
+      color: var(--text-gray);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e9ecef;
+    }
+
+    /* 表格组件 */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th, .table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .table th {
+      font-weight: 500;
+      color: var(--text-gray);
+      font-size: 0.875rem;
+      background-color: var(--bg-gray);
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-link {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .table-link:hover {
+      text-decoration: underline;
+    }
+
+    /* 状态标签 */
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+    }
+
+    .status-approved {
+      background-color: #dafbe1;
+      color: var(--success-green);
+    }
+
+    .status-rejected {
+      background-color: #ffebe9;
+      color: var(--error-red);
+    }
+
+    .status-suspended {
+      background-color: #f6f8fa;
+      color: var(--text-light);
+    }
+
+    /* 分页控件 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .pagination a, .pagination span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem;
+      margin: 0 0.25rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--text-gray);
+      text-decoration: none;
+    }
+
+    .pagination a {
+      background-color: white;
+      border: 1px solid var(--border-color);
+    }
+
+    .pagination a:hover {
+      background-color: var(--bg-gray);
+    }
+
+    .pagination .current {
+      background-color: var(--brand-green);
+      color: white;
+      font-weight: 500;
+    }
+
+    /* 消息提示 */
+    .message {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .message.success {
+      background-color: #dafbe1;
+      color: var(--success-green);
+      border: 1px solid rgba(31, 136, 61, 0.2);
+    }
+
+    .message.error {
+      background-color: #ffebe9;
+      color: var(--error-red);
+      border: 1px solid rgba(209, 36, 47, 0.2);
+    }
+
+    .message.warning {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+      border: 1px solid rgba(191, 135, 0, 0.2);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header class="header">
+    <div class="logo">
+      <span>MED环境数据平台</span>
+    </div>
+    
+    <div class="user-menu">
+      <div class="user-info">
+        {{ request.user.username }}
+        <span class="admin-label">管理员</span>
+      </div>
+      <a href="{% url 'index' %}" class="nav-link">返回前台</a>
+      <a href="{% url 'logout' %}" class="nav-link">退出</a>
+    </div>
+  </header>
+
+  <!-- 主体内容容器 -->
+  <div class="main-container">
+    <!-- 侧边导航栏 -->
+    <nav class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="{% url 'admin_dashboard' %}" class="sidebar-link">仪表盘</a></li>
+        <li><a href="{% url 'admin_user_list' %}" class="sidebar-link active">用户管理</a></li>
+        <li><a href="/admin/" class="sidebar-link">Django 管理</a></li>
+      </ul>
+    </nav>
+
+    <!-- 主体内容区 -->
+    <main class="content">
+      <h1 class="page-title">用户管理</h1>
+      
+      <!-- 消息提示 -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      
+      <!-- 筛选表单 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">筛选条件</h2>
+        </div>
+        
+        <div class="card-body">
+          <form class="filter-form" method="get">
+            <div class="form-group">
+              <label for="status">状态：</label>
+              <select name="status" id="status" class="form-control">
+                <option value="">全部</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>待审核</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>已通过</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>已拒绝</option>
+                <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>已暂停</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="query">搜索：</label>
+              <input type="text" name="query" id="query" value="{{ search_query }}" placeholder="用户名/邮箱/机构" class="form-control">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">筛选</button>
+            <a href="{% url 'admin_user_list' %}" class="btn btn-secondary">重置</a>
+          </form>
+        </div>
+      </div>
+      
+      <!-- 用户列表 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">用户列表</h2>
+        </div>
+        
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>邮箱</th>
+                <th>机构</th>
+                <th>机构类型</th>
+                <th>状态</th>
+                <th>注册时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for profile in page_obj %}
+              <tr>
+                <td>{{ profile.user.id }}</td>
+                <td>{{ profile.user.username }}</td>
+                <td>{{ profile.user.email }}</td>
+                <td>{{ profile.organization }}</td>
+                <td>{{ profile.get_organization_type_display }}</td>
+                <td>
+                  {% if profile.status == 'pending' %}
+                  <span class="status-badge status-pending">待审核</span>
+                  {% elif profile.status == 'approved' %}
+                  <span class="status-badge status-approved">已通过</span>
+                  {% elif profile.status == 'rejected' %}
+                  <span class="status-badge status-rejected">已拒绝</span>
+                  {% elif profile.status == 'suspended' %}
+                  <span class="status-badge status-suspended">已暂停</span>
+                  {% endif %}
+                </td>
+                <td>{{ profile.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                  <a href="{% url 'admin_user_detail' profile.user.id %}" class="table-link">详情</a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" style="text-align: center;">暂无用户记录</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+          <!-- 分页 -->
+          {% if page_obj.has_other_pages %}
+          <div class="pagination">
+            {% if page_obj.has_previous %}
+              <a href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">&laquo; 首页</a>
+              <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">上一页</a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <span class="current">{{ num }}</span>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">{{ num }}</a>
+              {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">下一页</a>
+              <a href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">末页 &raquo;</a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

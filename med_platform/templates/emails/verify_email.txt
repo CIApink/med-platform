@@ -1,0 +1,12 @@
+亲爱的 {{ user.username }},
+
+请点击以下链接验证您的邮箱地址：
+
+{{ verify_url }}
+
+此链接将在 {{ expires_hours }} 小时后过期。
+
+感谢您使用MED平台!
+
+此致
+MED平台团队

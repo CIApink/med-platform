@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证您的 MED 平台账户</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #24292f;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+        }
+        .header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 1px solid #d1d9e0;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #d1d9e0;
+            font-size: 12px;
+            color: #6e7781;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(90deg, #4ab6a4, #6fb8ed);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 20px 0;
+        }
+        .info {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #4ab6a4; margin: 0;">MED 环境健康数据平台</h1>
+            <p style="margin: 5px 0 0; color: #6e7781;">Metrics of Environmental Data</p>
+        </div>
+        
+        <div class="content">
+            <h2>请验证您的电子邮箱</h2>
+            
+            <p>尊敬的用户：</p>
+            
+            <p>感谢您注册 MED 环境健康数据平台。请点击下方按钮验证您的电子邮箱地址：</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ verify_url }}" class="button">验证我的邮箱</a>
+            </div>
+            
+            <p>或者，您可以复制以下链接到浏览器地址栏：</p>
+            <div class="info">
+                {{ verify_url }}
+            </div>
+            
+            <p>此验证链接将在 {{ expires_hours }} 小时后失效。</p>
+            
+            <p>如果您没有注册 MED 平台账户，请忽略此邮件。</p>
+            
+            <p>祝您使用愉快！<br>MED 平台团队</p>
+        </div>
+        
+        <div class="footer">
+            <p>此邮件由系统自动发送，请勿回复。</p>
+            <p>&copy; {% now "Y" %} MED 环境健康数据平台. 保留所有权利。</p>
+        </div>
+    </div>
+</body>
+</html>

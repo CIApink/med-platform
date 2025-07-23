@@ -15,4 +15,10 @@ urlpatterns = [
     path('verification-sent/', views.verification_sent, name='verification_sent'),
     path('verify-email/', views.verify_email, name='verify_email'),
     path('verify-email-new/', views.verify_email_new, name='verify_email_new'),
+    path('resend-verification/', views.resend_verification, name='resend_verification'),
+    
+    # 管理员面板路由
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-users/', views.admin_user_list, name='admin_user_list'),
+    path('admin-user/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
 ]

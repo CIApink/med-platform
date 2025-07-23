@@ -1,0 +1,717 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户详情 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+      --bg-gray: #f6f8fa;
+      --border-color: #d1d9e0;
+      --text-dark: #24292f;
+      --text-gray: #57606a;
+      --text-light: #6e7781;
+      --success-green: #1f883d;
+      --warning-yellow: #bf8700;
+      --error-red: #d1242f;
+      --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Normal.woff" %}') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Medium.woff" %}') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gray);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部导航栏 */
+    .header {
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      color: var(--brand-green);
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      font-size: 0.875rem;
+      color: var(--text-gray);
+    }
+
+    .admin-label {
+      background-color: var(--primary-blue);
+      color: var(--brand-green);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-left: 0.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-gray);
+      text-decoration: none;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background-color: var(--bg-gray);
+    }
+
+    /* 主体内容布局 */
+    .main-container {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* 侧边导航 */
+    .sidebar {
+      width: 240px;
+      background-color: white;
+      border-right: 1px solid var(--border-color);
+      padding: 1.5rem 0;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-gray);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      background-color: var(--bg-gray);
+    }
+
+    .sidebar-link.active {
+      background-color: var(--primary-blue);
+      color: var(--brand-green);
+      font-weight: 500;
+      border-right: 3px solid var(--brand-green);
+    }
+
+    /* 主体内容区 */
+    .content {
+      flex: 1;
+      padding: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-title a {
+      font-size: 0.875rem;
+      color: var(--brand-green);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .page-title a:hover {
+      text-decoration: underline;
+    }
+
+    /* 卡片组件 */
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* 用户信息列表 */
+    .info-list {
+      list-style: none;
+    }
+
+    .info-item {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .info-label {
+      width: 120px;
+      font-size: 0.875rem;
+      color: var(--text-gray);
+      padding-right: 1rem;
+    }
+
+    .info-value {
+      flex: 1;
+      min-width: 200px;
+      font-size: 0.9375rem;
+      word-break: break-word;
+    }
+
+    /* 表单组件 */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      background-color: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px rgba(74, 182, 164, 0.15);
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 0.625rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-green);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #3d9f8f;
+    }
+
+    .btn-success {
+      background-color: var(--success-green);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #1a7535;
+    }
+
+    .btn-danger {
+      background-color: var(--error-red);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #b51f29;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-yellow);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #a77600;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-gray);
+      color: var(--text-gray);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e9ecef;
+    }
+
+    /* 表格组件 */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th, .table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .table th {
+      font-weight: 500;
+      color: var(--text-gray);
+      font-size: 0.875rem;
+      background-color: var(--bg-gray);
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 状态标签 */
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+    }
+
+    .status-approved {
+      background-color: #dafbe1;
+      color: var(--success-green);
+    }
+
+    .status-rejected {
+      background-color: #ffebe9;
+      color: var(--error-red);
+    }
+
+    .status-suspended {
+      background-color: #f6f8fa;
+      color: var(--text-light);
+    }
+
+    /* 操作组 */
+    .action-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* 消息提示 */
+    .message {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .message.success {
+      background-color: #dafbe1;
+      color: var(--success-green);
+      border: 1px solid rgba(31, 136, 61, 0.2);
+    }
+
+    .message.error {
+      background-color: #ffebe9;
+      color: var(--error-red);
+      border: 1px solid rgba(209, 36, 47, 0.2);
+    }
+
+    .message.warning {
+      background-color: #fff8e6;
+      color: var(--warning-yellow);
+      border: 1px solid rgba(191, 135, 0, 0.2);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header class="header">
+    <div class="logo">
+      <span>MED环境数据平台</span>
+    </div>
+    
+    <div class="user-menu">
+      <div class="user-info">
+        {{ request.user.username }}
+        <span class="admin-label">管理员</span>
+      </div>
+      <a href="{% url 'index' %}" class="nav-link">返回前台</a>
+      <a href="{% url 'logout' %}" class="nav-link">退出</a>
+    </div>
+  </header>
+
+  <!-- 主体内容容器 -->
+  <div class="main-container">
+    <!-- 侧边导航栏 -->
+    <nav class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="{% url 'admin_dashboard' %}" class="sidebar-link">仪表盘</a></li>
+        <li><a href="{% url 'admin_user_list' %}" class="sidebar-link active">用户管理</a></li>
+        <li><a href="/admin/" class="sidebar-link">Django 管理</a></li>
+      </ul>
+    </nav>
+
+    <!-- 主体内容区 -->
+    <main class="content">
+      <h1 class="page-title">
+        用户详情
+        <a href="{% url 'admin_user_list' %}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          返回用户列表
+        </a>
+      </h1>
+      
+      <!-- 消息提示 -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      
+      <!-- 用户基本信息 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">基本信息</h2>
+        </div>
+        
+        <div class="card-body">
+          <ul class="info-list">
+            <li class="info-item">
+              <div class="info-label">用户名</div>
+              <div class="info-value">{{ user_profile.user.username }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">电子邮箱</div>
+              <div class="info-value">{{ user_profile.user.email }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">邮箱类型</div>
+              <div class="info-value">
+                {% if user_profile.is_edu_email %}
+                <span class="status-badge status-approved">教育邮箱</span>
+                {% else %}
+                <span class="status-badge status-pending">普通邮箱</span>
+                {% endif %}
+              </div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">邮箱验证</div>
+              <div class="info-value">
+                {% if user_profile.is_email_verified %}
+                <span class="status-badge status-approved">已验证</span>
+                {% else %}
+                <span class="status-badge status-rejected">未验证</span>
+                {% endif %}
+              </div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">账户状态</div>
+              <div class="info-value">
+                {% if user_profile.status == 'pending' %}
+                <span class="status-badge status-pending">待审核</span>
+                {% elif user_profile.status == 'approved' %}
+                <span class="status-badge status-approved">已通过</span>
+                {% elif user_profile.status == 'rejected' %}
+                <span class="status-badge status-rejected">已拒绝</span>
+                {% elif user_profile.status == 'suspended' %}
+                <span class="status-badge status-suspended">已暂停</span>
+                {% endif %}
+              </div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">注册时间</div>
+              <div class="info-value">{{ user_profile.created_at|date:"Y-m-d H:i:s" }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">最后更新</div>
+              <div class="info-value">{{ user_profile.updated_at|date:"Y-m-d H:i:s" }}</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- 机构信息 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">机构信息</h2>
+        </div>
+        
+        <div class="card-body">
+          <ul class="info-list">
+            <li class="info-item">
+              <div class="info-label">机构名称</div>
+              <div class="info-value">{{ user_profile.organization }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">机构类型</div>
+              <div class="info-value">{{ user_profile.get_organization_type_display }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">所在国家/地区</div>
+              <div class="info-value">{{ user_profile.get_country_display }}</div>
+            </li>
+            <li class="info-item">
+              <div class="info-label">联系电话</div>
+              <div class="info-value">{{ user_profile.phone|default:"未提供" }}</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- 账户管理 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">账户管理</h2>
+        </div>
+        
+        <div class="card-body">
+          <!-- 审核操作 -->
+          {% if user_profile.status == 'pending' %}
+          <div class="action-group" style="margin-bottom: 20px;">
+            <form method="post" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="approve">
+              <button type="submit" class="btn btn-success">批准申请</button>
+            </form>
+            
+            <button type="button" class="btn btn-danger" onclick="showRejectForm()">拒绝申请</button>
+          </div>
+          
+          <div id="rejectForm" style="display: none; margin-top: 15px; margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #f9f9f9;">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="reject">
+              
+              <div class="form-group">
+                <label for="rejection_reason" class="form-label">拒绝原因</label>
+                <textarea name="rejection_reason" id="rejection_reason" class="form-control" required></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="notes" class="form-label">管理员备注</label>
+                <textarea name="notes" id="notes" class="form-control"></textarea>
+              </div>
+              
+              <div class="action-group">
+                <button type="submit" class="btn btn-danger">确认拒绝</button>
+                <button type="button" class="btn btn-secondary" onclick="hideRejectForm()">取消</button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+          
+          <!-- 已审核用户操作 -->
+          {% if user_profile.status == 'approved' %}
+          <div class="action-group" style="margin-bottom: 20px;">
+            <form method="post" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="suspend">
+              <button type="submit" class="btn btn-warning">暂停账户</button>
+            </form>
+          </div>
+          {% endif %}
+          
+          <!-- 已拒绝用户操作 -->
+          {% if user_profile.status == 'rejected' %}
+          <div class="action-group" style="margin-bottom: 20px;">
+            <form method="post" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="approve">
+              <button type="submit" class="btn btn-success">重新批准</button>
+            </form>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">拒绝原因</label>
+            <div style="padding: 10px; background-color: #ffebe9; border-radius: 5px; margin-bottom: 15px;">
+              {{ user_profile.rejection_reason|default:"未提供拒绝原因" }}
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- 已暂停用户操作 -->
+          {% if user_profile.status == 'suspended' %}
+          <div class="action-group" style="margin-bottom: 20px;">
+            <form method="post" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="reactivate">
+              <button type="submit" class="btn btn-success">重新激活账户</button>
+            </form>
+          </div>
+          {% endif %}
+          
+          <!-- 管理员备注 -->
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_notes">
+            
+            <div class="form-group">
+              <label for="admin_notes" class="form-label">管理员备注</label>
+              <textarea name="notes" id="admin_notes" class="form-control">{{ user_profile.admin_notes|default:"" }}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">更新备注</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- 审核日志 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">审核日志</h2>
+        </div>
+        
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>操作</th>
+                <th>管理员</th>
+                <th>备注</th>
+                <th>时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in audit_logs %}
+              <tr>
+                <td>
+                  {% if log.action == 'approve' %}
+                  <span class="status-badge status-approved">审核通过</span>
+                  {% elif log.action == 'reject' %}
+                  <span class="status-badge status-rejected">拒绝申请</span>
+                  {% elif log.action == 'suspend' %}
+                  <span class="status-badge status-suspended">暂停账户</span>
+                  {% elif log.action == 'reactivate' %}
+                  <span class="status-badge status-approved">重新激活</span>
+                  {% else %}
+                  <span class="status-badge">{{ log.get_action_display }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ log.admin_user.username }}</td>
+                <td>{{ log.notes|default:"-" }}</td>
+                <td>{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" style="text-align: center;">暂无审核日志</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    function showRejectForm() {
+      document.getElementById('rejectForm').style.display = 'block';
+    }
+    
+    function hideRejectForm() {
+      document.getElementById('rejectForm').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

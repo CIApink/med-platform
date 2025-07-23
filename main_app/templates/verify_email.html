@@ -1,0 +1,304 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邮箱验证 - MED环境数据平台</title>
+  <style>
+    :root {
+      --primary-blue: #C1E9D2;
+      --brand-green: #4ab6a4c8;
+      --accent-blue: #4ab6a4c8;
+      --light-blue: #6fb8ed;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Normal.woff" %}') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'MiSans';
+      src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+           url('{% static "MiSans-Medium.woff" %}') format('woff');
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      background: #0d1117;
+      position: relative;
+      font-family: 'MiSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    }
+
+    /* 背景装饰元素 */
+    .bg-decoration {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--brand-green), var(--light-blue));
+      opacity: 0.03;
+      animation: float 30s infinite ease-in-out;
+    }
+
+    .floating-shape:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+
+    .floating-shape:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      top: 60%;
+      right: -150px;
+      animation-delay: -10s;
+    }
+
+    .floating-shape:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      bottom: -125px;
+      left: 40%;
+      animation-delay: -20s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+      33% { transform: translateY(-50px) rotate(120deg) scale(1.1); }
+      66% { transform: translateY(30px) rotate(240deg) scale(0.9); }
+    }
+
+    /* 主容器 */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 30px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 消息卡片 */
+    .message-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .icon-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .icon-container.success {
+      background: linear-gradient(135deg, #dcffe4 0%, #c1e9d2 100%);
+    }
+    
+    .icon-container.error {
+      background: linear-gradient(135deg, #ffe8e8 0%, #ffcccb 100%);
+    }
+    
+    .icon-container.pending {
+      background: linear-gradient(135deg, #fff8e6 0%, #ffebb3 100%);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 20px;
+    }
+
+    .message {
+      font-size: 16px;
+      color: #57606a;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .action-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, #4ab6a4, #6fb8ed);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(90deg, #6fb8ed, #4ab6a4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(74, 182, 164, 0.3);
+    }
+
+    .secondary-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #57606a;
+    }
+
+    .secondary-link a {
+      color: var(--brand-green);
+      text-decoration: none;
+    }
+
+    .secondary-link a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 状态标签 */
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    
+    .status-badge.pending {
+      background-color: #fff8e6;
+      color: #bf8700;
+    }
+    
+    .status-badge.approved {
+      background-color: #dafbe1;
+      color: #1f883d;
+    }
+    
+    .status-badge.rejected {
+      background-color: #ffebe9;
+      color: #d1242f;
+    }
+    
+    .status-badge.suspended {
+      background-color: #f6f8fa;
+      color: #57606a;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  <div class="container">
+    <div class="message-card">
+      {% if verified %}
+        <div class="icon-container success">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18457 2.99721 7.13633 4.39828 5.49707C5.79935 3.85782 7.69279 2.71538 9.79619 2.24015C11.8996 1.76491 14.1003 1.98234 16.07 2.86" stroke="#1f883d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 4L12 14.01L9 11.01" stroke="#1f883d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        
+        <h1 class="title">邮箱验证成功！</h1>
+        
+        {% if status == 'approved' %}
+          <div class="status-badge approved">已通过审核</div>
+          <p class="message">
+            您的邮箱已成功验证，账户已通过审核。<br>
+            您现在可以使用平台的所有功能。
+          </p>
+          <a href="{% url 'index' %}" class="action-btn">前往首页</a>
+        {% elif status == 'pending' %}
+          <div class="status-badge pending">待审核</div>
+          <p class="message">
+            您的邮箱已成功验证！<br>
+            但您的账户仍在审核中，请耐心等待。<br>
+            审核通过后，我们会通过邮件通知您。
+          </p>
+          <a href="{% url 'index' %}" class="action-btn">前往首页</a>
+        {% elif status == 'rejected' %}
+          <div class="status-badge rejected">已拒绝</div>
+          <p class="message">
+            您的邮箱已成功验证，但您的账户申请未通过审核。<br>
+            如有疑问，请联系管理员。
+          </p>
+          <a href="{% url 'index' %}" class="action-btn">前往首页</a>
+        {% elif status == 'suspended' %}
+          <div class="status-badge suspended">已暂停</div>
+          <p class="message">
+            您的邮箱已成功验证，但您的账户已被暂停。<br>
+            如有疑问，请联系管理员。
+          </p>
+          <a href="{% url 'index' %}" class="action-btn">前往首页</a>
+        {% endif %}
+      {% else %}
+        <div class="icon-container error">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#d1242f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 9L9 15" stroke="#d1242f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 9L15 15" stroke="#d1242f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        
+        <h1 class="title">验证链接无效</h1>
+        
+        <p class="message">
+          您点击的验证链接无效或已过期。<br>
+          请尝试重新发送验证邮件。
+        </p>
+        
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'resend_verification' %}">
+          {% csrf_token %}
+          <button type="submit" class="action-btn">重新发送验证邮件</button>
+        </form>
+        {% else %}
+        <a href="{% url 'sign_in' %}" class="action-btn">返回登录</a>
+        {% endif %}
+      {% endif %}
+      
+      <p class="secondary-link">
+        <a href="{% url 'index' %}">返回首页</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
