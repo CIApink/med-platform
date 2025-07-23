@@ -11,6 +11,7 @@ urlpatterns = [
     path('data-download-single/', views.data_download_single, name='data_download_single'),
     path('data-echart/', views.data_echart, name='data_echart'),
     path('data-echart-fixed/', views.data_echart_fixed, name='data_echart_fixed'),
+    path('data-echart-map/', views.data_echart_map, name='data_echart_map'),
     path('data-fetch-tool/', views.data_fetch_tool, name='data_fetch_tool'),
     path('data-local-map/', views.data_local_map, name='data_local_map'),
     path('user-status/', views.user_status, name='user_status'),

@@ -407,6 +407,43 @@ def data_echart_fixed(request):
     return render(request, 'data_echart_fixed.html')
 
 
+def data_echart_map(request):
+    """数据图表地图页面视图"""
+    print("Loading data_echart_map view")
+    import os
+    import json
+    from django.conf import settings
+    from django.http import JsonResponse
+    
+    # 检查静态文件是否存在
+    static_file_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'air-quality-data.json')
+    file_exists = os.path.exists(static_file_path)
+    print(f"JSON文件存在: {file_exists}, 路径: {static_file_path}")
+    
+    # 如果是API请求，返回JSON数据
+    if request.GET.get('api') == 'json':
+        try:
+            with open(static_file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                cities_count = len(data.get('cities', []))
+                return JsonResponse({
+                    'success': True,
+                    'file_exists': file_exists,
+                    'file_path': static_file_path,
+                    'cities_count': cities_count,
+                    'update_time': data.get('updateTime', ''),
+                    'data': data
+                })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    # 如果URL中有debug参数，则加载调试版本
+    if request.GET.get('debug') == '1':
+        return render(request, 'data_echart_map_debug.html')
+    
+    return render(request, 'data_echart_map.html')
+
+
 def data_fetch_tool(request):
     """数据获取工具页面视图"""
     return render(request, 'data_fetch_tool.html')
