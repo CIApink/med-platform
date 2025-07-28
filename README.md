@@ -1,173 +1,140 @@
 # MED 环境数据平台
 
-## 项目简介
+Django开发的环境数据展示平台，提供空气质量数据可视化和用户管理功能。
 
-MED 环境健康数据平台（Metrics of Environmental Data）是一个基于Django的环境数据展示和管理平台，为用户提供专业的全球环境数据与专题资料。
+## 快速开始
 
-## 功能特性
+### 启动项目
 
-- 用户注册、登录、注销功能
-- 环境数据展示和下载
-- 数据可视化图表
-- 响应式设计，支持移动端
-- 基于Django的后端管理
+```bash
+# 激活虚拟环境
+med_env\Scripts\activate
+
+# 启动服务器
+python manage.py runserver
+```
+
+访问 http://127.0.0.1:8000
+
+### 页面列表
+
+- `/` - 首页
+- `/sign-in/` - 登录
+- `/sign-up/` - 注册  
+- `/data-download/` - 数据下载
+- `/data-echart-map/` - 空气质量地图
+- `/admin/` - 管理后台
+
+## 项目特色
+
+- **空气质量地图**: 31个主要城市的实时空气质量数据可视化
+- **数据下载**: 多种格式的环境数据文件下载
+- **用户系统**: 注册、登录、权限管理
+- **响应式设计**: 适配桌面和移动设备
+
+## 技术实现
+
+- Django 4.2 + SQLite
+- Leaflet.js 地图可视化
+- MiSans 字体
+- 自适应CSS布局
 
 ## 项目结构
 
 ```
 med-platform/
-├── manage.py                 # Django管理脚本
-├── requirements.txt          # Python依赖包
-├── README.md                # 项目说明文档
-├── fonts/                   # 字体文件
-│   ├── MiSans-Normal.woff2
-│   ├── MiSans-Semibold.woff2
-│   └── ...
-├── image/                   # 图片资源
-│   ├── indeximage1.jpg
-│   ├── indeximage2.jpg
-│   └── ...
-├── med_platform/            # Django项目配置
-│   ├── __init__.py
-│   ├── settings.py          # 项目设置
-│   ├── urls.py              # 主URL配置
-│   ├── wsgi.py              # WSGI配置
-│   └── templates/           # 模板文件
-│       ├── index.html
-│       ├── sign_in.html
-│       ├── sign_up.html
-│       ├── data_download.html
-│       └── ...
-└── main_app/                # 主应用
-    ├── __init__.py
-    ├── admin.py             # 管理后台配置
-    ├── apps.py              # 应用配置
-    ├── models.py            # 数据模型
-    ├── views.py             # 视图函数
-    ├── urls.py              # 应用URL配置
-    └── tests.py             # 测试用例
+├── manage.py
+├── requirements.txt
+├── med_platform/          # 项目配置
+│   ├── settings.py
+│   ├── urls.py
+│   └── templates/         # 页面模板
+├── main_app/              # 主应用
+│   ├── models.py          # 数据模型
+│   ├── views.py           # 业务逻辑
+│   └── urls.py            # 路由配置
+├── staticfiles/           # 静态资源
+│   └── air-quality-data.json
+├── fonts/                 # 字体文件
+└── image/                 # 图片资源
 ```
 
-## 安装和运行
+## 开发
 
-### 1. 环境要求
-
-- Python 3.8+
-- pip
-
-### 2. 安装依赖
-
-```bash
-# 创建虚拟环境（推荐）
-python -m venv med_env
-
-# 激活虚拟环境
-# Windows:
-med_env\Scripts\activate
-# macOS/Linux:
-source med_env/bin/activate
-
-# 安装依赖
-pip install -r requirements.txt
-```
-
-### 3. 数据库迁移
+### 数据库操作
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
-```
-
-### 4. 创建超级用户（可选）
-
-```bash
 python manage.py createsuperuser
 ```
 
-### 5. 运行开发服务器
+### 修改页面
 
-```bash
-python manage.py runserver
+1. 编辑 `med_platform/templates/` 中的HTML文件
+2. 在 `main_app/views.py` 添加视图函数
+3. 在 `main_app/urls.py` 配置路由
+
+### 空气质量数据
+
+编辑 `staticfiles/air-quality-data.json` 文件修改地图显示的城市数据。
+
+## 部署
+
+生产环境需要修改 `settings.py`：
+
+```python
+DEBUG = False
+ALLOWED_HOSTS = ['your-domain.com']
 ```
 
-访问 http://127.0.0.1:8000 查看网站
+然后收集静态文件：
 
-### 6. 访问管理后台（可选）
-
-访问 http://127.0.0.1:8000/admin 进入管理后台
-
-## 页面说明
-
-### 前端页面
-
-- **主页** (`/`) - 平台介绍和数据产品展示
-- **登录** (`/sign-in/`) - 用户登录页面
-- **注册** (`/sign-up/`) - 用户注册页面
-- **数据下载** (`/data-download/`) - 数据浏览和下载
-- **数据地图** (`/data-echart/`) - 数据可视化展示
-- **用户状态** (`/user-status/`) - 用户信息查看
-
-### 后端功能
-
-- 用户认证和授权
-- 数据模型管理
-- 静态文件服务
-- 管理后台界面
-
-## 技术栈
-
-- **后端**: Django 4.2+
-- **前端**: HTML5, CSS3, JavaScript
-- **数据库**: SQLite（开发环境）
-- **字体**: MiSans
-- **样式**: 响应式CSS设计
-
-## 开发说明
-
-### 添加新页面
-
-1. 在 `main_app/views.py` 中添加视图函数
-2. 在 `main_app/urls.py` 中添加URL路由
-3. 在 `med_platform/templates/` 中创建模板文件
-
-### 修改样式
-
-- 所有页面使用统一的CSS变量定义颜色
-- 采用MiSans字体系列
-- 响应式设计适配移动端
-
-### 数据库模型
-
-- `UserProfile`: 用户扩展信息
-- `DataDownload`: 数据下载记录
-
-## 部署说明
-
-### 生产环境配置
-
-1. 修改 `settings.py` 中的配置：
-   - 设置 `DEBUG = False`
-   - 配置 `ALLOWED_HOSTS`
-   - 使用生产数据库（PostgreSQL/MySQL）
-   - 配置静态文件服务
-
-2. 收集静态文件：
 ```bash
 python manage.py collectstatic
 ```
 
-3. 使用WSGI服务器（如Gunicorn）部署
+## 页面功能说明
 
-## 贡献
+### 首页（/）
+平台门户，展示平台定位、核心优势和主要数据产品。包含横幅介绍、三大数据产品卡片、导航栏。用户可快速了解平台内容，点击卡片可跳转至各业务页面。
 
-欢迎提交Issue和Pull Request来改进项目。
+### 登录（/sign-in/）
+用户登录入口。支持邮箱+密码登录，未注册用户可跳转注册页。登录后可访问受限数据和个性化服务。登录失败有错误提示。
 
-## 许可证
+### 注册（/sign-up/）
+新用户注册页面。填写邮箱、密码等信息完成注册。注册成功后可登录平台，享受完整功能。注册表单有格式校验和重复邮箱检测。
 
-本项目采用MIT许可证。
+### 数据下载（/data-download/）
+环境数据资源中心。用户可浏览、筛选、下载中国及英国等多地区的空气质量、气象等多类型数据。
+- **数据类型**：支持PM2.5、粗颗粒物、PM10、NO2、O3、温度、紫外辐射、NDVI、夜光等。
+- **地区选择**：可选中国、英国等不同国家和城市。
+- **时间筛选**：支持按年、月精确筛选。例如：2023、2023-07、2023-07-15。
+- **文件格式**：支持CSV、Excel等主流格式。
+- **下载统计**：每个数据集有下载次数统计。
+- **数据说明**：每个数据集配有简要说明，包含数据来源、更新时间、空间分辨率等。
+- **操作流程**：选择地区、类型、时间后，点击下载按钮即可获取对应数据文件。
 
-## 联系方式
+### 空气质量地图（/data-echart-map/）
+核心可视化页面。以地图形式直观展示全国31个主要城市的实时空气质量（AQI、PM2.5等）。
+- **数据展示**：每个城市以圆圈标记，颜色和数值反映空气质量等级。
+- **污染物切换**：支持切换AQI、PM2.5、PM10、O3、NO2、SO2、CO等指标。
+- **详细弹窗**：点击城市标记可查看详细污染物浓度、更新时间等。
+- **图例说明**：底部有颜色图例，帮助用户理解数值区间。
+- **数据来源**：数据每日自动更新，来源权威。
+- **适用场景**：科研分析、政策决策、公众查询。
 
-如有问题，请通过以下方式联系：
-- 项目GitHub仓库
-- 邮箱：admin@med-platform.com
+### 管理后台（/admin/）
+Django自带后台。管理员可管理用户、数据模型、下载记录等。
+- **用户管理**：增删改查用户、分配权限。
+- **数据管理**：维护数据集、审核上传数据。
+- **下载记录**：查看用户下载历史。
+- **权限分配**：支持多级管理员和普通用户权限。
+- **安全性**：仅限授权用户访问。
+
+### 其他页面
+- **用户状态页**：展示当前用户的登录状态、基本信息、认证情况。
+- **模型介绍页**：介绍平台使用的环境数据模型、算法原理、数据处理流程。
+- **论文成果页**：展示平台相关的科研论文、成果发布，支持下载PDF。
+- **用户服务页**：FAQ、帮助文档、联系方式、意见反馈等用户支持内容。
+

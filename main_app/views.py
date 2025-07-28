@@ -387,7 +387,11 @@ def admin_user_detail(request, user_id):
 
 def data_download(request):
     """数据下载页面视图"""
-    return render(request, 'data_download.html', {'user': request.user})
+    return render(request, 'data_download_1.0.html', {'user': request.user})
+
+def data_download_1_0(request):
+    """数据下载页面视图（1.0版本）"""
+    return render(request, 'data_download_1.0.html', {'user': request.user})
 
 def data_download_single(request):
     return render(request, 'data_download-single.html')

@@ -440,6 +440,10 @@
             cursor: pointer;
             transition: all 0.2s;
             font-size: 13px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         
         .pollutant-btn.active {
@@ -484,6 +488,7 @@
                 <ul class="category-list">
                     <li class="category-item active" data-category="CN environmental data" data-title="中国大气污染数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国大气污染数据">中国大气污染数据</li>
                     <li class="category-item" data-category="CN environmental data" data-title="中国气象数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国气象数据">中国气象数据</li>
+                    <li class="category-item" data-category="CN environmental data" data-title="中国建城数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国建城数据">中国建城数据</li>
                 </ul>
             </div>
             
@@ -491,7 +496,7 @@
                 <div class="category-header">英国环境数据</div>
                 <ul class="category-list">
                     <li class="category-item" data-category="UK environmental data" data-title="英国大气污染数据下载" data-breadcrumb="数据产品 > 英国环境数据 > 英国大气污染数据">英国大气污染数据</li>
-                    <li class="category-item" data-category="UK environmental data" data-title="英国地表紫外辐射数据下载" data-breadcrumb="数据产品 > 英国环境数据 > 英国地表紫外辐射数据">英国地表紫外辐射数据</li>
+                    <!-- <li class="category-item" data-category="UK environmental data" data-title="英国地表紫外辐射数据下载" data-breadcrumb="数据产品 > 英国环境数据 > 英国地表紫外辐射数据">英国地表紫外辐射数据</li> -->
                 </ul>
             </div>
         </div>
@@ -528,8 +533,8 @@
                     <div class="control-section">
                         <div class="section-title">时间范围</div>
                         <div class="time-range-selector">
-                            <div class="time-range-btn active" data-range="day">日均</div>
-                            <div class="time-range-btn" data-range="month">月均</div>
+                            <!-- <div class="time-range-btn active" data-range="day">日均</div> -->
+                            <div class="time-range-btn active" data-range="month">月均</div>
                             <div class="time-range-btn" data-range="year">年均</div>
                         </div>
                         <div class="time-controls" id="timeControls">
@@ -540,7 +545,7 @@
                     <!-- 污染物选择 -->
                     <div class="control-section">
                         <div class="section-title">污染物种类</div>
-                        <div class="pollutant-selector">
+                        <div class="pollutant-selector" id="pollutantSelector">
                             <div class="pollutant-btn active">PM<sub>2.5</sub></div>
                             <div class="pollutant-btn">PM<sub>2.5</sub>-PM<sub>10</sub></div>
                             <div class="pollutant-btn">PM<sub>10</sub></div>
@@ -572,10 +577,6 @@
                                 {% if not user.is_authenticated %}disabled{% endif %}>
                             {% if user.is_authenticated %}下载数据{% else %}请登录后下载{% endif %}
                         </button>
-                        <button class="btn btn-secondary" id="exportBtn" 
-                                {% if not user.is_authenticated %}disabled{% endif %}>
-                            {% if user.is_authenticated %}导出数据{% else %}请登录后下载{% endif %}
-                        </button>
                     </div>
                 </div>
             </div>
@@ -586,14 +587,45 @@
     <script>
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化日期控件
-            updateDateControls('day');
+            // 检查URL参数，如果有category参数则激活对应的类别
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category');
             
-            // 初始化页面标题
-            const activeItem = document.querySelector('.category-item.active');
-            if (activeItem) {
-                updatePageTitle(activeItem);
+            if (category) {
+                // 查找并激活对应的类别项
+                const categoryItems = document.querySelectorAll('.category-item');
+                let targetItem = null;
+                
+                categoryItems.forEach(item => {
+                    const itemText = item.textContent.trim();
+                    if ((category === 'air' && itemText.includes('中国大气污染')) ||
+                        (category === 'weather' && itemText.includes('气象')) ||
+                        (category === 'urban' && itemText.includes('建城')) ||
+                        (category === 'uk_air' && itemText.includes('英国大气污染'))) {
+                        targetItem = item;
+                    }
+                });
+                
+                if (targetItem) {
+                    // 移除所有活动状态
+                    categoryItems.forEach(item => item.classList.remove('active'));
+                    // 激活目标项
+                    targetItem.classList.add('active');
+                    // 更新页面标题和污染物选项
+                    updatePageTitle(targetItem);
+                    updatePollutantOptions(targetItem.textContent);
+                }
+            } else {
+                // 没有URL参数时使用默认逻辑
+                const activeItem = document.querySelector('.category-item.active');
+                if (activeItem) {
+                    updatePageTitle(activeItem);
+                    updatePollutantOptions(activeItem.textContent);
+                }
             }
+            
+            // 初始化日期控件 - 默认为月均
+            updateDateControls('month');
             
             // 更新协议状态
             updateAgreementState();
@@ -657,24 +689,6 @@
                 
                 timeControls.appendChild(startMonthGroup);
                 timeControls.appendChild(endMonthGroup);
-            } else {
-                // 日均选择 - 使用日期选择器
-                const startDateGroup = document.createElement('div');
-                startDateGroup.className = 'date-group';
-                startDateGroup.innerHTML = `
-                    <label>开始日期:</label>
-                    <input type="date" class="date-input" id="startDate" value="2025-06-23" onchange="updateEndDateMin()">
-                `;
-                
-                const endDateGroup = document.createElement('div');
-                endDateGroup.className = 'date-group';
-                endDateGroup.innerHTML = `
-                    <label>结束日期:</label>
-                    <input type="date" class="date-input" id="endDate" value="2025-06-30" min="2025-06-23">
-                `;
-                
-                timeControls.appendChild(startDateGroup);
-                timeControls.appendChild(endDateGroup);
             }
         }
         
@@ -742,6 +756,38 @@
             }
         }
         
+        // 更新污染物选择选项
+        function updatePollutantOptions(categoryText) {
+            const pollutantSelector = document.getElementById('pollutantSelector');
+            const sectionTitle = document.querySelector('.control-section .section-title');
+            
+            if (categoryText.includes('气象')) {
+                // 气象数据选项
+                sectionTitle.textContent = '气象指标';
+                pollutantSelector.innerHTML = `
+                    <div class="pollutant-btn active">温度</div>
+                    <div class="pollutant-btn">紫外辐射</div>
+                `;
+            } else if (categoryText.includes('建城')) {
+                // 建城数据选项
+                sectionTitle.textContent = '建城指标';
+                pollutantSelector.innerHTML = `
+                    <div class="pollutant-btn active">NDVI</div>
+                    <div class="pollutant-btn">夜光数据</div>
+                `;
+            } else {
+                // 大气污染数据选项
+                sectionTitle.textContent = '污染物种类';
+                pollutantSelector.innerHTML = `
+                    <div class="pollutant-btn active">PM<sub>2.5</sub></div>
+                    <div class="pollutant-btn">PM<sub>2.5</sub>-PM<sub>10</sub></div>
+                    <div class="pollutant-btn">PM<sub>10</sub></div>
+                    <div class="pollutant-btn">NO<sub>2</sub></div>
+                    <div class="pollutant-btn">O<sub>3</sub></div>
+                `;
+            }
+        }
+        
         // 更新页面标题和面包屑
         function updatePageTitle(item) {
             const pageTitle = document.querySelector('.page-title');
@@ -765,19 +811,15 @@
         function updateAgreementState() {
             const agreementCheck = document.getElementById('agreementCheck');
             const downloadBtn = document.getElementById('downloadBtn');
-            const exportBtn = document.getElementById('exportBtn');
             
             agreementCheck.addEventListener('change', function() {
                 {% if user.is_authenticated %}
                     downloadBtn.disabled = !this.checked;
-                    exportBtn.disabled = !this.checked;
                     
                     if (this.checked) {
                         downloadBtn.textContent = '下载数据';
-                        exportBtn.textContent = '导出数据';
                     } else {
                         downloadBtn.textContent = '请先同意协议';
-                        exportBtn.textContent = '请先同意协议';
                     }
                 {% endif %}
             });
@@ -795,6 +837,9 @@
                 
                 // 更新页面标题和面包屑
                 updatePageTitle(e.target);
+                
+                // 更新污染物/气象指标选项
+                updatePollutantOptions(e.target.textContent);
             }
             
             // 时间范围按钮
@@ -808,9 +853,14 @@
                 updateDateControls(e.target.getAttribute('data-range'));
             }
             
-            // 污染物选择按钮
+            // 污染物选择按钮 - 改为单选
             if (e.target.classList.contains('pollutant-btn')) {
-                e.target.classList.toggle('active');
+                // 移除同组内所有按钮的active状态
+                e.target.parentElement.querySelectorAll('.pollutant-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // 只激活当前点击的按钮
+                e.target.classList.add('active');
             }
         });
 
@@ -828,22 +878,6 @@
             
             // 模拟下载
             alert('正在准备下载数据...');
-        });
-
-        // 导出功能
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            {% if not user.is_authenticated %}
-                alert('请先登录');
-                return;
-            {% endif %}
-            
-            if (!document.getElementById('agreementCheck').checked) {
-                alert('请先同意用户协议');
-                return;
-            }
-            
-            // 模拟导出
-            alert('正在导出数据...');
         });
 
         // 注销功能
