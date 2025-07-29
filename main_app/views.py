@@ -389,6 +389,10 @@ def data_download(request):
     """数据下载页面视图"""
     return render(request, 'data_download_1.0.html', {'user': request.user})
 
+def model_instruction(request):
+    """模型介绍页面视图"""
+    return render(request, 'model_instruction.html', {'user': request.user})
+
 def data_download_1_0(request):
     """数据下载页面视图（1.0版本）"""
     return render(request, 'data_download_1.0.html', {'user': request.user})

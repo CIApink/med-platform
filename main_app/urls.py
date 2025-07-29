@@ -6,6 +6,7 @@ urlpatterns = [
     path('sign-in/', views.sign_in, name='sign_in'),
     path('sign-up/', views.sign_up, name='sign_up'),
     path('logout/', views.user_logout, name='logout'),
+    path('model-instruction/', views.model_instruction, name='model_instruction'),
     path('data-download/', views.data_download, name='data_download'),
     path('data-download-1.0/', views.data_download_1_0, name='data_download_1_0'),
     # path('data-download/', views.data_download, name='data_download_1.0'),
