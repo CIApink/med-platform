@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}示例页面 - MED 环境数据平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面特有样式 */
+    .example-content {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 60px);
+    }
+    
+    .example-title {
+        font-size: 32px;
+        font-weight: 600;
+        color: var(--brand-green);
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .example-description {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #333;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .feature-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--brand-green);
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .feature-text {
+        color: #666;
+        line-height: 1.5;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="example-content">
+    <h1 class="example-title">🎯 公用导航栏模板示例</h1>
+    <p class="example-description">
+        这个页面展示了如何使用公用的导航栏模板。所有页面都可以继承 <code>base.html</code> 来获得一致的导航栏样式和功能。
+    </p>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3 class="feature-title">统一样式</h3>
+            <p class="feature-text">
+                所有页面使用相同的导航栏样式，包括颜色、字体、布局和交互效果。
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3 class="feature-title">响应式设计</h3>
+            <p class="feature-text">
+                导航栏自动适配不同屏幕尺寸，在移动端显示汉堡包菜单。
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">完整功能</h3>
+            <p class="feature-text">
+                包含用户认证、页面导航、悬停效果等所有交互功能。
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🔧</div>
+            <h3 class="feature-title">易于维护</h3>
+            <p class="feature-text">
+                只需修改base.html即可更新所有页面的导航栏，大大简化维护工作。
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3 class="feature-title">快速开发</h3>
+            <p class="feature-text">
+                新页面只需继承模板并专注于内容开发，无需重复编写导航栏代码。
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">✨</div>
+            <h3 class="feature-title">自定义扩展</h3>
+            <p class="feature-text">
+                每个页面可以通过block区块添加自己的CSS和JavaScript。
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // 页面特有的JavaScript
+    console.log('示例页面已加载！导航栏功能完全可用。');
+    
+    // 示例：添加卡片点击事件
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.backgroundColor = '#e8f4cd';
+            setTimeout(() => {
+                this.style.backgroundColor = 'white';
+            }, 200);
+        });
+    });
+</script>
+{% endblock %}

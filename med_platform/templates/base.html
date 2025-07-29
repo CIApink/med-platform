@@ -5,43 +5,492 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MED 环境数据平台{% endblock %}</title>
-    <!-- 基本样式 -->
-    {% block styles %}{% endblock %}
+    
+    <!-- 通用字体和导航栏样式 -->
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Normal.woff" %}') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Semibold.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Semibold.woff" %}') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Medium.woff" %}') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* 强制设置所有元素使用MiSans字体 */
+        body, html, div, span, a, h1, h2, h3, h4, h5, h6 {
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif !important;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color: #157c479d;
+            margin-right: 40px;
+            width: 32.5%;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        .logo .main-title {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        .logo .sub-title {
+            font-size: 14px;
+            font-weight: normal;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        .logo a {
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            color: inherit;
+        }
+
+        /* Logo响应式显示 */
+        .logo-short {
+            display: none;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 600;
+        }
+        .logo-full {
+            display: inline;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            width: 50%;
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        .user-auth {
+            margin-left: auto;
+            color: white;
+            width: 25%;
+            text-align: right;
+        }
+        
+        .user-auth a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .user-auth .user-email {
+            display: none;
+            cursor: pointer;
+        }
+        
+        .user-auth .user-email:hover {
+            text-decoration: underline;
+        }
+        
+        .user-auth .login-signup {
+            display: block;
+        }
+
+        /* 汉堡菜单按钮 */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: auto;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 2px 0;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .menu-toggle span:before,
+        .menu-toggle span:after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            transition: 0.3s;
+        }
+
+        .menu-toggle span:before {
+            top: -8px;
+        }
+
+        .menu-toggle span:after {
+            top: 8px;
+        }
+
+        .menu-toggle.active span {
+            background: transparent;
+        }
+
+        .menu-toggle.active span:before {
+            transform: rotate(-45deg);
+            top: 0;
+        }
+
+        .menu-toggle.active span:after {
+            transform: rotate(45deg);
+            top: 0;
+        }
+
+        /* 当菜单打开时的样式 */
+        .nav-menu.active {
+            display: flex;
+        }
+
+        /* 导航栏响应式设计 */
+        @media (max-width: 1200px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            .logo .main-title {
+                font-size: 22px;
+            }
+            .logo .sub-title {
+                font-size: 13px;
+            }
+            .nav-item {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .navbar {
+                padding: 0 15px;
+            }
+            .logo {
+                width: 30%;
+            }
+            .nav-menu {
+                width: 55%;
+                gap: 20px;
+            }
+            .user-auth {
+                width: 20%;
+            }
+            .nav-item {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                height: 60px;
+                padding: 5px 15px;
+            }
+            .logo {
+                width: 20%;
+                margin-right: 10px;
+            }
+            .logo-full {
+                display: none;
+            }
+            .logo-short {
+                display: inline;
+            }
+            .logo .main-title {
+                font-size: 20px;
+            }
+            .logo .sub-title {
+                font-size: 10px;
+            }
+            .user-auth {
+                width: 25%;
+                margin-left: 0;
+                font-size: 12px;
+            }
+            .nav-menu {
+                width: 55%;
+                justify-content: center;
+                gap: 12px;
+            }
+            .nav-item {
+                font-size: 12px;
+                padding: 3px 4px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                height: 60px;
+                padding: 5px 8px;
+            }
+            .logo {
+                width: 15%;
+            }
+            .logo-full {
+                display: none;
+            }
+            .logo-short {
+                display: inline;
+            }
+            .logo .main-title {
+                font-size: 18px;
+            }
+            .logo .sub-title {
+                display: none;
+            }
+            .nav-menu {
+                width: 65%;
+                gap: 8px;
+                margin-top: 0;
+            }
+            .nav-item {
+                font-size: 11px;
+                padding: 2px 3px;
+                white-space: nowrap;
+            }
+            .user-auth {
+                width: 20%;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                height: 60px;
+                padding: 5px 8px;
+                flex-wrap: nowrap;
+            }
+            .logo {
+                width: auto;
+                text-align: left;
+                margin-bottom: 0;
+                margin-right: 10px;
+            }
+            .logo-full {
+                display: none;
+            }
+            .logo-short {
+                display: inline;
+            }
+            .logo .main-title {
+                font-size: 18px;
+            }
+            .logo .sub-title {
+                display: none;
+            }
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+                flex-direction: column;
+                padding: 10px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                z-index: 999;
+            }
+            .nav-menu.active {
+                display: flex;
+            }
+            .nav-item {
+                font-size: 14px;
+                padding: 10px 20px;
+                text-align: center;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                color: white;
+                text-decoration: none;
+            }
+            .nav-item:hover {
+                background-color: rgba(255,255,255,0.1);
+            }
+            .nav-item:last-child {
+                border-bottom: none;
+            }
+            .mobile-auth {
+                background-color: rgba(255,255,255,0.1);
+                font-weight: bold;
+            }
+            .mobile-auth span {
+                color: white;
+                cursor: pointer;
+            }
+            .user-auth {
+                display: none;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+        }
+
+        /* 页面内容区域 */
+        .page-content {
+            margin-top: 60px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- 顶部导航栏 -->
+    <!-- 导航栏 -->
     <nav class="navbar">
         <div class="logo">
             <a href="{% url 'index' %}" style="text-decoration: none; color: inherit;">
-                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="main-title">
+                    <span class="logo-full">MED 环境健康数据平台</span>
+                    <span class="logo-short">MED</span>
+                </div>
                 <div class="sub-title">Metrics of Environmental Data</div>
             </a>
         </div>
         <div class="nav-menu">
             <a href="{% url 'index' %}" class="nav-item">主页</a>
-            <a href="#" class="nav-item">模型介绍</a>
+            <a href="{% url 'model_instruction' %}" class="nav-item">模型介绍</a>
             <a href="{% url 'data_download' %}" class="nav-item">数据下载</a>
             <a href="#" class="nav-item">论文成果</a>
-            <a href="{% url 'data_echart_fixed' %}" class="nav-item">数据地图</a>
+            <a href="{% url 'data_echart' %}" class="nav-item">数据地图</a>
             <a href="#" class="nav-item">用户服务</a>
+            <!-- <div class="nav-item mobile-auth">
+                {% if user.is_authenticated %}
+                    <span onclick="logout()">{{ user.email }} (点击注销)</span>
+                {% else %}
+                    <a href="{% url 'sign_in' %}" style="color: white; text-decoration: none;">登录/注册</a>
+                {% endif %}
+            </div> -->
         </div>
         <div class="user-auth" id="userAuth">
-            <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
-            <div class="user-email" onclick="logout()">{{ user.email }} (点击注销)</div>
+            {% if user.is_authenticated %}
+                <div class="user-email" style="display: block;" onclick="logout()">{{ user.email }} (点击注销)</div>
+            {% else %}
+                <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
+            {% endif %}
+        </div>
+        <div class="menu-toggle">
+            <span></span>
         </div>
     </nav>
 
     <!-- 页面内容 -->
-    {% block content %}{% endblock %}
+    <div class="page-content">
+        {% block content %}{% endblock %}
+    </div>
 
-    <!-- 基本脚本 -->
-    <script src="{% static 'js/auth.js' %}"></script>
+    <!-- 通用JavaScript -->
     <script>
+        function logout() {
+            if (confirm('确定要注销吗？')) {
+                window.location.href = "{% url 'logout' %}";
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // 更新导航栏用户认证UI
-            updateAuthUI();
+            // 检查用户认证状态
+            {% if user.is_authenticated %}
+                const loginSignup = document.querySelector('.login-signup');
+                const userEmail = document.querySelector('.user-email');
+                if (loginSignup) loginSignup.style.display = 'none';
+                if (userEmail) userEmail.style.display = 'block';
+            {% else %}
+                const loginSignup = document.querySelector('.login-signup');
+                const userEmail = document.querySelector('.user-email');
+                if (loginSignup) loginSignup.style.display = 'block';
+                if (userEmail) userEmail.style.display = 'none';
+            {% endif %}
+            
+            // 移动端导航菜单控制
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', function() {
+                    menuToggle.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // 点击导航项后关闭菜单
+                const navItems = document.querySelectorAll('.nav-item a');
+                navItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        menuToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+                
+                // 点击其他区域关闭菜单
+                document.addEventListener('click', function(e) {
+                    if (!menuToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                        menuToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                });
+            }
         });
     </script>
-    {% block scripts %}{% endblock %}
+    
+    {% block javascript %}{% endblock %}
 </body>
 </html>
