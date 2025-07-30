@@ -87,9 +87,11 @@ class UserVerification(models.Model):
     """用户邮箱验证模型"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(max_length=64, verbose_name="验证码")
+    verification_code = models.CharField(max_length=64, verbose_name="重置密码验证码", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
-    expires_at = models.DateTimeField(verbose_name="过期时间")
+    expires_at = models.DateTimeField(verbose_name="过期时间", blank=True, null=True)
     is_used = models.BooleanField(default=False, verbose_name="是否已使用")
+    is_verified = models.BooleanField(default=False, verbose_name="是否已验证")
     
     def __str__(self):
         return f"{self.user.username} - {self.code}"

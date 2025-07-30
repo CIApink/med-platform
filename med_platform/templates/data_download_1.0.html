@@ -1,336 +1,484 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据下载 - MED环境数据平台</title>
+    <style>
+        :root {
+            --primary-blue: #C1E9D2;
+            --brand-green: #4ab6a4c8;
+            --accent-blue: #4ab6a4c8;
+            --light-blue: #6fb8ed;
+        }
 
-{% block title %}数据下载 - MED环境数据平台{% endblock %}
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Normal.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Normal.woff" %}') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
 
-{% block extra_css %}
-<style>
-    /* 主体布局 */
-    .main-container {
-        display: flex;
-        margin-top: 60px;
-        min-height: calc(100vh - 60px);
-        background-color: #f8f9fa;
-    }
-    
-    /* 左侧数据类别区 */
-    .data-category-panel {
-        width: 300px;
-        background: white;
-        border-right: 1px solid #e0e0e0;
-        overflow-y: auto;
-    }
-    
-    .category-section {
-        border-bottom: 1px solid #e8e8e8;
-    }
-    
-    .category-header {
-        background: #239a86af;
-        color: white;
-        padding: 12px 20px;
-        font-weight: 500;
-        font-size: 16px;
-    }
-    
-    .category-list {
-        list-style: none;
-    }
-    
-    .category-item {
-        padding: 10px 30px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        font-size: 14px;
-        color: #333;
-    }
-    
-    .category-item:hover {
-        background-color: #f5f5f5;
-    }
-    
-    .category-item.active {
-        background-color: #99cfc6bc;
-        color: #ffffff;
-    }
-    
-    /* 右侧内容区 */
-    .content-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        background: white; /* 添加背景色保持一致 */
-    }
-    
-    /* 页面标题区 */
-    .page-header {
-        background: white;
-        padding: 20px 30px;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .page-title {
-        font-size: 22px;
-        color: #333;
-        font-weight: 500;
-        margin-bottom: 5px;
-    }
-    
-    .breadcrumb {
-        font-size: 13px;
-        color: #666;
-    }
-    
-    /* 内容主体 */
-    .content-body {
-        flex: 1;
-        display: flex;
-        justify-content: flex-start; /* 改为左对齐 */
-        align-items: flex-start;
-        padding: 0; /* 移除内边距 */
-    }
-    
-    /* 按钮样式 */
-    .action-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-top: 30px;
-    }
-    
-    .btn {
-        padding: 10px 24px;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .btn-primary {
-        background-color: #1976d2;
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        background-color: #1565c0;
-    }
-    
-    .btn-secondary {
-        background-color: #757575;
-        color: white;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #616161;
-    }
-    
-    .time-controls {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        margin-bottom: 16px;
-        flex-wrap: wrap;
-    }
-    
-    .date-group {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .date-select {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        min-width: 120px;
-        margin-right: 8px;
-    }
-    
-    .date-input {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        min-width: 140px;
-    }
-    
-    /* 协议区域 */
-    .agreement-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 6px;
-        margin-bottom: 25px;
-        border-left: 4px solid #4ab6a4;
-    }
-    
-    .agreement-title {
-        font-size: 15px;
-        color: #3f9b8b;
-        margin-bottom: 12px;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .agreement-checkbox {
-        margin-right: 8px;
-    }
-    
-    .agreement-text {
-        font-size: 13px;
-        color: #666;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-    
-    .agreement-link {
-        color: #359988;
-        text-decoration: none;
-    }
-    
-    .agreement-link:hover {
-        text-decoration: underline;
-    }
-    
-    /* 登录状态样式 */
-    .login-status {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 18px;
-        padding: 12px;
-        background: #e3f2fd;
-        border-radius: 5px;
-        border-left: 4px solid #2196f3;
-    }
-    
-    .login-status.logged-out {
-        background: #fff3e0;
-        border-left-color: #ff9800;
-    }
-    
-    .login-icon {
-        font-size: 18px;
-    }
-    
-    .login-text {
-        flex: 1;
-        font-size: 13px;
-        color: #333;
-    }
-    
-    .login-button {
-        padding: 6px 14px;
-        background: #2196f3;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 13px;
-    }
-    
-    .login-button:hover {
-        background: #1976d2;
-    }
-    
-    /* 禁用状态的下载按钮 */
-    .btn:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-    
-    .btn:disabled:hover {
-        background-color: #ccc;
-    }
-    
-    /* 右侧控制面板 */
-    .control-panel {
-        flex: 1;
-        background: white;
-        padding: 32px;
-        margin: 0; /* 移除所有边距 */
-        border-radius: 0; /* 移除圆角 */
-        box-shadow: none; /* 移除阴影 */
-        max-width: none;
-        width: 100%; /* 占据全部宽度 */
-        margin-left: 20px; /* 只保留与左侧类别区的间隔 */
-    }
-    
-    .control-section {
-        margin-bottom: 28px;
-    }
-    
-    .section-title {
-        font-size: 16px;
-        margin-bottom: 16px;
-        color: var(--accent-blue);
-        border-left: 4px solid var(--brand-green);
-        padding-left: 12px;
-        font-weight: 500;
-    }
-    
-    .time-range-selector {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 16px;
-        justify-content: flex-start;
-    }
-    
-    .time-range-btn {
-        padding: 10px 16px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 14px;
-        min-width: 70px;
-    }
-    
-    .time-range-btn.active {
-        background: var(--brand-green);
-        color: white;
-        border-color: var(--brand-green);
-    }
-    
-    .pollutant-selector {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-bottom: 20px;
-        max-width: 550px;
-    }
-    
-    .pollutant-btn {
-        padding: 10px 12px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 13px;
-        user-select: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-    }
-    
-    .pollutant-btn.active {
-        background: var(--brand-green);
-        color: white;
-        border-color: var(--brand-green);
-    }
-</style>
-{% endblock %}
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Semibold.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Semibold.woff" %}') format('woff');
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'MiSans';
+            src: url('{% static "MiSans-Medium.woff2" %}') format('woff2'),
+                url('{% static "MiSans-Medium.woff" %}') format('woff');
+            font-weight: 500;
+            font-style: normal;
+        }
 
-{% block content %}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #e8f4cd, #82bdb3);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            flex-direction: column;
+            color: #6fb8ed;
+            font-weight: bold;
+            margin-right: 40px;
+            width: 32.5%;
+        }
+
+        .logo .main-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .logo .sub-title {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            width: 50%;
+        }
+        
+        .nav-item {
+            color: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            padding: 5px 0;
+            transition: none;
+        }
+
+        .nav-item:hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        .user-auth {
+            margin-left: auto;
+            color: rgba(255, 255, 255, 1);
+            width: 25%;
+            text-align: right;
+        }
+        
+        .user-auth a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .user-auth .user-email {
+            display: none;
+            cursor: pointer;
+        }
+        
+        .user-auth .user-email:hover {
+            text-decoration: underline;
+        }
+        
+        .user-auth .login-signup {
+            display: block;
+        }
+        
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+            background-color: #f8f9fa;
+        }
+        
+        /* 左侧数据类别区 */
+        .data-category-panel {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+        
+        .category-section {
+            border-bottom: 1px solid #e8e8e8;
+        }
+        
+        .category-header {
+            background: #239a86af;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .category-list {
+            list-style: none;
+        }
+        
+        .category-item {
+            padding: 10px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .category-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .category-item.active {
+            background-color: #99cfc6bc;
+            color: #ffffff;
+        }
+        
+        /* 右侧内容区 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white; /* 添加背景色保持一致 */
+        }
+        
+        /* 页面标题区 */
+        .page-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .page-title {
+            font-size: 22px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* 内容主体 */
+        .content-body {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start; /* 改为左对齐 */
+            align-items: flex-start;
+            padding: 0; /* 移除内边距 */
+        }
+        
+        /* 按钮样式 */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1976d2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1565c0;
+        }
+        
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+        
+        .time-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .date-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .date-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 120px;
+            margin-right: 8px;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 140px;
+        }
+        
+        /* 协议区域 */
+        .agreement-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4ab6a4;
+        }
+        
+        .agreement-title {
+            font-size: 15px;
+            color: #3f9b8b;
+            margin-bottom: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .agreement-checkbox {
+            margin-right: 8px;
+        }
+        
+        .agreement-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .agreement-link {
+            color: #359988;
+            text-decoration: none;
+        }
+        
+        .agreement-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* 登录状态样式 */
+        .login-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding: 12px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .login-status.logged-out {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        
+        .login-icon {
+            font-size: 18px;
+        }
+        
+        .login-text {
+            flex: 1;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .login-button {
+            padding: 6px 14px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .login-button:hover {
+            background: #1976d2;
+        }
+        
+        /* 禁用状态的下载按钮 */
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn:disabled:hover {
+            background-color: #ccc;
+        }
+        
+        /* 右侧控制面板 */
+        .control-panel {
+            flex: 1;
+            background: white;
+            padding: 32px;
+            margin: 0; /* 移除所有边距 */
+            border-radius: 0; /* 移除圆角 */
+            box-shadow: none; /* 移除阴影 */
+            max-width: none;
+            width: 100%; /* 占据全部宽度 */
+            margin-left: 20px; /* 只保留与左侧类别区的间隔 */
+        }
+        
+        .control-section {
+            margin-bottom: 28px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--accent-blue);
+            border-left: 4px solid var(--brand-green);
+            padding-left: 12px;
+            font-weight: 500;
+        }
+        
+        .time-range-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            justify-content: flex-start;
+        }
+        
+        .time-range-btn {
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            min-width: 70px;
+        }
+        
+        .time-range-btn.active {
+            background: var(--brand-green);
+            color: white;
+            border-color: var(--brand-green);
+        }
+        
+        .pollutant-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            max-width: 550px;
+        }
+        
+        .pollutant-btn {
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        .pollutant-btn.active {
+            background: var(--brand-green);
+            color: white;
+            border-color: var(--brand-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{% url 'index' %}" style="text-decoration: none; color: inherit;">
+                <div class="main-title">MED 环境健康数据平台</div>
+                <div class="sub-title">Metrics of Environmental Data</div>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="{% url 'index' %}" class="nav-item">主页</a>
+            <a href="{% url 'model_instruction' %}" class="nav-item">模型介绍</a>
+            <a href="{% url 'data_download' %}" class="nav-item">数据下载</a>
+            <a href="#" class="nav-item">论文成果</a>
+            <a href="{% url 'data_echart' %}" class="nav-item">数据地图</a>
+            <a href="#" class="nav-item">用户服务</a>
+        </div>
+        <div class="user-auth" id="userAuth">
+            {% if user.is_authenticated %}
+                <div class="user-email" style="display: block;" onclick="logout()">{{ user.email }} (点击注销)</div>
+            {% else %}
+                <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
+            {% endif %}
+        </div>
+    </nav>
+
     <!-- 主体内容区 -->
     <div class="main-container">
         <!-- 左侧数据类别面板 -->
@@ -434,10 +582,9 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block javascript %}
-<script>
+    <!-- JavaScript -->
+    <script>
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
             // 检查URL参数，如果有category参数则激活对应的类别
@@ -768,5 +915,6 @@
             }
             return cookieValue;
         }
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

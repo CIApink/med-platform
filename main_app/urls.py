@@ -23,6 +23,11 @@ urlpatterns = [
     path('verify-email-new/', views.verify_email_new, name='verify_email_new'),
     path('resend-verification/', views.resend_verification, name='resend_verification'),
     
+    # 忘记密码功能路由
+    path('send-reset-code/', views.send_reset_code, name='send_reset_code'),
+    path('verify-reset-code/', views.verify_reset_code, name='verify_reset_code'),
+    path('reset-password/', views.reset_password, name='reset_password'),
+    
     # 管理员面板路由
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-users/', views.admin_user_list, name='admin_user_list'),
