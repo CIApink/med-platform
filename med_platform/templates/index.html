@@ -58,6 +58,7 @@
     }
 
     .hero-button {
+        display: inline-block;
         padding: 12px 30px;
         background-color: #6eb2e2;
         color: white;
@@ -66,6 +67,7 @@
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
+        text-decoration: none;
         transition: background-color 0.3s;
     }
 
@@ -178,7 +180,7 @@
         <div class="hero-content">
             <h1 class="hero-title">为您提供更专业的全球环境数据与专题资料</h1>
             <p class="hero-subtitle">To provide you with more professional global environmental data and thematic materials</p>
-            <button class="hero-button">了解更多</button>
+            <a href="{% url 'model_instruction' %}" class="hero-button">了解更多</a>
         </div>
     </section>
 
@@ -191,16 +193,16 @@
                 <div class="card-icon">📊</div>
                 <h3 class="card-title">中国环境数据</h3>
                 <div class="data-item">
-                    <a href="{% url 'data_download' %}?category=air" class="data-link">中国大气污染数据</a>
+                    <a href="{% url 'model_instruction' %}?category=china_air" class="data-link">中国大气污染数据</a>
                     <p class="data-description">包括PM<sub>2.5</sub>、粗颗粒物（PM<sub>2.5</sub>-PM<sub>10</sub>）、PM<sub>10</sub>、
                         NO<sub>2</sub>、O<sub>3</sub>等要素。</p>
                 </div>
                 <div class="data-item">
-                    <a href="{% url 'data_download' %}?category=weather" class="data-link">中国气象数据</a>
+                    <a href="{% url 'model_instruction' %}?category=china_weather" class="data-link">中国气象数据</a>
                     <p class="data-description">包括温度、紫外辐射等要素。</p>
                 </div>
                 <div class="data-item">
-                    <a href="{% url 'data_download' %}?category=urban" class="data-link">中国建城环境数据</a>
+                    <a href="{% url 'model_instruction' %}?category=china_urban" class="data-link">中国建城环境数据</a>
                     <p class="data-description">包括NDVI、夜光等要素。</p>
                 </div>
             </div>
@@ -210,7 +212,7 @@
                 <div class="card-icon">🛰️</div>
                 <h3 class="card-title">英国环境数据</h3>
                 <div class="data-item">
-                    <a href="{% url 'data_download' %}?category=uk_air" class="data-link">英国大气污染数据</a>
+                    <a href="{% url 'model_instruction' %}?category=uk_air" class="data-link">英国大气污染数据</a>
                     <p class="data-description">包括PM<sub>2.5</sub>、PM<sub>10</sub>、NO<sub>2</sub>、O<sub>3</sub>等要素。</p>
                 </div>
                 <!-- <div class="data-item">

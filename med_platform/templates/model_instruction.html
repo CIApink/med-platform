@@ -33,10 +33,84 @@
         line-height: 1.5;
     }
 
-    /* 模型海报网格 */
-    .models-grid {
+    /* 选择按钮 */
+    .data-selector {
+        text-align: center;
+        margin: 30px 0 40px 0;
+    }
+
+    .selector-buttons {
+        display: inline-flex;
+        background: white;
+        border-radius: 12px;
+        padding: 4px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .selector-btn {
+        padding: 12px 24px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 140px;
+    }
+
+    .selector-btn.active {
+        background: var(--brand-green);
+        color: white;
+        box-shadow: 0 4px 15px rgba(74, 182, 164, 0.3);
+    }
+
+    .selector-btn:hover:not(.active) {
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    /* 数据分组 */
+    .data-group {
+        display: none;
         max-width: 1200px;
         margin: 0 auto;
+    }
+
+    .data-group.active {
+        display: block;
+    }
+
+    .data-category {
+        margin-bottom: 40px;
+    }
+
+    .category-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--brand-green);
+        margin-bottom: 20px;
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e0e0;
+        position: relative;
+    }
+
+    .category-title::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: var(--brand-green);
+    }
+
+    /* 模型海报网格 */
+    .models-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
@@ -106,6 +180,7 @@
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
     }
 
@@ -295,6 +370,82 @@
             font-size: 24px;
         }
     }
+
+    /* 右侧导航栏 */
+    .right-navigation {
+        position: fixed;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        padding: 20px 15px;
+        z-index: 1000;
+        min-width: 180px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .nav-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--brand-green);
+        margin-bottom: 15px;
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .right-navigation .nav-item {
+        display: block;
+        padding: 10px 12px;
+        color: #666;
+        text-decoration: none;
+        font-size: 13px;
+        border-radius: 6px;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+    }
+
+    .right-navigation .nav-item:hover {
+        background: #f8f9fa;
+        color: #333;
+    }
+
+    .right-navigation .nav-item.active {
+        background: rgba(74, 182, 164, 0.1);
+        color: var(--brand-green);
+        border-left-color: var(--brand-green);
+        font-weight: 500;
+    }
+
+    .right-navigation .nav-item.disabled {
+        color: #ccc;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .right-navigation .nav-item.disabled:hover {
+        background: transparent;
+        color: #ccc;
+    }
+
+    /* 响应式导航栏 */
+    @media (max-width: 1200px) {
+        .right-navigation {
+            right: 15px;
+            min-width: 160px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .right-navigation {
+            display: none;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -309,110 +460,291 @@
             </p>
         </div>
 
-        <div class="models-grid">
-            <!-- PM2.5 模型 -->
-            <div class="model-card" onclick="openModal('pm25')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">PM<sub>2.5</sub> 预测模型</h3>
-                    <p class="model-description">
-                        基于卫星遥感和地面监测数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度预测模型
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.85</span>
+        <!-- 数据选择器 -->
+        <div class="data-selector">
+            <div class="selector-buttons">
+                <button class="selector-btn active" onclick="showDataGroup('china')">中国环境数据</button>
+                <button class="selector-btn" onclick="showDataGroup('uk')">英国环境数据</button>
+            </div>
+        </div>
+
+        <!-- 中国环境数据 -->
+        <div class="data-group active" id="china-data">
+            <!-- 中国大气污染数据 -->
+            <div class="data-category" id="section-china_air">
+                <h2 class="category-title">中国大气污染数据</h2>
+                <div class="models-grid">
+                    <!-- PM2.5 模型 -->
+                    <div class="model-card" onclick="openModal('pm25')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">PM<sub>2.5</sub> 预测模型</h3>
+                            <p class="model-description">
+                                基于卫星遥感和地面监测数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度预测模型
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.85</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PM10 模型 -->
+                    <div class="model-card" onclick="openModal('pm10')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">PM<sub>10</sub> 预测模型</h3>
+                            <p class="model-description">
+                                综合多源遥感数据和气象要素，实现PM<sub>10</sub>浓度的高精度时空预测
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.85</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 臭氧模型 -->
+                    <div class="model-card" onclick="openModal('ozone')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">臭氧浓度模型</h3>
+                            <p class="model-description">
+                                结合紫外辐射、温度等因子，精确预测地表臭氧浓度分布
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.85</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NO2 模型 -->
+                    <div class="model-card" onclick="openModal('no2')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">NO<sub>2</sub> 浓度模型</h3>
+                            <p class="model-description">
+                                利用TropOMI卫星数据，结合机器学习算法，估算地表NO<sub>2</sub>浓度
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.83</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SO2 模型 -->
+                    <div class="model-card" onclick="openModal('so2')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">SO<sub>2</sub> 浓度模型</h3>
+                            <p class="model-description">
+                                基于卫星遥感和地面观测融合，实现SO<sub>2</sub>浓度高精度估算
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.80</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PM10 模型 -->
-            <div class="model-card" onclick="openModal('pm10')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">PM<sub>10</sub> 预测模型</h3>
-                    <p class="model-description">
-                        综合多源遥感数据和气象要素，实现PM<sub>10</sub>浓度的高精度时空预测
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.85</span>
+            <!-- 中国气象数据 -->
+            <div class="data-category" id="section-china_weather">
+                <h2 class="category-title">中国气象数据</h2>
+                <div class="models-grid">
+                    <!-- 温度模型 -->
+                    <div class="model-card" onclick="openModal('temperature')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">地表温度模型</h3>
+                            <p class="model-description">
+                                基于MODIS和Landsat卫星数据，采用机器学习算法精确估算地表温度分布
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">精度±2°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 降水模型 -->
+                    <div class="model-card" onclick="openModal('precipitation')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">降水量预测模型</h3>
+                            <p class="model-description">
+                                融合多源卫星降水产品和地面观测数据，提供高精度降水量估算
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">0.1°分辨率</span>
+                                <span class="model-tag">小时数据</span>
+                                <span class="model-tag">R²>0.88</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 臭氧模型 -->
-            <div class="model-card" onclick="openModal('ozone')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">臭氧浓度模型</h3>
-                    <p class="model-description">
-                        结合紫外辐射、温度等因子，精确预测地表臭氧浓度分布
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.85</span>
+            <!-- 中国建城数据 -->
+            <div class="data-category" id="section-china_urban">
+                <h2 class="category-title">中国建城数据</h2>
+                <div class="models-grid">
+                    <!-- 建成区提取模型 -->
+                    <div class="model-card" onclick="openModal('urban')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">建成区提取模型</h3>
+                            <p class="model-description">
+                                基于高分辨率卫星影像，采用深度学习算法精确提取城市建成区范围
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">30m分辨率</span>
+                                <span class="model-tag">年度更新</span>
+                                <span class="model-tag">精度>95%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 城市扩张模型 -->
+                    <div class="model-card" onclick="openModal('expansion')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">城市扩张监测模型</h3>
+                            <p class="model-description">
+                                通过时序遥感数据分析，监测和预测城市空间扩张模式和趋势
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">30m分辨率</span>
+                                <span class="model-tag">多时相</span>
+                                <span class="model-tag">趋势预测</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- NO2 模型 -->
-            <div class="model-card" onclick="openModal('no2')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">NO<sub>2</sub> 浓度模型</h3>
-                    <p class="model-description">
-                        利用TropOMI卫星数据，结合机器学习算法，估算地表NO<sub>2</sub>浓度
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.83</span>
+        <!-- 英国环境数据 -->
+        <div class="data-group" id="uk-data">
+            <!-- 英国大气污染数据 -->
+            <div class="data-category" id="section-uk_air">
+                <h2 class="category-title">英国大气污染数据</h2>
+                <div class="models-grid">
+                    <!-- 英国PM2.5 模型 -->
+                    <div class="model-card" onclick="openModal('uk_pm25')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">英国PM<sub>2.5</sub> 预测模型</h3>
+                            <p class="model-description">
+                                针对英国地区气候特征优化的PM<sub>2.5</sub>浓度预测模型，考虑海洋性气候影响
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.82</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- SO2 模型 -->
-            <div class="model-card" onclick="openModal('so2')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">SO<sub>2</sub> 浓度模型</h3>
-                    <p class="model-description">
-                        基于卫星遥感和地面观测融合，实现SO<sub>2</sub>浓度高精度估算
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.80</span>
+                    <!-- 英国PM10 模型 -->
+                    <div class="model-card" onclick="openModal('uk_pm10')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">英国PM<sub>10</sub> 预测模型</h3>
+                            <p class="model-description">
+                                基于英国地面监测网络和卫星数据，适应当地污染源特征的PM<sub>10</sub>预测模型
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.80</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- CO 模型 -->
-            <div class="model-card" onclick="openModal('co')">
-                <div class="model-image">
-                </div>
-                <div class="model-info">
-                    <h3 class="model-title">CO 浓度模型</h3>
-                    <p class="model-description">
-                        集成多种遥感产品和气象数据，构建一氧化碳浓度预测模型
-                    </p>
-                    <div class="model-tags">
-                        <span class="model-tag">1km分辨率</span>
-                        <span class="model-tag">日均数据</span>
-                        <span class="model-tag">R²>0.78</span>
+                    <!-- 英国臭氧模型 -->
+                    <div class="model-card" onclick="openModal('uk_ozone')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">英国臭氧浓度模型</h3>
+                            <p class="model-description">
+                                考虑英国高纬度地区特殊光化学条件的臭氧浓度预测模型
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.78</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 英国NO2 模型 -->
+                    <div class="model-card" onclick="openModal('uk_no2')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">英国NO<sub>2</sub> 浓度模型</h3>
+                            <p class="model-description">
+                                针对英国城市交通污染特征开发的NO<sub>2</sub>浓度估算模型
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.81</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 英国SO2 模型 -->
+                    <div class="model-card" onclick="openModal('uk_so2')">
+                        <div class="model-image">
+                        </div>
+                        <div class="model-info">
+                            <h3 class="model-title">英国SO<sub>2</sub> 浓度模型</h3>
+                            <p class="model-description">
+                                基于英国工业布局特点和排放清单的SO<sub>2</sub>浓度预测模型
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">R²>0.77</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- 右侧导航栏 -->
+    <nav class="right-navigation" id="rightNavigation">
+        <div class="nav-title" id="navTitle">中国环境数据</div>
+        <a class="nav-item active" onclick="scrollToSection('china_air')" id="nav-china_air">中国大气污染数据</a>
+        <a class="nav-item" onclick="scrollToSection('china_weather')" id="nav-china_weather">中国气象数据</a>
+        <a class="nav-item" onclick="scrollToSection('china_urban')" id="nav-china_urban">中国建城数据</a>
+        <a class="nav-item disabled" onclick="scrollToSection('uk_air')" id="nav-uk_air">英国大气污染数据</a>
+    </nav>
 
     <!-- 模态框 -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
@@ -430,6 +762,311 @@
 
 {% block javascript %}
 <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // 页面加载时处理URL参数
+        document.addEventListener('DOMContentLoaded', function() {
+            const category = getUrlParameter('category');
+            
+            if (category) {
+                // 根据category参数设置初始状态
+                if (category.startsWith('china_')) {
+                    showDataGroup('china');
+                    // 滚动到对应的分类
+                    setTimeout(function() {
+                        scrollToCategory(category);
+                    }, 100);
+                } else if (category.startsWith('uk_')) {
+                    showDataGroup('uk');
+                    // 滚动到对应的分类
+                    setTimeout(function() {
+                        scrollToCategory(category);
+                    }, 100);
+                }
+            }
+
+            // 初始化滚动监听
+            initScrollListener();
+        });
+
+        // 滚动到指定分类
+        function scrollToCategory(category) {
+            let targetElement = null;
+            
+            switch(category) {
+                case 'china_air':
+                    targetElement = document.querySelector('#section-china_air');
+                    break;
+                case 'china_weather':
+                    targetElement = document.querySelector('#section-china_weather');
+                    break;
+                case 'china_urban':
+                    targetElement = document.querySelector('#section-china_urban');
+                    break;
+                case 'uk_air':
+                    targetElement = document.querySelector('#section-uk_air');
+                    break;
+            }
+            
+            if (targetElement) {
+                targetElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+                // 添加高亮效果
+                targetElement.style.background = 'rgba(74, 182, 164, 0.1)';
+                targetElement.style.borderRadius = '8px';
+                targetElement.style.padding = '20px';
+                targetElement.style.transition = 'all 0.3s ease';
+                
+                // 3秒后移除高亮
+                setTimeout(function() {
+                    targetElement.style.background = '';
+                    targetElement.style.padding = '';
+                }, 3000);
+            }
+        }
+
+        // 通过导航栏滚动到指定区域
+        function scrollToSection(sectionId) {
+            const targetElement = document.getElementById('section-' + sectionId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        }
+
+        // 初始化滚动监听器
+        function initScrollListener() {
+            const sections = [
+                { id: 'china_air', element: document.getElementById('section-china_air') },
+                { id: 'china_weather', element: document.getElementById('section-china_weather') },
+                { id: 'china_urban', element: document.getElementById('section-china_urban') },
+                { id: 'uk_air', element: document.getElementById('section-uk_air') }
+            ];
+
+            function updateActiveNavItem() {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                let activeSection = null;
+
+                // 检查当前显示的数据组
+                const chinaGroup = document.getElementById('china-data');
+                const ukGroup = document.getElementById('uk-data');
+                const isChinaActive = chinaGroup.classList.contains('active');
+                const isUkActive = ukGroup.classList.contains('active');
+
+                // 根据当前激活的组过滤相关的sections
+                const relevantSections = sections.filter(section => {
+                    if (isChinaActive && section.id.startsWith('china_')) return true;
+                    if (isUkActive && section.id.startsWith('uk_')) return true;
+                    return false;
+                });
+
+                // 如果页面可以滚动，使用正常的滚动检测逻辑
+                if (documentHeight > viewportHeight) {
+                    // 检测哪个section在视窗中最可见
+                    let maxVisibleArea = 0;
+                    
+                    for (let i = 0; i < relevantSections.length; i++) {
+                        const section = relevantSections[i];
+                        if (section.element) {
+                            const rect = section.element.getBoundingClientRect();
+                            
+                            // 计算section在视窗中的可见面积
+                            const visibleTop = Math.max(0, -rect.top);
+                            const visibleBottom = Math.min(rect.height, viewportHeight - rect.top);
+                            const visibleArea = Math.max(0, visibleBottom - visibleTop);
+                            
+                            if (visibleArea > maxVisibleArea) {
+                                maxVisibleArea = visibleArea;
+                                activeSection = section.id;
+                            }
+                        }
+                    }
+                    
+                    // 如果接近页面底部，激活最后一个section
+                    if (scrollPosition + viewportHeight >= documentHeight - 50) {
+                        if (relevantSections.length > 0) {
+                            activeSection = relevantSections[relevantSections.length - 1].id;
+                        }
+                    }
+                } else {
+                    // 如果页面无法滚动或滚动距离很小，显示第一个相关section
+                    if (relevantSections.length > 0) {
+                        activeSection = relevantSections[0].id;
+                    }
+                }
+
+                // 如果没有找到活动section，使用第一个相关section
+                if (!activeSection && relevantSections.length > 0) {
+                    activeSection = relevantSections[0].id;
+                }
+
+                // 更新导航栏状态
+                updateNavigationState(activeSection, isChinaActive);
+            }
+
+            // 节流函数，避免频繁触发
+            let ticking = false;
+            function handleScroll() {
+                if (!ticking) {
+                    requestAnimationFrame(function() {
+                        updateActiveNavItem();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }
+
+            window.addEventListener('scroll', handleScroll);
+            // 初始调用一次
+            updateActiveNavItem();
+        }
+
+        // 更新导航栏状态
+        function updateNavigationState(activeSection, isChinaActive) {
+            const navTitle = document.getElementById('navTitle');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // 更新标题
+            navTitle.textContent = isChinaActive ? '中国环境数据' : '英国环境数据';
+            
+            // 重置所有导航项
+            navItems.forEach(item => {
+                item.classList.remove('active', 'disabled');
+            });
+
+            if (isChinaActive) {
+                // 启用中国相关的导航项
+                const chinaNavItems = ['nav-china_air', 'nav-china_weather', 'nav-china_urban'];
+                chinaNavItems.forEach(itemId => {
+                    const item = document.getElementById(itemId);
+                    if (item) item.classList.remove('disabled');
+                });
+                
+                // 禁用英国导航项
+                const ukNavItem = document.getElementById('nav-uk_air');
+                if (ukNavItem) ukNavItem.classList.add('disabled');
+                
+                // 设置活动项
+                if (activeSection) {
+                    const activeNavItem = document.getElementById('nav-' + activeSection);
+                    if (activeNavItem) {
+                        activeNavItem.classList.add('active');
+                    }
+                }
+            } else {
+                // 禁用中国相关的导航项
+                const chinaNavItems = ['nav-china_air', 'nav-china_weather', 'nav-china_urban'];
+                chinaNavItems.forEach(itemId => {
+                    const item = document.getElementById(itemId);
+                    if (item) item.classList.add('disabled');
+                });
+                
+                // 启用英国导航项
+                const ukNavItem = document.getElementById('nav-uk_air');
+                if (ukNavItem) ukNavItem.classList.remove('disabled');
+                
+                // 设置活动项
+                if (activeSection === 'uk_air') {
+                    const activeNavItem = document.getElementById('nav-uk_air');
+                    if (activeNavItem) {
+                        activeNavItem.classList.add('active');
+                    }
+                }
+            }
+        }
+
+        // 切换数据组的函数
+        function showDataGroup(groupType) {
+            // 隐藏所有数据组
+            const allGroups = document.querySelectorAll('.data-group');
+            allGroups.forEach(group => group.classList.remove('active'));
+            
+            // 显示选定的数据组
+            const targetGroup = document.getElementById(groupType + '-data');
+            if (targetGroup) {
+                targetGroup.classList.add('active');
+            }
+            
+            // 更新按钮状态
+            const allButtons = document.querySelectorAll('.selector-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // 激活对应按钮
+            const activeButton = document.querySelector(`.selector-btn[onclick="showDataGroup('${groupType}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            // 立即更新导航栏状态
+            const isChinaActive = groupType === 'china';
+            
+            // 确定默认的活动section
+            let defaultActiveSection = null;
+            if (isChinaActive) {
+                defaultActiveSection = 'china_air'; // 中国数据默认显示第一个section
+            } else {
+                defaultActiveSection = 'uk_air'; // 英国数据默认显示唯一的section
+            }
+            
+            updateNavigationState(defaultActiveSection, isChinaActive);
+            
+            // 延迟重新计算滚动位置，确保DOM已更新
+            setTimeout(function() {
+                if (typeof initScrollListener === 'function') {
+                    const sections = [
+                        { id: 'china_air', element: document.getElementById('section-china_air') },
+                        { id: 'china_weather', element: document.getElementById('section-china_weather') },
+                        { id: 'china_urban', element: document.getElementById('section-china_urban') },
+                        { id: 'uk_air', element: document.getElementById('section-uk_air') }
+                    ];
+
+                    const relevantSections = sections.filter(section => {
+                        if (isChinaActive && section.id.startsWith('china_')) return true;
+                        if (!isChinaActive && section.id.startsWith('uk_')) return true;
+                        return false;
+                    });
+
+                    if (relevantSections.length > 0) {
+                        // 重新检查当前最可见的section
+                        const viewportHeight = window.innerHeight;
+                        let maxVisibleArea = 0;
+                        let mostVisibleSection = relevantSections[0].id;
+                        
+                        for (let i = 0; i < relevantSections.length; i++) {
+                            const section = relevantSections[i];
+                            if (section.element) {
+                                const rect = section.element.getBoundingClientRect();
+                                const visibleTop = Math.max(0, -rect.top);
+                                const visibleBottom = Math.min(rect.height, viewportHeight - rect.top);
+                                const visibleArea = Math.max(0, visibleBottom - visibleTop);
+                                
+                                if (visibleArea > maxVisibleArea) {
+                                    maxVisibleArea = visibleArea;
+                                    mostVisibleSection = section.id;
+                                }
+                            }
+                        }
+                        
+                        updateNavigationState(mostVisibleSection, isChinaActive);
+                    }
+                }
+            }, 100);
+        }
+
         // 模型详细信息数据
         const modelData = {
             pm25: {
@@ -557,20 +1194,21 @@
                     { label: '特色功能', value: '点源排放监测' }
                 ]
             },
-            co: {
-                title: 'CO 浓度模型',
+            // 添加新的模型数据
+            temperature: {
+                title: '地表温度模型',
                 sections: [
                     {
                         title: '模型概述',
-                        content: 'CO浓度预测模型基于MOPITT卫星CO柱浓度数据，结合MODIS火点产品和气象再分析数据，采用集成学习算法构建。该模型能够有效识别生物质燃烧、交通排放等CO污染来源。'
+                        content: '地表温度模型基于MODIS和Landsat卫星热红外数据，采用机器学习算法进行地表温度估算。该模型结合了大气校正、发射率估算等技术，能够提供高精度的地表温度产品。'
                     },
                     {
-                        title: '技术路线',
-                        content: '采用梯度提升树算法框架，集成多个弱学习器提升预测性能。模型输入包括CO柱浓度、气温、风速、边界层高度、火点强度等变量，通过特征工程优化提升模型表现。'
+                        title: '技术特点',
+                        content: '采用支持向量机和神经网络融合算法，集成多光谱数据、地形数据、土地覆盖类型等辅助信息，通过时空插值技术填补云层遮挡区域，实现连续的地表温度监测。'
                     },
                     {
                         title: '应用领域',
-                        content: '主要应用于森林火灾监测、秸秆焚烧识别、交通污染评估等领域。为应急管理部门提供火灾烟羽追踪、污染传输预测等技术服务，支撑大气环境管理和应急响应。'
+                        content: '广泛应用于城市热岛效应监测、农业干旱预警、气候变化研究等领域。为城市规划、农业管理和气象预报提供重要的温度数据支撑。'
                     }
                 ],
                 specs: [
@@ -578,8 +1216,209 @@
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
                     { label: '数据时段', value: '2000-至今' },
+                    { label: '精度指标', value: '误差 < ±2°C' },
+                    { label: '特色功能', value: '热岛效应监测' }
+                ]
+            },
+            precipitation: {
+                title: '降水量预测模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '降水量预测模型融合GPM、TRMM等卫星降水产品和地面雨量站观测数据，采用贝叶斯融合算法构建高精度降水量估算模型。该模型能够提供近实时的降水量监测和短期预报。'
+                    },
+                    {
+                        title: '算法框架',
+                        content: '采用多源数据融合技术，结合雷达反射率、云顶温度、大气水汽含量等信息，通过概率降水预测算法，实现不同时空尺度的降水量估算和预报。'
+                    },
+                    {
+                        title: '服务应用',
+                        content: '为水资源管理、洪涝灾害预警、农业灌溉决策提供数据支撑。在极端降水事件监测和预警方面具有重要作用，有效支撑防灾减灾工作。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '0.1° × 0.1°' },
+                    { label: '时间分辨率', value: '小时' },
+                    { label: '覆盖范围', value: '中国大陆' },
+                    { label: '数据时段', value: '1998-至今' },
+                    { label: '精度指标', value: 'R² > 0.88' },
+                    { label: '特色功能', value: '极端降水预警' }
+                ]
+            },
+            urban: {
+                title: '建成区提取模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '建成区提取模型基于Landsat和Sentinel-2高分辨率卫星影像，采用深度学习算法精确识别和提取城市建成区范围。该模型能够区分不同类型的建成区，包括居住区、商业区、工业区等。'
+                    },
+                    {
+                        title: '核心技术',
+                        content: '采用U-Net卷积神经网络架构，结合多光谱指数（NDVI、NDBI、MNDWI等）和纹理特征，通过像素级分类技术实现高精度的建成区提取。模型具有良好的泛化能力和自适应性。'
+                    },
+                    {
+                        title: '产品应用',
+                        content: '为城市规划、土地利用管理、人口分布估算等提供基础数据。支撑城市发展监测、违建识别、生态环境评估等应用，为可持续城市发展提供科学依据。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '30m × 30m' },
+                    { label: '时间分辨率', value: '年度' },
+                    { label: '覆盖范围', value: '全国城市' },
+                    { label: '数据时段', value: '1990-至今' },
+                    { label: '精度指标', value: '总体精度 > 95%' },
+                    { label: '特色功能', value: '建成区类型识别' }
+                ]
+            },
+            expansion: {
+                title: '城市扩张监测模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '城市扩张监测模型通过时序遥感数据分析，采用变化检测和趋势分析算法，监测和预测城市空间扩张模式。该模型能够量化城市扩张速度、方向和强度。'
+                    },
+                    {
+                        title: '分析方法',
+                        content: '采用多时相变化检测技术，结合城市增长边界分析、景观格局指数计算等方法，通过时间序列分析和空间统计技术，揭示城市扩张的时空规律和驱动机制。'
+                    },
+                    {
+                        title: '决策支持',
+                        content: '为城市总体规划、土地利用规划、基础设施建设等提供科学依据。帮助政府部门制定合理的城市发展策略，促进城市可持续发展。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '30m × 30m' },
+                    { label: '时间分辨率', value: '多时相' },
+                    { label: '覆盖范围', value: '重点城市群' },
+                    { label: '数据时段', value: '1990-至今' },
+                    { label: '监测能力', value: '扩张趋势预测' },
+                    { label: '特色功能', value: '增长模式分析' }
+                ]
+            },
+            // 英国模型数据
+            uk_pm25: {
+                title: '英国PM₂.₅ 预测模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '针对英国地区海洋性气候特征开发的PM₂.₅浓度预测模型，考虑了英国特有的气象条件和污染源分布特点。该模型结合欧洲地面监测网络和卫星遥感数据，实现高精度的PM₂.₅浓度估算。'
+                    },
+                    {
+                        title: '区域适应性',
+                        content: '模型特别针对英国的地理环境进行了优化，考虑了海陆交界、地形复杂等因素对污染物传输的影响。采用本地化的气象要素和排放清单，提升了模型在英国地区的预测精度。'
+                    },
+                    {
+                        title: '数据质量',
+                        content: '基于英国环境局(Environment Agency)和欧洲环境署的监测数据进行验证，模型在英国主要城市地区表现出良好的预测性能，为当地空气质量管理提供技术支撑。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日均' },
+                    { label: '覆盖范围', value: '英国全境' },
+                    { label: '数据时段', value: '2010-至今' },
+                    { label: '精度指标', value: 'R² > 0.82' },
+                    { label: '特色功能', value: '海洋性气候适应' }
+                ]
+            },
+            uk_pm10: {
+                title: '英国PM₁₀ 预测模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '基于英国地面监测网络和欧洲卫星数据构建的PM₁₀浓度预测模型，特别适应英国的污染源特征和大气传输条件。该模型在城市交通污染和海盐粒子影响评估方面具有优势。'
+                    },
+                    {
+                        title: '技术特色',
+                        content: '模型集成了欧洲中期天气预报中心(ECMWF)的气象数据和Copernicus大气监测服务(CAMS)的污染物数据，通过本地化校准提升预测精度。'
+                    },
+                    {
+                        title: '应用服务',
+                        content: '为英国公共卫生部门、地方政府和公众提供PM₁₀浓度信息，支撑空气质量预警和健康防护建议，在沙哈拉沙尘传输事件监测方面发挥重要作用。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日均' },
+                    { label: '覆盖范围', value: '英国全境' },
+                    { label: '数据时段', value: '2010-至今' },
+                    { label: '精度指标', value: 'R² > 0.80' },
+                    { label: '特色功能', value: '沙尘传输监测' }
+                ]
+            },
+            uk_ozone: {
+                title: '英国臭氧浓度模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '考虑英国高纬度地区特殊光化学条件的臭氧浓度预测模型，结合OMI/TROPOMI卫星数据和英国环境监测网络观测，实现地表臭氧浓度的准确估算。'
+                    },
+                    {
+                        title: '算法优化',
+                        content: '针对英国较低的太阳辐射强度和较短的日照时间，模型对光化学反应参数进行了调整，更好地反映了英国地区臭氧的生成和消耗过程。'
+                    },
+                    {
+                        title: '预警应用',
+                        content: '为英国气象局和环境部门提供臭氧预报服务，特别是在夏季高温期间的臭氧污染预警，为公众健康防护提供及时准确的信息。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日最大8小时' },
+                    { label: '覆盖范围', value: '英国全境' },
+                    { label: '数据时段', value: '2010-至今' },
                     { label: '精度指标', value: 'R² > 0.78' },
-                    { label: '特色功能', value: '火灾烟羽追踪' }
+                    { label: '特色功能', value: '高纬度光化学适应' }
+                ]
+            },
+            uk_no2: {
+                title: '英国NO₂ 浓度模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '针对英国城市交通污染特征开发的NO₂浓度估算模型，基于TROPOMI高精度卫星数据和英国交通部门的活动数据，实现城市尺度的NO₂浓度监测。'
+                    },
+                    {
+                        title: '城市应用',
+                        content: '模型特别关注伦敦、伯明翰、曼彻斯特等主要城市的交通污染热点，结合道路网络数据和交通流量信息，提供精细化的NO₂浓度分布图。'
+                    },
+                    {
+                        title: '政策支撑',
+                        content: '为英国低排放区(LEZ)和超低排放区(ULEZ)政策制定提供科学依据，评估交通管制措施的环境效果，支撑城市空气质量改善计划。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日均' },
+                    { label: '覆盖范围', value: '英国全境' },
+                    { label: '数据时段', value: '2018-至今' },
+                    { label: '精度指标', value: 'R² > 0.81' },
+                    { label: '特色功能', value: '交通热点识别' }
+                ]
+            },
+            uk_so2: {
+                title: '英国SO₂ 浓度模型',
+                sections: [
+                    {
+                        title: '模型概述',
+                        content: '基于英国工业布局特点和排放清单的SO₂浓度预测模型，结合OMI/TROPOMI卫星数据和英国环境局监测网络，监测工业排放源的SO₂污染状况。'
+                    },
+                    {
+                        title: '排放源监测',
+                        content: '模型重点关注英国剩余的燃煤电厂、炼油厂和化工企业等主要SO₂排放源，通过高精度卫星监测技术识别异常排放事件。'
+                    },
+                    {
+                        title: '监管服务',
+                        content: '为英国环境局和地方政府提供SO₂排放监管技术支持，评估减排政策效果，支撑英国2050年净零排放目标的实现。'
+                    }
+                ],
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日均' },
+                    { label: '覆盖范围', value: '英国全境' },
+                    { label: '数据时段', value: '2010-至今' },
+                    { label: '精度指标', value: 'R² > 0.77' },
+                    { label: '特色功能', value: '工业源监管' }
                 ]
             }
         };
