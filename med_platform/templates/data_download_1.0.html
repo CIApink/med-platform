@@ -728,9 +728,113 @@
                 return;
             }
             
-            // 模拟下载
-            alert('正在准备下载数据...');
+            // 收集用户选择的参数
+            const downloadParams = collectDownloadParams();
+            
+            // 调用下载接口
+            downloadData(downloadParams);
         });
+        
+        // 收集下载参数
+        function collectDownloadParams() {
+            // 获取选中的数据类别
+            const activeCategory = document.querySelector('.category-item.active');
+            const category = activeCategory ? activeCategory.getAttribute('data-category') : 'CN environmental data';
+            
+            // 获取选中的污染物/指标
+            const activePollutant = document.querySelector('.pollutant-btn.active');
+            const pollutant = activePollutant ? activePollutant.textContent.trim() : 'PM2.5';
+            
+            // 获取时间范围类型
+            const activeTimeRange = document.querySelector('.time-range-btn.active');
+            const timeRange = activeTimeRange ? activeTimeRange.getAttribute('data-range') : 'month';
+            
+            // 获取具体时间
+            let startDate, endDate;
+            if (timeRange === 'year') {
+                startDate = document.getElementById('startYear')?.value || '2020';
+                endDate = document.getElementById('endYear')?.value || '2023';
+            } else if (timeRange === 'month') {
+                const startYear = document.getElementById('startYear')?.value || '2023';
+                const startMonth = document.getElementById('startMonth')?.value || '1';
+                const endYear = document.getElementById('endYear')?.value || '2023';
+                const endMonth = document.getElementById('endMonth')?.value || '12';
+                startDate = `${startYear}-${startMonth.padStart(2, '0')}`;
+                endDate = `${endYear}-${endMonth.padStart(2, '0')}`;
+            }
+            
+            return {
+                category: category,
+                pollutant: pollutant,
+                time_range: timeRange,
+                start_date: startDate,
+                end_date: endDate
+            };
+        }
+        
+        // 实际下载数据的函数
+        async function downloadData(params) {
+            try {
+                // 显示下载进度
+                const downloadBtn = document.getElementById('downloadBtn');
+                const originalText = downloadBtn.textContent;
+                downloadBtn.textContent = '正在准备数据...';
+                downloadBtn.disabled = true;
+                
+                // 创建表单数据
+                const formData = new FormData();
+                Object.keys(params).forEach(key => {
+                    formData.append(key, params[key]);
+                });
+                
+                // 添加CSRF令牌
+                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                
+                // 发送下载请求
+                const response = await fetch('{% url "download_data" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                
+                if (response.ok) {
+                    // 获取文件名
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'data.csv';
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    // 下载文件
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    alert('数据下载成功！');
+                } else {
+                    const errorData = await response.json();
+                    alert('下载失败：' + (errorData.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('下载错误:', error);
+                alert('下载失败：网络错误');
+            } finally {
+                // 恢复按钮状态
+                downloadBtn.textContent = originalText;
+                downloadBtn.disabled = false;
+            }
+        }
 
         // 获取CSRF Token
         function getCookie(name) {

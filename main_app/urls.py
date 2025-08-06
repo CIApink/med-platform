@@ -32,4 +32,10 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-users/', views.admin_user_list, name='admin_user_list'),
     path('admin-user/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
+    
+    # 数据下载相关接口
+    path('api/download-data/', views.download_data, name='download_data'),
+    path('api/export-data/', views.export_data, name='export_data'),
+    path('api/preview-data/', views.preview_data, name='preview_data'),
+    path('api/data-statistics/', views.data_statistics, name='data_statistics'),
 ]
