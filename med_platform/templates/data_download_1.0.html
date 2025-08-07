@@ -178,6 +178,7 @@
         
         .agreement-checkbox {
             margin-right: 8px;
+            accent-color: #35998895;
         }
         
         .agreement-text {
@@ -340,7 +341,7 @@
                 <ul class="category-list">
                     <li class="category-item active" data-category="CN environmental data" data-title="中国大气污染数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国大气污染数据">中国大气污染数据</li>
                     <li class="category-item" data-category="CN environmental data" data-title="中国气象数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国气象数据">中国气象数据</li>
-                    <li class="category-item" data-category="CN environmental data" data-title="中国建城数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国建城数据">中国建城数据</li>
+                    <li class="category-item" data-category="CN environmental data" data-title="中国建成数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国建成数据">中国建成数据</li>
                 </ul>
             </div>
             
@@ -452,7 +453,7 @@
                     const itemText = item.textContent.trim();
                     if ((category === 'air' && itemText.includes('中国大气污染')) ||
                         (category === 'weather' && itemText.includes('气象')) ||
-                        (category === 'urban' && itemText.includes('建城')) ||
+                        (category === 'urban' && itemText.includes('建成')) ||
                         (category === 'uk_air' && itemText.includes('英国大气污染'))) {
                         targetItem = item;
                     }
@@ -620,9 +621,9 @@
                     <div class="pollutant-btn active">温度</div>
                     <div class="pollutant-btn">紫外辐射</div>
                 `;
-            } else if (categoryText.includes('建城')) {
-                // 建城数据选项
-                sectionTitle.textContent = '建城指标';
+            } else if (categoryText.includes('建成')) {
+                // 建成数据选项
+                sectionTitle.textContent = '建成指标';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">NDVI</div>
                     <div class="pollutant-btn">夜光数据</div>

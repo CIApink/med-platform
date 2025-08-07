@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>{% block title %}MED 环境数据平台{% endblock %}</title>
+    <title>{% block title %}OpenEx 环境数据平台{% endblock %}</title>
     
     <!-- 通用字体和导航栏样式 -->
     <style>
@@ -71,8 +71,8 @@
             display: flex;
             flex-direction: column;
             color: #157c479d;
-            margin-right: 40px;
-            width: 32.5%;
+            margin-right: 20px;
+            min-width: 200px;
             font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
 
@@ -109,7 +109,9 @@
             display: flex;
             gap: 25px;
             justify-content: center;
-            width: 50%;
+            align-items: center;
+            flex: 1;
+            margin: 0 20px;
         }
         
         .nav-item {
@@ -148,10 +150,10 @@
         }
         
         .user-auth {
-            margin-left: auto;
             color: white;
-            width: 25%;
             text-align: right;
+            margin-left: auto;
+            min-width: 120px;
         }
         
         .user-auth a {
@@ -248,14 +250,14 @@
                 padding: 0 15px;
             }
             .logo {
-                width: 30%;
+                min-width: 180px;
             }
             .nav-menu {
-                width: 55%;
                 gap: 20px;
+                margin: 0 15px;
             }
             .user-auth {
-                width: 20%;
+                min-width: 100px;
             }
             .nav-item {
                 font-size: 14px;
@@ -268,7 +270,7 @@
                 padding: 5px 15px;
             }
             .logo {
-                width: 20%;
+                min-width: 120px;
                 margin-right: 10px;
             }
             .logo-full {
@@ -284,14 +286,14 @@
                 font-size: 10px;
             }
             .user-auth {
-                width: 25%;
+                min-width: 80px;
                 margin-left: 0;
                 font-size: 12px;
             }
             .nav-menu {
-                width: 55%;
                 justify-content: center;
                 gap: 12px;
+                margin: 0 10px;
             }
             .nav-item {
                 font-size: 12px;
@@ -419,10 +421,10 @@
         <div class="logo">
             <a href="{% url 'index' %}" style="text-decoration: none; color: inherit;">
                 <div class="main-title">
-                    <span class="logo-full">MED 环境健康数据平台</span>
-                    <span class="logo-short">MED</span>
+                    <span class="logo-full">OpenEx 环境数据平台</span>
+                    <span class="logo-short">OpenEx</span>
                 </div>
-                <div class="sub-title">Metrics of Environmental Data</div>
+                <div class="sub-title">Open Data Platform for Environmental Exposure</div>
             </a>
         </div>
         <div class="nav-menu">
@@ -431,7 +433,7 @@
             <a href="{% url 'data_download' %}" class="nav-item {% if request.resolver_match.url_name == 'data_download' %}current{% endif %}">数据下载</a>
             <!-- <a href="#" class="nav-item">论文成果</a> -->
             <!-- <a href="{% url 'data_echart' %}" class="nav-item {% if request.resolver_match.url_name == 'data_echart' %}current{% endif %}">数据地图</a> -->
-            <a href="#" class="nav-item">用户服务</a>
+            <a href="{% url 'user_service' %}" class="nav-item {% if request.resolver_match.url_name == 'user_service' %}current{% endif %}">用户服务</a>
             <!-- <div class="nav-item mobile-auth">
                 {% if user.is_authenticated %}
                     <span onclick="logout()">{{ user.email }} (点击注销)</span>

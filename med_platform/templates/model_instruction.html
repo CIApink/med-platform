@@ -19,18 +19,19 @@
     }
 
     .page-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 600;
         color: #333;
         margin-bottom: 10px;
     }
 
     .page-subtitle {
-        font-size: 15px;
+        font-size: 16px;
         color: #666;
-        max-width: 600px;
+        max-width: 1000px;
         margin: 0 auto;
         line-height: 1.5;
+        text-align: left;
     }
 
     /* 选择按钮 */
@@ -88,9 +89,9 @@
     }
 
     .category-title {
-        font-size: 20px;
+        font-size: 26px;
         font-weight: 600;
-        color: var(--brand-green);
+        color: #4ab6a4;
         margin-bottom: 20px;
         text-align: center;
         padding-bottom: 10px;
@@ -107,6 +108,18 @@
         width: 60px;
         height: 2px;
         background: var(--brand-green);
+    }
+
+    /* 数据集说明样式 */
+    .category-description {
+        font-size: 14px;
+        color: #666;
+        text-align: left;
+        margin-bottom: 25px;
+        line-height: 1.6;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     /* 模型海报网格 */
@@ -134,10 +147,14 @@
 
     .model-image {
         width: 100%;
-        height: 150px;
-        background: #6fb8edc5;
+        height: 80px;
+        /* background: #6fb8edc5; */
+        background: var(--brand-green);
         position: relative;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .model-image::before {
@@ -148,6 +165,17 @@
         right: 0;
         bottom: 0;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.3"/><circle cx="80" cy="40" r="1.5" fill="white" opacity="0.2"/><circle cx="40" cy="70" r="1" fill="white" opacity="0.4"/></svg>');
+    }
+
+    .model-title-in-image {
+        position: relative;
+        z-index: 2;
+        font-size: 20px;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        padding: 0 15px;
     }
 
     .model-icon {
@@ -161,13 +189,6 @@
 
     .model-info {
         padding: 20px;
-    }
-
-    .model-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 10px;
     }
 
     .model-description {
@@ -199,6 +220,28 @@
         font-weight: 500;
     }
 
+    /* 统一下标样式 */
+    sub {
+        font-size: 0.75em;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+        bottom: -0.25em;
+        font-weight: inherit;
+    }
+
+    /* 确保标题中的下标与主文字对齐 */
+    .model-title-in-image sub {
+        font-size: 0.8em;
+        bottom: -0.2em;
+    }
+
+    /* 描述文字中的下标样式 */
+    .model-description sub {
+        font-size: 0.75em;
+        bottom: -0.25em;
+    }
+
     /* 模态框样式 */
     .modal-overlay {
         position: fixed;
@@ -226,9 +269,9 @@
         transform: translate(-50%, -50%) scale(0.8);
         background: white;
         border-radius: 20px;
-        width: 90%;
-        max-width: 900px;
-        max-height: 80vh;
+        width: 95%;
+        max-width: 1200px;
+        max-height: 90vh;
         overflow: hidden;
         transition: all 0.3s ease;
     }
@@ -239,7 +282,7 @@
 
     .modal-body {
         padding: 40px;
-        max-height: calc(80vh - 250px);
+        max-height: calc(90vh - 180px);
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: rgba(74, 182, 164, 0.3) transparent;
@@ -266,7 +309,7 @@
 
     .modal-header {
         position: relative;
-        height: 150px;
+        height: 100px;
         background: var(--brand-green);
         display: flex;
         align-items: center;
@@ -294,7 +337,7 @@
     }
 
     .modal-title {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 600;
         text-align: center;
     }
@@ -343,6 +386,134 @@
         font-size: 16px;
         font-weight: 600;
         color: #333;
+    }
+
+    /* 产品输出图样式 */
+    .product-image-container {
+        text-align: center;
+        margin: 15px 0;
+    }
+
+    .product-image-item {
+        margin-bottom: 25px;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .product-image {
+        max-width: 70%;
+        max-height: 600px;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin: 0 auto;
+        display: block;
+        object-fit: contain;
+    }
+
+    .product-image-legend {
+        margin-top: 12px;
+        font-size: 14px;
+        color: #666;
+        font-style: italic;
+        text-align: center;
+        padding: 8px 15px;
+        max-width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .product-image-placeholder {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .placeholder-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+
+    .placeholder-text {
+        font-size: 16px;
+        margin: 0;
+    }
+
+    /* 参考文献样式 */
+    .references-list {
+        margin-top: 15px;
+    }
+
+    .reference-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid var(--brand-green);
+    }
+
+    .reference-number {
+        font-weight: 600;
+        color: var(--brand-green);
+        margin-right: 10px;
+        flex-shrink: 0;
+        min-width: 20px;
+    }
+
+    .reference-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    /* 操作按钮样式 */
+    .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .modal-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+
+    .modal-btn-secondary {
+        background: #f8f9fa;
+        color: #666;
+        border: 1px solid #dee2e6;
+    }
+
+    .modal-btn-secondary:hover {
+        background: #e9ecef;
+        color: #333;
+    }
+
+    .modal-btn-primary {
+        background: var(--brand-green);
+        color: white;
+        box-shadow: 0 4px 15px rgba(74, 182, 164, 0.3);
+    }
+
+    .modal-btn-primary:hover {
+        background: #45a089;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 182, 164, 0.4);
     }
 
     /* 响应式设计 */
@@ -426,6 +597,7 @@
         color: #ccc;
         cursor: not-allowed;
         opacity: 0.5;
+        pointer-events: none;
     }
 
     .right-navigation .nav-item.disabled:hover {
@@ -455,8 +627,8 @@
         <div class="page-header">
             <h1 class="page-title">环境数据模型介绍</h1>
             <p class="page-subtitle">
-                基于先进的机器学习算法和卫星遥感技术，我们构建了多种高精度环境数据预测模型，
-                为环境监测、气候研究和公共健康提供可靠的数据支撑。
+                面向影响人群健康的主要大气、气候和建成环境因素，复旦大学公共卫生学院环境与健康团队开发并构建了高时空分辨率和覆盖度的暴露评价数据平台。本平台通过融合地面观测和卫星遥感等多源数据，基于机器学习算法，开发和构建了多尺度的环境因素数据集，通过云平台进行数据共享，以期可为环境健康相关科学研究开展及相关政策制定提供基础数据支持。平台当前提供中国和英国两个国家的环境暴露数据集。
+
             </p>
         </div>
 
@@ -473,20 +645,24 @@
             <!-- 中国大气污染数据 -->
             <div class="data-category" id="section-china_air">
                 <h2 class="category-title">中国大气污染数据</h2>
+                <p class="category-description">
+                    本数据集包含六类环境要素：PM<sub>2.5</sub>、PM<sub>10-2.5</sub>、PM<sub>10</sub>、O<sub>3</sub>、NO<sub>2</sub>和CO。其中，CO 数据的时间范围为 2013–2020 年（单位：mg/m³），其余五项的时间范围为 2005–2024 年（单位：µg/m³）。数据的空间分辨率为1 km × 1 km，时间分辨率为日、月、年。<br>
+                    该数据集基于随机森林模型构建，预测变量包括卫星遥感（MAIAC AOD 用于 PM<sub>2.5</sub>、PM<sub>10-2.5</sub> 和 PM<sub>10</sub>；TROPOMI 用于 NO<sub>2</sub>；MOPITT 用于 CO）、化学传输模式模拟值、气象参数、能见度、海拔高度及人口密度等多源数据。由于卫星观测存在非随机缺失，本数据已对卫星数据缺失引起的大气污染预测数据缺失进行了补缺处理，因此得到的大气污染物日平均浓度实现了时空全覆盖；月均和年均浓度则由日均值计算得出。
+                </p>
                 <div class="models-grid">
                     <!-- PM2.5 模型 -->
                     <div class="model-card" onclick="openModal('pm25')">
                         <div class="model-image">
+                            <div class="model-title-in-image">PM<sub>2.5</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">PM<sub>2.5</sub> 预测模型</h3>
                             <p class="model-description">
-                                基于卫星遥感和地面监测数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度预测模型
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.85</span>
+                                <span class="model-tag">2013-2020年</span>
                             </div>
                         </div>
                     </div>
@@ -494,33 +670,50 @@
                     <!-- PM10 模型 -->
                     <div class="model-card" onclick="openModal('pm10')">
                         <div class="model-image">
+                            <div class="model-title-in-image">PM<sub>10</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">PM<sub>10</sub> 预测模型</h3>
                             <p class="model-description">
-                                综合多源遥感数据和气象要素，实现PM<sub>10</sub>浓度的高精度时空预测
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.85</span>
+                                <span class="model-tag">2013-2020年</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PM10-25 模型 -->
+                    <div class="model-card" onclick="openModal('pm1025')">
+                        <div class="model-image">
+                            <div class="model-title-in-image">PM<sub>10-2.5</sub> 浓度模拟数据集</div>
+                        </div>
+                        <div class="model-info">
+                            <p class="model-description">
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>10-2.5</sub>浓度模拟数据集
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">2013-2020年</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 臭氧模型 -->
-                    <div class="model-card" onclick="openModal('ozone')">
+                    <div class="model-card" onclick="openModal('o3')">
                         <div class="model-image">
+                            <div class="model-title-in-image">O<sub>3</sub>浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">臭氧浓度模型</h3>
                             <p class="model-description">
-                                结合紫外辐射、温度等因子，精确预测地表臭氧浓度分布
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.85</span>
+                                <span class="model-tag">2013-2020年</span>
                             </div>
                         </div>
                     </div>
@@ -528,33 +721,33 @@
                     <!-- NO2 模型 -->
                     <div class="model-card" onclick="openModal('no2')">
                         <div class="model-image">
+                            <div class="model-title-in-image">NO<sub>2</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">NO<sub>2</sub> 浓度模型</h3>
                             <p class="model-description">
-                                利用TropOMI卫星数据，结合机器学习算法，估算地表NO<sub>2</sub>浓度
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度NO<sub>2</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.83</span>
+                                <span class="model-tag">2013-2020年</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SO2 模型 -->
-                    <div class="model-card" onclick="openModal('so2')">
+                    <!-- CO 模型 -->
+                    <div class="model-card" onclick="openModal('co')">
                         <div class="model-image">
+                            <div class="model-title-in-image">CO 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">SO<sub>2</sub> 浓度模型</h3>
                             <p class="model-description">
-                                基于卫星遥感和地面观测融合，实现SO<sub>2</sub>浓度高精度估算
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度CO浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.80</span>
+                                <span class="model-tag">2013-2020年</span>
                             </div>
                         </div>
                     </div>
@@ -564,70 +757,78 @@
             <!-- 中国气象数据 -->
             <div class="data-category" id="section-china_weather">
                 <h2 class="category-title">中国气象数据</h2>
+                <p class="category-description">
+                    本数据集包含两类环境要素的四种参数：温度（每日最高、最低、平均气温）和紫外辐射（UV）。<br>
+                    温度：单位 ℃，时间范围为 2011–2020年，空间分辨率为1 km × 1 km，时间分辨率为日、月、年。该数据基于机器学习算法中的随机森林模型预测得到，模型构建使用的预测变量包括地表温度（MODIS LST）、气象参数、海拔高度和人口密度等多源数据。数据已经针对卫星数据缺失进行了补缺处理，可达到时空全覆盖。月均、年均气温由日均气温平均而来。<br>
+                    UV：单位W/m²，时间范围为2005-2023年，空间分辨率为10km × 10km，时间分辨率为日、月、年。该数据集以UV地面监测站测量值作为因变量，以OMI的红斑加权每日剂量（EDD）、ERA-5 的UV数据、气象参数、臭氧、太阳天顶角、地表反照率、海拔作为预测变量建立随机森林模型。数据同样已经针对卫星数据缺失进行了补缺处理，可达到时空全覆盖。月均、年均UV由日均UV平均而来。
+                </p>
                 <div class="models-grid">
                     <!-- 温度模型 -->
                     <div class="model-card" onclick="openModal('temperature')">
                         <div class="model-image">
+                            <div class="model-title-in-image">地表温度模型</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">地表温度模型</h3>
                             <p class="model-description">
-                                基于MODIS和Landsat卫星数据，采用机器学习算法精确估算地表温度分布
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度地表温度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">精度±2°C</span>
+                                <span class="model-tag">2011-2020年</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 降水模型 -->
-                    <div class="model-card" onclick="openModal('precipitation')">
+                    <!-- 紫外辐射模型 -->
+                    <div class="model-card" onclick="openModal('uv')">
                         <div class="model-image">
+                            <div class="model-title-in-image">紫外辐射模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">降水量预测模型</h3>
                             <p class="model-description">
-                                融合多源卫星降水产品和地面观测数据，提供高精度降水量估算
+                                基于地面监测站和卫星遥感等多源数据，采用机器学习算法构建的高精度紫外辐射模拟数据集
                             </p>
                             <div class="model-tags">
-                                <span class="model-tag">0.1°分辨率</span>
-                                <span class="model-tag">小时数据</span>
-                                <span class="model-tag">R²>0.88</span>
+                                <span class="model-tag">10km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">2005-2023年</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 中国建城数据 -->
+            <!-- 中国建成数据 -->
             <div class="data-category" id="section-china_urban">
-                <h2 class="category-title">中国建城数据</h2>
+                <h2 class="category-title">中国建成环境数据</h2>
+                <p class="category-description">
+                    本数据集目前针对植被指数构建了NDVI年均值与年最大值数据集。数据时间范围为 2005–2024 年，空间分辨率为250m × 250m ，时间分辨率为年。该数据使用的原始数据来自于Terra卫星MODIS传感器反演的NDVI数据（MOD13Q1），其空间分辨率为250m × 250m，原始数据时间分辨率为16 天。剔除云、雪和水体影响的数据，计算得到年平均NDVI和年最大NDVI数据。NDVI 原始数值在-1到1之间，接近0表示裸土，负值表示水或者雪覆盖（计算时已经将负值剔除）。
+                </p>
                 <div class="models-grid">
-                    <!-- 建成区提取模型 -->
-                    <div class="model-card" onclick="openModal('urban')">
+                    <!-- 归一化植被指数提取模型 -->
+                    <div class="model-card" onclick="openModal('ndvi')">
                         <div class="model-image">
+                            <div class="model-title-in-image">归一化植被指数数据</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">建成区提取模型</h3>
                             <p class="model-description">
-                                基于高分辨率卫星影像，采用深度学习算法精确提取城市建成区范围
+                                基于卫星遥感数据反演的归一化植被指数（NDVI）数据集
                             </p>
                             <div class="model-tags">
-                                <span class="model-tag">30m分辨率</span>
-                                <span class="model-tag">年度更新</span>
-                                <span class="model-tag">精度>95%</span>
+                                <span class="model-tag">250m分辨率</span>
+                                <span class="model-tag">年均数据</span>
+                                <span class="model-tag">2005-2024年</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 城市扩张模型 -->
-                    <div class="model-card" onclick="openModal('expansion')">
+                    <!-- <div class="model-card" onclick="openModal('expansion')">
                         <div class="model-image">
+                            <div class="model-title-in-image">城市扩张监测模型</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">城市扩张监测模型</h3>
                             <p class="model-description">
                                 通过时序遥感数据分析，监测和预测城市空间扩张模式和趋势
                             </p>
@@ -637,7 +838,7 @@
                                 <span class="model-tag">趋势预测</span>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -647,20 +848,23 @@
             <!-- 英国大气污染数据 -->
             <div class="data-category" id="section-uk_air">
                 <h2 class="category-title">英国大气污染数据</h2>
+                <p class="category-description">
+                    本数据集包含四种大气污染物数据：PM<sub>2.5</sub>、PM<sub>10</sub>、NO<sub>2</sub>以及O<sub>3</sub>，单位为µg/m³，时间范围为2006-2021年，空间分辨率为1 km × 1 km，模型构建的时间分辨率为每日平均（O3为每日最大8小时平均）。该数据基于机器学习算法中的随机森林模型预测得到，模型构建使用的预测变量包括化学传输模型模拟的污染物浓度、气象参数、人口密度、道路长度、海拔高度和归一化植被指数等多源数据。月均、年均浓度由日均浓度平均而来。
+                </p>
                 <div class="models-grid">
                     <!-- 英国PM2.5 模型 -->
                     <div class="model-card" onclick="openModal('uk_pm25')">
                         <div class="model-image">
+                            <div class="model-title-in-image">英国PM<sub>2.5</sub> 模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">英国PM<sub>2.5</sub> 预测模型</h3>
                             <p class="model-description">
-                                针对英国地区气候特征优化的PM<sub>2.5</sub>浓度预测模型，考虑海洋性气候影响
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国CO浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.82</span>
+                                <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
                     </div>
@@ -668,33 +872,16 @@
                     <!-- 英国PM10 模型 -->
                     <div class="model-card" onclick="openModal('uk_pm10')">
                         <div class="model-image">
+                            <div class="model-title-in-image">英国PM<sub>10</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">英国PM<sub>10</sub> 预测模型</h3>
                             <p class="model-description">
-                                基于英国地面监测网络和卫星数据，适应当地污染源特征的PM<sub>10</sub>预测模型
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国PM<sub>10</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.80</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 英国臭氧模型 -->
-                    <div class="model-card" onclick="openModal('uk_ozone')">
-                        <div class="model-image">
-                        </div>
-                        <div class="model-info">
-                            <h3 class="model-title">英国臭氧浓度模型</h3>
-                            <p class="model-description">
-                                考虑英国高纬度地区特殊光化学条件的臭氧浓度预测模型
-                            </p>
-                            <div class="model-tags">
-                                <span class="model-tag">1km分辨率</span>
-                                <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.78</span>
+                                <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
                     </div>
@@ -702,26 +889,45 @@
                     <!-- 英国NO2 模型 -->
                     <div class="model-card" onclick="openModal('uk_no2')">
                         <div class="model-image">
+                            <div class="model-title-in-image">英国NO<sub>2</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">英国NO<sub>2</sub> 浓度模型</h3>
                             <p class="model-description">
-                                针对英国城市交通污染特征开发的NO<sub>2</sub>浓度估算模型
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国NO<sub>2</sub>浓度模拟数据集
                             </p>
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
-                                <span class="model-tag">R²>0.81</span>
+                                <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 英国SO2 模型 -->
-                    <div class="model-card" onclick="openModal('uk_so2')">
+                    <!-- 英国臭氧模型 -->
+                    <div class="model-card" onclick="openModal('uk_o3')">
                         <div class="model-image">
+                            <div class="model-title-in-image">英国O<sub>3</sub>浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <h3 class="model-title">英国SO<sub>2</sub> 浓度模型</h3>
+                            <p class="model-description">
+                                基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国O<sub>3</sub>浓度模拟数据集
+                            </p>
+                            <div class="model-tags">
+                                <span class="model-tag">1km分辨率</span>
+                                <span class="model-tag">日均数据</span>
+                                <span class="model-tag">2006-2021年</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- 英国SO2 模型 -->
+                    <!-- <div class="model-card" onclick="openModal('uk_so2')">
+                        <div class="model-image">
+                            <div class="model-title-in-image">英国SO<sub>2</sub> 浓度模型</div>
+                        </div>
+                        <div class="model-info">
                             <p class="model-description">
                                 基于英国工业布局特点和排放清单的SO<sub>2</sub>浓度预测模型
                             </p>
@@ -731,7 +937,7 @@
                                 <span class="model-tag">R²>0.77</span>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -740,10 +946,10 @@
     <!-- 右侧导航栏 -->
     <nav class="right-navigation" id="rightNavigation">
         <div class="nav-title" id="navTitle">中国环境数据</div>
-        <a class="nav-item active" onclick="scrollToSection('china_air')" id="nav-china_air">中国大气污染数据</a>
-        <a class="nav-item" onclick="scrollToSection('china_weather')" id="nav-china_weather">中国气象数据</a>
-        <a class="nav-item" onclick="scrollToSection('china_urban')" id="nav-china_urban">中国建城数据</a>
-        <a class="nav-item disabled" onclick="scrollToSection('uk_air')" id="nav-uk_air">英国大气污染数据</a>
+        <a class="nav-item active" onclick="handleNavClick('china_air')" id="nav-china_air" data-section="china_air">中国大气污染数据</a>
+        <a class="nav-item" onclick="handleNavClick('china_weather')" id="nav-china_weather" data-section="china_weather">中国气象数据</a>
+        <a class="nav-item" onclick="handleNavClick('china_urban')" id="nav-china_urban" data-section="china_urban">中国建成环境数据</a>
+        <a class="nav-item disabled" onclick="handleNavClick('uk_air')" id="nav-uk_air" data-section="uk_air">英国大气污染数据</a>
     </nav>
 
     <!-- 模态框 -->
@@ -789,6 +995,9 @@
                         scrollToCategory(category);
                     }, 100);
                 }
+            } else {
+                // 如果没有URL参数，确保默认状态正确初始化
+                updateNavigationState('china_air', true);
             }
 
             // 初始化滚动监听
@@ -815,11 +1024,20 @@
             }
             
             if (targetElement) {
-                targetElement.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start',
-                    inline: 'nearest'
+                // 获取固定导航栏的高度
+                const navbarHeight = 60;
+                const additionalOffset = 20;
+                
+                // 计算目标位置
+                const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - navbarHeight - additionalOffset;
+                
+                // 平滑滚动到计算出的位置
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
                 });
+                
                 // 添加高亮效果
                 targetElement.style.background = 'rgba(74, 182, 164, 0.1)';
                 targetElement.style.borderRadius = '8px';
@@ -834,15 +1052,85 @@
             }
         }
 
+        // 处理导航点击事件
+        function handleNavClick(sectionId) {
+            // 检查导航项是否被禁用
+            const navItem = document.getElementById('nav-' + sectionId);
+            if (navItem && navItem.classList.contains('disabled')) {
+                return; // 如果被禁用，不执行任何操作
+            }
+            
+            // 如果点击的是英国数据，需要先切换到英国数据组
+            if (sectionId.startsWith('uk_')) {
+                const ukGroup = document.getElementById('uk-data');
+                const chinaGroup = document.getElementById('china-data');
+                
+                if (!ukGroup.classList.contains('active')) {
+                    showDataGroup('uk');
+                    // 等待数据组切换完成后再滚动
+                    setTimeout(function() {
+                        scrollToSection(sectionId);
+                    }, 100);
+                } else {
+                    // 立即更新导航状态
+                    updateNavigationState(sectionId, false);
+                    scrollToSection(sectionId);
+                }
+            }
+            // 如果点击的是中国数据，需要先切换到中国数据组
+            else if (sectionId.startsWith('china_')) {
+                const chinaGroup = document.getElementById('china-data');
+                const ukGroup = document.getElementById('uk-data');
+                
+                if (!chinaGroup.classList.contains('active')) {
+                    showDataGroup('china');
+                    // 等待数据组切换完成后再滚动
+                    setTimeout(function() {
+                        scrollToSection(sectionId);
+                    }, 100);
+                } else {
+                    // 立即更新导航状态
+                    updateNavigationState(sectionId, true);
+                    scrollToSection(sectionId);
+                }
+            }
+        }
+
         // 通过导航栏滚动到指定区域
         function scrollToSection(sectionId) {
+            // 检查导航项是否被禁用
+            const navItem = document.getElementById('nav-' + sectionId);
+            if (navItem && navItem.classList.contains('disabled')) {
+                return; // 如果被禁用，不执行滚动
+            }
+            
             const targetElement = document.getElementById('section-' + sectionId);
             if (targetElement) {
-                targetElement.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start',
-                    inline: 'nearest'
+                // 获取固定导航栏的高度（如果有的话）
+                const navbarHeight = 60; // 根据CSS中的main-content margin-top值
+                const additionalOffset = 20; // 额外的偏移量，确保标题在页面顶部有合适的间距
+                
+                // 计算目标位置
+                const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - navbarHeight - additionalOffset;
+                
+                // 平滑滚动到计算出的位置
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
                 });
+                
+                // 添加高亮效果
+                targetElement.style.background = 'rgba(74, 182, 164, 0.1)';
+                targetElement.style.borderRadius = '8px';
+                targetElement.style.padding = '20px';
+                targetElement.style.transition = 'all 0.3s ease';
+                
+                // 3秒后移除高亮
+                setTimeout(function() {
+                    targetElement.style.background = '';
+                    targetElement.style.padding = '';
+                }, 3000);
             }
         }
 
@@ -876,24 +1164,40 @@
 
                 // 如果页面可以滚动，使用正常的滚动检测逻辑
                 if (documentHeight > viewportHeight) {
-                    // 检测哪个section在视窗中最可见
-                    let maxVisibleArea = 0;
+                    // 检测哪个section的标题最接近页面顶部
+                    const navbarHeight = 60;
+                    const threshold = navbarHeight + 30; // 考虑导航栏高度和一些缓冲
+                    let closestSection = null;
+                    let minDistance = Infinity;
                     
                     for (let i = 0; i < relevantSections.length; i++) {
                         const section = relevantSections[i];
                         if (section.element) {
                             const rect = section.element.getBoundingClientRect();
                             
-                            // 计算section在视窗中的可见面积
-                            const visibleTop = Math.max(0, -rect.top);
-                            const visibleBottom = Math.min(rect.height, viewportHeight - rect.top);
-                            const visibleArea = Math.max(0, visibleBottom - visibleTop);
-                            
-                            if (visibleArea > maxVisibleArea) {
-                                maxVisibleArea = visibleArea;
-                                activeSection = section.id;
+                            // 如果section在视窗范围内
+                            if (rect.bottom > 0 && rect.top < viewportHeight) {
+                                // 计算section顶部距离理想位置的距离
+                                const distanceFromTop = Math.abs(rect.top - threshold);
+                                
+                                // 如果section顶部在理想区域内，优先选择
+                                if (rect.top <= threshold && rect.bottom > threshold) {
+                                    if (distanceFromTop < minDistance) {
+                                        minDistance = distanceFromTop;
+                                        closestSection = section.id;
+                                    }
+                                }
+                                // 否则选择距离最近的
+                                else if (!closestSection && distanceFromTop < minDistance) {
+                                    minDistance = distanceFromTop;
+                                    closestSection = section.id;
+                                }
                             }
                         }
+                    }
+                    
+                    if (closestSection) {
+                        activeSection = closestSection;
                     }
                     
                     // 如果接近页面底部，激活最后一个section
@@ -1070,357 +1374,250 @@
         // 模型详细信息数据
         const modelData = {
             pm25: {
-                title: 'PM₂.₅ 预测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: 'PM₂.₅预测模型是基于MODIS、VIIRS等多源卫星遥感数据，结合地面监测站点观测数据，采用集成机器学习算法构建的高精度PM₂.₅浓度预测模型。该模型能够提供1km空间分辨率的日均PM₂.₅浓度数据，为空气质量监测和健康风险评估提供重要支撑。'
-                    },
-                    {
-                        title: '技术特点',
-                        content: '采用随机森林和梯度提升等集成学习算法，融合气溶胶光学厚度(AOD)、地表反射率、气象要素、地形地貌、土地利用类型等多维特征，通过空间插值和时序建模技术，实现高精度的PM₂.₅浓度估算。模型具有良好的泛化能力和稳定性。'
-                    },
-                    {
-                        title: '验证指标',
-                        content: '基于全国400+地面监测站点数据进行交叉验证，模型整体R²达到0.87，RMSE为12.5 μg/m³，MAE为8.2 μg/m³。在不同地区和季节条件下均表现出良好的预测精度，特别是在重污染事件预测方面具有显著优势。'
-                    }
-                ],
+                title: 'PM<sub>2.5</sub> 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2000-至今' },
-                    { label: '精度指标', value: 'R² > 0.85' },
-                    { label: '更新频率', value: '每日更新' }
-                ]
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/我国PM2.5年均浓度图.png',
+                imageLegend: '图 1: 中国大陆PM<sub>2.5</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                references: [
+                    'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM<sub>2.5</sub> concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
+                    'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM<sub>2.5</sub> concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
+                    'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM<sub>2.5</sub> pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+                ],
+                downloadCategory: 'air' // 用于跳转到数据下载页面的参数
             },
             pm10: {
-                title: 'PM₁₀ 预测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: 'PM₁₀预测模型综合利用多源卫星遥感数据和地面观测数据，采用深度学习和机器学习融合算法，构建高精度的PM₁₀浓度预测模型。该模型特别针对粗颗粒物的特征进行了优化，能够准确反映沙尘、施工等源排放对PM₁₀浓度的影响。'
-                    },
-                    {
-                        title: '技术特点',
-                        content: '模型集成了MODIS AOD、风速风向、相对湿度、边界层高度等关键变量，并引入了沙尘指数、植被覆盖度等特征参数。采用时空卷积神经网络架构，能够有效捕捉PM₁₀浓度的时空变化规律和传输特征。'
-                    },
-                    {
-                        title: '应用场景',
-                        content: '广泛应用于空气质量预报、沙尘暴监测预警、建筑施工环境影响评估等领域。为环保部门、气象部门和公众提供及时准确的PM₁₀浓度信息，支撑空气质量管理和健康防护决策。'
-                    }
-                ],
+                title: 'PM<sub>10</sub> 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2000-至今' },
-                    { label: '精度指标', value: 'R² > 0.83' },
-                    { label: '特色功能', value: '沙尘事件识别' }
-                ]
-            },
-            ozone: {
-                title: '臭氧浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '地表臭氧浓度预测模型基于OMI/TROPOMI卫星臭氧柱浓度数据，结合气象要素和前体物排放信息，采用机器学习算法估算地表臭氧浓度。该模型能够捕捉臭氧的光化学生成特征和区域传输规律。'
-                    },
-                    {
-                        title: '核心算法',
-                        content: '采用多层感知机神经网络结合随机森林的集成算法，输入变量包括臭氧柱浓度、紫外辐射、温度、湿度、NO₂浓度、VOCs浓度等。通过垂直分布建模技术，实现从柱浓度到地表浓度的准确转换。'
-                    },
-                    {
-                        title: '预测性能',
-                        content: '模型在夏季臭氧污染高发期表现尤为出色，能够准确预测臭氧浓度的日变化和空间分布特征。对于臭氧超标事件的预测准确率达到85%以上，为臭氧污染预警提供重要技术支撑。'
-                    }
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
                 ],
+                productImage: '/static/我国PM10年均浓度图.png',
+                imageLegend: '图 1: 中国大陆PM<sub>10</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                references: [
+                    'Shi, S., Chen, R., Wang, P., Zhang, H., Kan, H., and Meng, X. (2024). An Ensemble Machine Learning Model to Enhance Extrapolation Ability of Predicting Coarse Particulate Matter with High Resolutions in China. Environ Sci Technol 58, 19325-19337.'
+                ],
+                downloadCategory: 'air'
+            },
+            pm1025: {
+                title: 'PM<sub>10</sub> 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
-                    { label: '时间分辨率', value: '日最大8小时' },
+                    { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2005-至今' },
-                    { label: '精度指标', value: 'R² > 0.82' },
-                    { label: '预警能力', value: '超标预测准确率85%' }
-                ]
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/我国PM1025年均浓度图.png', 
+                references: [
+                    'Shi, S., Chen, R., Wang, P., Zhang, H., Kan, H., and Meng, X. (2024). An Ensemble Machine Learning Model to Enhance Extrapolation Ability of Predicting Coarse Particulate Matter with High Resolutions in China. Environ Sci Technol 58, 19325-19337.'
+                ],
+                downloadCategory: 'air'
+            },
+            o3: {
+                title: 'O<sub>3</sub>浓度模拟数据集',
+                specs: [
+                    { label: '空间分辨率', value: '1km × 1km' },
+                    { label: '时间分辨率', value: '日均' },
+                    { label: '覆盖范围', value: '中国大陆' },
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/我国O3年均浓度图.png',
+                imageLegend: '图 1: 中国大陆O<sub>3</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                references: [
+                    'Xia Meng, Weidong Wang, Su Shi, Shengqiang Zhu, Peng Wang, Renjie Chen, Qingyang Xiao, Tao Xue, Guannan Geng, Qiang Zhang, Haidong Kan, Hongliang Zhang. Evaluating the spatiotemporal ozone characteristics with high-resolution predictions in mainland China, 2013–2019. Environmental Pollution 2022, 299, 118865.'
+                ],
+                downloadCategory: 'air'
             },
             no2: {
-                title: 'NO₂ 浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: 'NO₂浓度预测模型基于TROPOMI等高精度卫星NO₂柱浓度产品，结合气象要素和排放清单数据，采用深度学习算法实现地表NO₂浓度的高精度估算。模型特别适用于城市地区NO₂污染的监测和评估。'
-                    },
-                    {
-                        title: '技术创新',
-                        content: '采用注意力机制的卷积神经网络架构，能够自适应地学习不同区域NO₂垂直分布特征。引入了交通流量、工业排放强度等人为活动指标，显著提升了模型在城市地区的预测精度。'
-                    },
-                    {
-                        title: '应用价值',
-                        content: '为交通污染评估、工业排放监管、健康风险评估提供数据支撑。帮助识别NO₂污染热点区域，评估减排措施效果，为大气污染防治提供科学依据。'
-                    }
-                ],
+                title: 'NO<sub>2</sub> 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2018-至今' },
-                    { label: '精度指标', value: 'R² > 0.83' },
-                    { label: '特色功能', value: '城市污染热点识别' }
-                ]
-            },
-            so2: {
-                title: 'SO₂ 浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: 'SO₂浓度预测模型基于OMI/TROPOMI卫星SO₂柱浓度数据，结合地面监测站点观测，采用时空融合算法构建。该模型能够有效监测工业排放源周边的SO₂污染状况，为环境监管提供技术支撑。'
-                    },
-                    {
-                        title: '算法特色',
-                        content: '采用时空克里金插值与机器学习相结合的混合算法，充分利用卫星数据的空间覆盖优势和地面数据的精度优势。针对SO₂的点源排放特征，开发了局部增强算法，提升重点排放源周边的预测精度。'
-                    },
-                    {
-                        title: '监管应用',
-                        content: '广泛应用于火电厂、钢铁厂、化工企业等重点污染源的环境影响评估。为执法部门提供违规排放识别、减排效果评估等技术支持，有效提升环境监管能力。'
-                    }
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
                 ],
+                productImage: '/static/我国NO2年均浓度图.png',
+                imageLegend: '图 1: 中国大陆NO<sub>2</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                references: [
+                    'Xinyue Li, Peng Wang, Weidong Wang, Hongliang Zhang, Su Shi, Tao Xue, Jintai Lin, Yuhang Zhang, Mengyao Liu, Renjie Chen, Haidong Kan, Xia Meng, Mortality burden due to ambient nitrogen dioxide pollution in China: Application of high-resolution models. Environment International 2023, 176, 107967.'
+                ],
+                downloadCategory: 'air'
+            },
+            // 投稿中
+            co: {
+                title: 'CO 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2004-至今' },
-                    { label: '精度指标', value: 'R² > 0.80' },
-                    { label: '特色功能', value: '点源排放监测' }
-                ]
+                    { label: '时间范围', value: '2013-2020年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/indeximage4.jpg',
+                references: [
+                    'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
+                    'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
+                    'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+                ],
+                downloadCategory: 'air'
             },
-            // 添加新的模型数据
+            // 投稿中
             temperature: {
-                title: '地表温度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '地表温度模型基于MODIS和Landsat卫星热红外数据，采用机器学习算法进行地表温度估算。该模型结合了大气校正、发射率估算等技术，能够提供高精度的地表温度产品。'
-                    },
-                    {
-                        title: '技术特点',
-                        content: '采用支持向量机和神经网络融合算法，集成多光谱数据、地形数据、土地覆盖类型等辅助信息，通过时空插值技术填补云层遮挡区域，实现连续的地表温度监测。'
-                    },
-                    {
-                        title: '应用领域',
-                        content: '广泛应用于城市热岛效应监测、农业干旱预警、气候变化研究等领域。为城市规划、农业管理和气象预报提供重要的温度数据支撑。'
-                    }
-                ],
+                title: '地表温度浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '2000-至今' },
-                    { label: '精度指标', value: '误差 < ±2°C' },
-                    { label: '特色功能', value: '热岛效应监测' }
-                ]
-            },
-            precipitation: {
-                title: '降水量预测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '降水量预测模型融合GPM、TRMM等卫星降水产品和地面雨量站观测数据，采用贝叶斯融合算法构建高精度降水量估算模型。该模型能够提供近实时的降水量监测和短期预报。'
-                    },
-                    {
-                        title: '算法框架',
-                        content: '采用多源数据融合技术，结合雷达反射率、云顶温度、大气水汽含量等信息，通过概率降水预测算法，实现不同时空尺度的降水量估算和预报。'
-                    },
-                    {
-                        title: '服务应用',
-                        content: '为水资源管理、洪涝灾害预警、农业灌溉决策提供数据支撑。在极端降水事件监测和预警方面具有重要作用，有效支撑防灾减灾工作。'
-                    }
+                    { label: '时间范围', value: '2000-2020' },
+                    { label: '数据格式', value: 'NetCDF, GeoTIFF' }
                 ],
+                productImage: '/static/indeximage.jpg',
+                references: [
+                    'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
+                    'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
+                    'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+                ],
+                downloadCategory: 'weather'
+            },
+            uv: {
+                title: '紫外辐射模拟数据集',
                 specs: [
-                    { label: '空间分辨率', value: '0.1° × 0.1°' },
-                    { label: '时间分辨率', value: '小时' },
+                    { label: '空间分辨率', value: '10km × 10km' },
+                    { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '中国大陆' },
-                    { label: '数据时段', value: '1998-至今' },
-                    { label: '精度指标', value: 'R² > 0.88' },
-                    { label: '特色功能', value: '极端降水预警' }
-                ]
-            },
-            urban: {
-                title: '建成区提取模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '建成区提取模型基于Landsat和Sentinel-2高分辨率卫星影像，采用深度学习算法精确识别和提取城市建成区范围。该模型能够区分不同类型的建成区，包括居住区、商业区、工业区等。'
-                    },
-                    {
-                        title: '核心技术',
-                        content: '采用U-Net卷积神经网络架构，结合多光谱指数（NDVI、NDBI、MNDWI等）和纹理特征，通过像素级分类技术实现高精度的建成区提取。模型具有良好的泛化能力和自适应性。'
-                    },
-                    {
-                        title: '产品应用',
-                        content: '为城市规划、土地利用管理、人口分布估算等提供基础数据。支撑城市发展监测、违建识别、生态环境评估等应用，为可持续城市发展提供科学依据。'
-                    }
+                    { label: '时间范围', value: '2005-2023年' },
+                    { label: '数据格式', value: 'HDF' }
                 ],
+                productImage: '/static/我国UV年均浓度图.png',
+                imageLegend: '图 1: 中国大陆紫外辐射年均强度空间分布图（2005-2023年平均，单位：J/m²）',
+                references: [
+                    'Jiang, Y., Shi, S., Li, X., Xu, C., Kan, H., Hu, B., and Meng, X. (2024). A 10 km daily-level ultraviolet-radiation-predicting dataset based on machine learning models in China from 2005 to 2020. Earth System Science Data 16, 4655-4672.'
+                ],
+                downloadCategory: 'weather'
+            },
+            ndvi: {
+                title: '归一化植被指数（NDVI）数据集',
                 specs: [
-                    { label: '空间分辨率', value: '30m × 30m' },
+                    { label: '空间分辨率', value: '250m × 250m' },
                     { label: '时间分辨率', value: '年度' },
-                    { label: '覆盖范围', value: '全国城市' },
-                    { label: '数据时段', value: '1990-至今' },
-                    { label: '精度指标', value: '总体精度 > 95%' },
-                    { label: '特色功能', value: '建成区类型识别' }
-                ]
-            },
-            expansion: {
-                title: '城市扩张监测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '城市扩张监测模型通过时序遥感数据分析，采用变化检测和趋势分析算法，监测和预测城市空间扩张模式。该模型能够量化城市扩张速度、方向和强度。'
-                    },
-                    {
-                        title: '分析方法',
-                        content: '采用多时相变化检测技术，结合城市增长边界分析、景观格局指数计算等方法，通过时间序列分析和空间统计技术，揭示城市扩张的时空规律和驱动机制。'
-                    },
-                    {
-                        title: '决策支持',
-                        content: '为城市总体规划、土地利用规划、基础设施建设等提供科学依据。帮助政府部门制定合理的城市发展策略，促进城市可持续发展。'
-                    }
+                    { label: '覆盖范围', value: '中国大陆' },
+                    { label: '时间范围', value: '2005-2024年' },
+                    { label: '数据格式', value: 'HDF' }
                 ],
-                specs: [
-                    { label: '空间分辨率', value: '30m × 30m' },
-                    { label: '时间分辨率', value: '多时相' },
-                    { label: '覆盖范围', value: '重点城市群' },
-                    { label: '数据时段', value: '1990-至今' },
-                    { label: '监测能力', value: '扩张趋势预测' },
-                    { label: '特色功能', value: '增长模式分析' }
-                ]
+                productImage: [
+                    '/static/我国NDVI年均浓度图.png',
+                    '/static/我国NDVI年最大浓度图.png'
+                ],
+                imageLegends: [
+                    '图 1: 中国大陆NDVI年均值空间分布图',
+                    '图 2: 中国大陆NDVI年最大值空间分布图'
+                ],
+                references: [
+                    'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+                ],
+                downloadCategory: 'urban'
             },
+            // expansion: {
+            //     title: '城市扩张监测模型',
+            //     specs: [
+            //         { label: '空间分辨率', value: '30m × 30m' },
+            //         { label: '时间分辨率', value: '多时相' },
+            //         { label: '覆盖范围', value: '重点城市群' },
+            //         { label: '时间范围', value: '1990-2020' },
+            //         { label: '数据格式', value: 'NetCDF, GeoTIFF' }
+            //     ],
+            //     productImage: '/static/indeximage3.jpg',
+            //     downloadCategory: 'urban'
+            // },
             // 英国模型数据
             uk_pm25: {
-                title: '英国PM₂.₅ 预测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '针对英国地区海洋性气候特征开发的PM₂.₅浓度预测模型，考虑了英国特有的气象条件和污染源分布特点。该模型结合欧洲地面监测网络和卫星遥感数据，实现高精度的PM₂.₅浓度估算。'
-                    },
-                    {
-                        title: '区域适应性',
-                        content: '模型特别针对英国的地理环境进行了优化，考虑了海陆交界、地形复杂等因素对污染物传输的影响。采用本地化的气象要素和排放清单，提升了模型在英国地区的预测精度。'
-                    },
-                    {
-                        title: '数据质量',
-                        content: '基于英国环境局(Environment Agency)和欧洲环境署的监测数据进行验证，模型在英国主要城市地区表现出良好的预测性能，为当地空气质量管理提供技术支撑。'
-                    }
-                ],
+                title: '英国PM<sub>2.5</sub> 预测模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '英国全境' },
-                    { label: '数据时段', value: '2010-至今' },
-                    { label: '精度指标', value: 'R² > 0.82' },
-                    { label: '特色功能', value: '海洋性气候适应' }
-                ]
+                    { label: '时间范围', value: '2006-2021年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/英国大气PM25、PM10、NO2和O3年均浓度的空间分布图.png',
+                references: [
+                    'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
+                ],
+                downloadCategory: 'uk_air'
             },
             uk_pm10: {
-                title: '英国PM₁₀ 预测模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '基于英国地面监测网络和欧洲卫星数据构建的PM₁₀浓度预测模型，特别适应英国的污染源特征和大气传输条件。该模型在城市交通污染和海盐粒子影响评估方面具有优势。'
-                    },
-                    {
-                        title: '技术特色',
-                        content: '模型集成了欧洲中期天气预报中心(ECMWF)的气象数据和Copernicus大气监测服务(CAMS)的污染物数据，通过本地化校准提升预测精度。'
-                    },
-                    {
-                        title: '应用服务',
-                        content: '为英国公共卫生部门、地方政府和公众提供PM₁₀浓度信息，支撑空气质量预警和健康防护建议，在沙哈拉沙尘传输事件监测方面发挥重要作用。'
-                    }
-                ],
+                title: '英国PM<sub>10</sub> 预测模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '英国全境' },
-                    { label: '数据时段', value: '2010-至今' },
-                    { label: '精度指标', value: 'R² > 0.80' },
-                    { label: '特色功能', value: '沙尘传输监测' }
-                ]
-            },
-            uk_ozone: {
-                title: '英国臭氧浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '考虑英国高纬度地区特殊光化学条件的臭氧浓度预测模型，结合OMI/TROPOMI卫星数据和英国环境监测网络观测，实现地表臭氧浓度的准确估算。'
-                    },
-                    {
-                        title: '算法优化',
-                        content: '针对英国较低的太阳辐射强度和较短的日照时间，模型对光化学反应参数进行了调整，更好地反映了英国地区臭氧的生成和消耗过程。'
-                    },
-                    {
-                        title: '预警应用',
-                        content: '为英国气象局和环境部门提供臭氧预报服务，特别是在夏季高温期间的臭氧污染预警，为公众健康防护提供及时准确的信息。'
-                    }
+                    { label: '时间范围', value: '2006-2021年' },
+                    { label: '数据格式', value: 'HDF' }
                 ],
+                productImage: '/static/indeximage.jpg',
+                references: [
+                    'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
+                ],
+                downloadCategory: 'uk_air'
+            },
+            uk_o3: {
+                title: '英国臭氧浓度模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
-                    { label: '时间分辨率', value: '日最大8小时' },
+                    { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '英国全境' },
-                    { label: '数据时段', value: '2010-至今' },
-                    { label: '精度指标', value: 'R² > 0.78' },
-                    { label: '特色功能', value: '高纬度光化学适应' }
-                ]
+                    { label: '时间范围', value: '2006-2021年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/indeximage1.jpg',
+                references: [
+                    'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
+                ],
+                downloadCategory: 'uk_air'
             },
             uk_no2: {
-                title: '英国NO₂ 浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '针对英国城市交通污染特征开发的NO₂浓度估算模型，基于TROPOMI高精度卫星数据和英国交通部门的活动数据，实现城市尺度的NO₂浓度监测。'
-                    },
-                    {
-                        title: '城市应用',
-                        content: '模型特别关注伦敦、伯明翰、曼彻斯特等主要城市的交通污染热点，结合道路网络数据和交通流量信息，提供精细化的NO₂浓度分布图。'
-                    },
-                    {
-                        title: '政策支撑',
-                        content: '为英国低排放区(LEZ)和超低排放区(ULEZ)政策制定提供科学依据，评估交通管制措施的环境效果，支撑城市空气质量改善计划。'
-                    }
-                ],
+                title: '英国NO<sub>2</sub> 浓度模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
                     { label: '覆盖范围', value: '英国全境' },
-                    { label: '数据时段', value: '2018-至今' },
-                    { label: '精度指标', value: 'R² > 0.81' },
-                    { label: '特色功能', value: '交通热点识别' }
-                ]
+                    { label: '时间范围', value: '2006-2021年' },
+                    { label: '数据格式', value: 'HDF' }
+                ],
+                productImage: '/static/indeximage2.jpg',
+                references: [
+                    'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
+                ],
+                downloadCategory: 'uk_air'
             },
-            uk_so2: {
-                title: '英国SO₂ 浓度模型',
-                sections: [
-                    {
-                        title: '模型概述',
-                        content: '基于英国工业布局特点和排放清单的SO₂浓度预测模型，结合OMI/TROPOMI卫星数据和英国环境局监测网络，监测工业排放源的SO₂污染状况。'
-                    },
-                    {
-                        title: '排放源监测',
-                        content: '模型重点关注英国剩余的燃煤电厂、炼油厂和化工企业等主要SO₂排放源，通过高精度卫星监测技术识别异常排放事件。'
-                    },
-                    {
-                        title: '监管服务',
-                        content: '为英国环境局和地方政府提供SO₂排放监管技术支持，评估减排政策效果，支撑英国2050年净零排放目标的实现。'
-                    }
-                ],
-                specs: [
-                    { label: '空间分辨率', value: '1km × 1km' },
-                    { label: '时间分辨率', value: '日均' },
-                    { label: '覆盖范围', value: '英国全境' },
-                    { label: '数据时段', value: '2010-至今' },
-                    { label: '精度指标', value: 'R² > 0.77' },
-                    { label: '特色功能', value: '工业源监管' }
-                ]
-            }
+            // uk_so2: {
+            //     title: '英国SO₂ 浓度模型',
+            //     specs: [
+            //         { label: '空间分辨率', value: '1km × 1km' },
+            //         { label: '时间分辨率', value: '日均' },
+            //         { label: '覆盖范围', value: '英国全境' },
+            //         { label: '时间范围', value: '2010-2019' },
+            //         { label: '数据格式', value: 'NetCDF, GeoTIFF' }
+            //     ],
+            //     productImage: '/static/indeximage3.jpg',
+            //     references: [
+            //         'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
+            //         'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
+            //         'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+            //     ],
+            //     downloadCategory: 'uk_air'
+            // }
         };
 
         function openModal(modelType) {
@@ -1431,15 +1628,9 @@
             const data = modelData[modelType];
             if (!data) return;
             
-            modalTitle.textContent = data.title;
+            modalTitle.innerHTML = data.title;
             modalBody.innerHTML = `
-                ${data.sections.map(section => `
-                    <div class="modal-section">
-                        <h3 class="modal-section-title">${section.title}</h3>
-                        <p class="modal-text">${section.content}</p>
-                    </div>
-                `).join('')}
-                
+                <!-- 技术规格 -->
                 <div class="modal-section">
                     <h3 class="modal-section-title">技术规格</h3>
                     <div class="modal-specs">
@@ -1451,10 +1642,70 @@
                         `).join('')}
                     </div>
                 </div>
+                
+                <!-- 产品输出图 -->
+                <div class="modal-section">
+                    <h3 class="modal-section-title">产品输出图</h3>
+                    <div class="product-image-container">
+                        ${Array.isArray(data.productImage) ? 
+                            data.productImage.map((img, index) => `
+                                <div class="product-image-item">
+                                    <img src="${img}" alt="${data.title} 产品输出图 ${index + 1}" class="product-image" 
+                                         onerror="this.style.display='none';">
+                                    <div class="product-image-legend">
+                                        ${data.imageLegends && data.imageLegends[index] ? data.imageLegends[index] : `图 ${index + 1}: ${data.title}产品输出图`}
+                                    </div>
+                                </div>
+                                ${index < data.productImage.length - 1 ? '<div style="margin-bottom: 20px;"></div>' : ''}
+                            `).join('') :
+                            `<div class="product-image-item">
+                                <img src="${data.productImage}" alt="${data.title} 产品输出图" class="product-image" 
+                                     onerror="this.style.display='none'; this.parentElement.nextElementSibling.style.display='block';">
+                                <div class="product-image-legend">
+                                    ${data.imageLegend ? data.imageLegend : `图 1: ${data.title}产品输出图`}
+                                </div>
+                            </div>`
+                        }
+                        <div class="product-image-placeholder" style="display: none;">
+                            <div class="placeholder-icon">📊</div>
+                            <p class="placeholder-text">产品输出图加载中...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 参考文献 -->
+                <div class="modal-section">
+                    <h3 class="modal-section-title">参考文献</h3>
+                    <div class="references-list">
+                        ${data.references.map((ref, index) => `
+                            <div class="reference-item">
+                                <span class="reference-number">${index + 1}.</span>
+                                <span class="reference-text">${ref}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-secondary" onclick="closeModal()">
+                        返回
+                    </button>
+                    <button class="modal-btn modal-btn-primary" onclick="goToDownload('${data.downloadCategory}')">
+                        前往下载
+                    </button>
+                </div>
             `;
             
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        // 跳转到数据下载页面
+        function goToDownload(category) {
+            // 构建下载页面URL，传递对应的数据类别参数
+            const downloadUrl = `/data-download/?category=${category}`;
+            window.location.href = downloadUrl;
         }
 
         function closeModal() {
