@@ -13,6 +13,14 @@
         padding: 35px 30px 20px 30px;
     }
 
+    /* 段落文字首行缩进两个汉字 */
+    .page-subtitle,
+    .category-description,
+    .modal-text,
+    p:not(.model-description):not(.placeholder-text):not(.spec-label):not(.spec-value) {
+        text-indent: 2em;
+    }
+
     .page-header {
         text-align: center;
         margin-bottom: 30px;
@@ -130,6 +138,33 @@
         padding: 10px 0;
     }
 
+    /* 特殊网格：用于卡片数量少于3个的情况，居中显示 */
+    .models-grid.centered {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .models-grid.centered .model-card {
+        flex: 0 0 calc((100% - 40px) / 3);  /* 保持与3列网格相同的卡片宽度 */
+        max-width: calc((100% - 40px) / 3);
+    }
+
+    /* 2x2网格布局样式：适用于4个卡片的情况 */
+    .models-grid.grid-2x2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 20px;
+        justify-content: center;
+        max-width: calc(2 * ((100% - 40px) / 3) + 20px); /* 2个卡片宽度 + 1个间距 */
+        margin: 0 auto;
+    }
+
+    .models-grid.grid-2x2 .model-card {
+        width: 100%;
+    }
+
     .model-card {
         background: white;
         border-radius: 12px;
@@ -191,7 +226,7 @@
         padding: 20px;
     }
 
-    .model-description {
+    /* .model-description {
         font-size: 13px;
         color: #666;
         line-height: 1.4;
@@ -203,7 +238,7 @@
         -webkit-line-clamp: 2;
         line-clamp: 2;
         -webkit-box-orient: vertical;
-    }
+    } */
 
     .model-tags {
         display: flex;
@@ -237,10 +272,10 @@
     }
 
     /* 描述文字中的下标样式 */
-    .model-description sub {
+    /* .model-description sub {
         font-size: 0.75em;
         bottom: -0.25em;
-    }
+    } */
 
     /* 模态框样式 */
     .modal-overlay {
@@ -523,6 +558,17 @@
             gap: 20px;
         }
         
+        .models-grid.centered .model-card {
+            flex: 0 0 calc((100% - 20px) / 2);  /* 在平板尺寸下调整为2列的宽度 */
+            max-width: calc((100% - 20px) / 2);
+        }
+
+        /* 2x2网格在平板上保持2x2布局 */
+        .models-grid.grid-2x2 {
+            max-width: calc(2 * ((100% - 20px) / 2) + 20px);
+            gap: 20px;
+        }
+        
         .modal-content {
             width: 95%;
         }
@@ -535,6 +581,23 @@
     @media (max-width: 600px) {
         .models-grid {
             grid-template-columns: 1fr;
+        }
+        
+        .models-grid.centered {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .models-grid.centered .model-card {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        /* 2x2网格在手机上改为1列布局 */
+        .models-grid.grid-2x2 {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(4, 1fr);
+            max-width: 100%;
         }
         
         .page-title {
@@ -627,8 +690,10 @@
         <div class="page-header">
             <h1 class="page-title">OpenEx环境数据平台介绍</h1>
             <p class="page-subtitle">
-                面向影响人群健康的主要大气、气候和建成环境因素，环境与健康团队开发并构建了高时空分辨率和覆盖度的暴露评价数据平台。本平台通过融合地面观测和卫星遥感等多源数据，基于机器学习算法，开发和构建了多尺度的环境因素数据集，通过云平台进行数据共享，以期可为环境健康相关科学研究开展及相关政策制定提供基础数据支持。平台当前提供中国和英国两个国家的环境暴露数据集。
-
+                面向影响人群健康的主要大气、气候和建成环境因素，环境与健康团队开发并构建了高时空分辨率和覆盖度的暴露评价数据平台。本平台通过融合地面观测和卫星遥感等多源数据，基于机器学习算法，开发和构建了多尺度的环境因素数据集，通过云平台进行数据共享，以期可为环境健康相关科学研究开展及相关政策制定提供基础数据支持。
+            </p>
+            <p class="page-subtitle">
+                平台当前提供中国和英国两个国家的环境暴露数据集。
             </p>
         </div>
 
@@ -647,6 +712,8 @@
                 <h2 class="category-title">中国大气污染数据</h2>
                 <p class="category-description">
                     本数据集包含六类环境要素：PM<sub>2.5</sub>、PM<sub>10-2.5</sub>、PM<sub>10</sub>、O<sub>3</sub>、NO<sub>2</sub>和CO。其中，CO 数据的时间范围为 2013–2020 年（单位：mg/m³），其余五项的时间范围为 2005–2024 年（单位：µg/m³）。数据的空间分辨率为1 km × 1 km，时间分辨率为日、月、年。<br>
+                </p>
+                <p class="category-description">
                     该数据集基于随机森林模型构建，预测变量包括卫星遥感（MAIAC AOD 用于 PM<sub>2.5</sub>、PM<sub>10-2.5</sub> 和 PM<sub>10</sub>；TROPOMI 用于 NO<sub>2</sub>；MOPITT 用于 CO）、化学传输模式模拟值、气象参数、能见度、海拔高度及人口密度等多源数据。由于卫星观测存在非随机缺失，本数据已对卫星数据缺失引起的大气污染预测数据缺失进行了补缺处理，因此得到的大气污染物日平均浓度实现了时空全覆盖；月均和年均浓度则由日均值计算得出。
                 </p>
                 <div class="models-grid">
@@ -656,9 +723,9 @@
                             <div class="model-title-in-image">PM<sub>2.5</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -673,9 +740,9 @@
                             <div class="model-title-in-image">PM<sub>10</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -690,9 +757,9 @@
                             <div class="model-title-in-image">PM<sub>10-2.5</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>10-2.5</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -707,9 +774,9 @@
                             <div class="model-title-in-image">O<sub>3</sub>浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度PM<sub>2.5</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -724,9 +791,9 @@
                             <div class="model-title-in-image">NO<sub>2</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度NO<sub>2</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -741,9 +808,9 @@
                             <div class="model-title-in-image">CO 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度CO浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -758,20 +825,24 @@
             <div class="data-category" id="section-china_weather">
                 <h2 class="category-title">中国气象数据</h2>
                 <p class="category-description">
-                    本数据集包含两类环境要素的四种参数：温度（每日最高、最低、平均气温）和紫外辐射（UV）。<br>
-                    温度：单位 ℃，时间范围为 2011–2020年，空间分辨率为1 km × 1 km，时间分辨率为日、月、年。该数据基于机器学习算法中的随机森林模型预测得到，模型构建使用的预测变量包括地表温度（MODIS LST）、气象参数、海拔高度和人口密度等多源数据。数据已经针对卫星数据缺失进行了补缺处理，可达到时空全覆盖。月均、年均气温由日均气温平均而来。<br>
+                    本数据集包含两类环境要素的四种参数：温度（每日最高、最低、平均气温）和紫外辐射（UV）。
+                </p>
+                <p class="category-description">
+                    温度：单位 ℃，时间范围为 2011–2020年，空间分辨率为1 km × 1 km，时间分辨率为日、月、年。该数据基于机器学习算法中的随机森林模型预测得到，模型构建使用的预测变量包括地表温度（MODIS LST）、气象参数、海拔高度和人口密度等多源数据。数据已经针对卫星数据缺失进行了补缺处理，可达到时空全覆盖。月均、年均气温由日均气温平均而来。
+                </p>
+                <p class="category-description">
                     UV：单位W/m²，时间范围为2005-2023年，空间分辨率为10km × 10km，时间分辨率为日、月、年。该数据集以UV地面监测站测量值作为因变量，以OMI的红斑加权每日剂量（EDD）、ERA-5 的UV数据、气象参数、臭氧、太阳天顶角、地表反照率、海拔作为预测变量建立随机森林模型。数据同样已经针对卫星数据缺失进行了补缺处理，可达到时空全覆盖。月均、年均UV由日均UV平均而来。
                 </p>
-                <div class="models-grid">
+                <div class="models-grid centered">
                     <!-- 温度模型 -->
                     <div class="model-card" onclick="openModal('temperature')">
                         <div class="model-image">
                             <div class="model-title-in-image">地表温度模型</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度地表温度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -786,9 +857,9 @@
                             <div class="model-title-in-image">紫外辐射模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于地面监测站和卫星遥感等多源数据，采用机器学习算法构建的高精度紫外辐射模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">10km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -805,16 +876,16 @@
                 <p class="category-description">
                     本数据集目前针对植被指数构建了NDVI年均值与年最大值数据集。数据时间范围为 2005–2024 年，空间分辨率为250m × 250m ，时间分辨率为年。该数据使用的原始数据来自于Terra卫星MODIS传感器反演的NDVI数据（MOD13Q1），其空间分辨率为250m × 250m，原始数据时间分辨率为16 天。剔除云、雪和水体影响的数据，计算得到年平均NDVI和年最大NDVI数据。NDVI 原始数值在-1到1之间，接近0表示裸土，负值表示水或者雪覆盖（计算时已经将负值剔除）。
                 </p>
-                <div class="models-grid">
+                <div class="models-grid centered">
                     <!-- 归一化植被指数提取模型 -->
                     <div class="model-card" onclick="openModal('ndvi')">
                         <div class="model-image">
                             <div class="model-title-in-image">归一化植被指数数据</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感数据反演的归一化植被指数（NDVI）数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">250m分辨率</span>
                                 <span class="model-tag">年均数据</span>
@@ -829,16 +900,16 @@
                             <div class="model-title-in-image">城市扩张监测模型</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                             <p class="model-description">
                                 通过时序遥感数据分析，监测和预测城市空间扩张模式和趋势
-                            </p>
+                             </p> 
                             <div class="model-tags">
                                 <span class="model-tag">30m分辨率</span>
                                 <span class="model-tag">多时相</span>
                                 <span class="model-tag">趋势预测</span>
                             </div>
                         </div>
-                    </div> -->
+                    </div>  -->
                 </div>
             </div>
         </div>
@@ -851,16 +922,16 @@
                 <p class="category-description">
                     本数据集包含四种大气污染物数据：PM<sub>2.5</sub>、PM<sub>10</sub>、NO<sub>2</sub>以及O<sub>3</sub>，单位为µg/m³，时间范围为2006-2021年，空间分辨率为1 km × 1 km，模型构建的时间分辨率为每日平均（O3为每日最大8小时平均）。该数据基于机器学习算法中的随机森林模型预测得到，模型构建使用的预测变量包括化学传输模型模拟的污染物浓度、气象参数、人口密度、道路长度、海拔高度和归一化植被指数等多源数据。月均、年均浓度由日均浓度平均而来。
                 </p>
-                <div class="models-grid">
+                <div class="models-grid grid-2x2">
                     <!-- 英国PM2.5 模型 -->
                     <div class="model-card" onclick="openModal('uk_pm25')">
                         <div class="model-image">
                             <div class="model-title-in-image">英国PM<sub>2.5</sub> 模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国CO浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -875,9 +946,9 @@
                             <div class="model-title-in-image">英国PM<sub>10</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国PM<sub>10</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -892,9 +963,9 @@
                             <div class="model-title-in-image">英国NO<sub>2</sub> 浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国NO<sub>2</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -909,9 +980,9 @@
                             <div class="model-title-in-image">英国O<sub>3</sub>浓度模拟数据集</div>
                         </div>
                         <div class="model-info">
-                            <p class="model-description">
+                            <!-- <p class="model-description">
                                 基于卫星遥感等多源数据，采用机器学习算法构建的高精度英国O<sub>3</sub>浓度模拟数据集
-                            </p>
+                            </p> -->
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
@@ -930,8 +1001,8 @@
                         <div class="model-info">
                             <p class="model-description">
                                 基于英国工业布局特点和排放清单的SO<sub>2</sub>浓度预测模型
-                            </p>
-                            <div class="model-tags">
+                            </p> -->
+                            <!-- <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
                                 <span class="model-tag">R²>0.77</span>
