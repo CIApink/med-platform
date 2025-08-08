@@ -144,7 +144,30 @@
     .content-area {
         flex: 1;
         background: white;
-        overflow-y: auto;
+        overflow-y: scroll; /* 强制显示滚动条 */
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: rgba(74, 182, 164, 0.3) transparent; /* Firefox */
+        min-height: 100vh; /* 确保有足够高度触发滚动条 */
+    }
+    
+    /* Webkit滚动条样式 */
+    .content-area::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .content-area::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .content-area::-webkit-scrollbar-thumb {
+        background: rgba(74, 182, 164, 0.4);
+        border-radius: 4px;
+        transition: background 0.3s ease;
+    }
+    
+    .content-area::-webkit-scrollbar-thumb:hover {
+        background: rgba(74, 182, 164, 0.6);
     }
     
     .content-header {
@@ -177,7 +200,9 @@
     
     .content-body {
         padding: 30px;
-        max-width: 800px;
+        max-width: 1200px;
+        width: 100%;
+        min-height: calc(100vh - 120px); /* 确保内容体有足够高度，减去header高度 */
     }
     
     /* 内容节 */
@@ -242,13 +267,23 @@
     
     .article-title {
         font-weight: 600;
+        font-size: 18px;
         color: #333;
         margin-bottom: 10px;
     }
     
     .article-content {
-        color: #666;
+        color: #333;
         line-height: 1.6;
+    }
+    
+    /* 协议条款中以数字编号开头的条款加粗 */
+    .article-content {
+        font-weight: normal;
+    }
+    
+    .article-content strong {
+        font-weight: 600;
     }
     
     /* 常见问题样式 */
@@ -348,11 +383,24 @@
     }
     
     /* 联系我们样式 */
+    .contact-container {
+        display: flex;
+        gap: 60px;
+        align-items: flex-start;
+        width: 100%;
+    }
+    
+    .contact-left, .contact-right {
+        flex: 1;
+        min-width: 0; /* 防止flex项目收缩问题 */
+    }
+    
     .contact-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: 1fr;
         gap: 20px;
         margin-bottom: 30px;
+        width: 100%;
     }
     
     .contact-card {
@@ -360,6 +408,9 @@
         padding: 20px;
         border-radius: 8px;
         border-left: 4px solid #4ab6a4c8;
+        height: 180px; /* 设置固定高度 */
+        display: flex;
+        flex-direction: column;
     }
     
     .contact-title {
@@ -372,6 +423,7 @@
     .contact-info {
         color: #666;
         line-height: 1.6;
+        flex: 1; /* 让内容区域自动填充剩余空间 */
     }
     
     .contact-email {
@@ -389,6 +441,9 @@
         padding: 20px;
         border-radius: 8px;
         margin-top: 20px;
+        height: 180px; /* 设置与contact-card相同的高度 */
+        display: flex;
+        flex-direction: column;
     }
     
     .team-title {
@@ -399,7 +454,7 @@
     }
     
     .team-description {
-        color: #666;
+        color: #333;
         line-height: 1.8;
     }
     
@@ -421,6 +476,7 @@
         
         .content-body {
             padding: 20px;
+            max-width: none;
         }
         
         .nav-header {
@@ -475,6 +531,11 @@
         .contact-grid {
             grid-template-columns: 1fr;
         }
+        
+        .contact-container {
+            flex-direction: column;
+            gap: 30px;
+        }
     }
 </style>
 {% endblock %}
@@ -488,7 +549,7 @@
         </div>
         <ul class="left-nav-menu">
             <li class="left-nav-item">
-                <a href="#agreement" class="left-nav-link active" onclick="showSection('agreement', this); return false;">数据使用协议</a>
+                <a href="#agreement" class="left-nav-link active" onclick="showSection('agreement', this); return false;">用户注册协议</a>
             </li>
             <li class="left-nav-item">
                 <a href="#faq" class="left-nav-link" onclick="showSection('faq', this); return false;">常见问题</a>
@@ -505,49 +566,90 @@
     <!-- 右侧内容区域 -->
     <main class="content-area">
         <div class="content-header">
-            <h1 class="content-title" id="contentTitle">数据使用协议</h1>
+            <h1 class="content-title" id="contentTitle">用户注册协议</h1>
         </div>
         
         <div class="content-body">
-            <!-- 数据使用协议 -->
+            <!-- 用户注册协议 -->
             <section id="agreement" class="content-section active">
-                <div class="section-title">数据使用协议</div>
+                <div class="section-title">OpenEx环境数据平台用户注册协议</div>
                 <div class="section-content">
-                    <div class="section-subtitle">版本信息</div>
-                    <p>协议版本：v2.1 | 最后更新：2024年8月</p>
+                    <div class="section-subtitle">（学术开源非商业使用版）</div>
+                    <p>在访问、注册或使用本平台提供的数据服务前，请务必仔细阅读并充分理解本协议全部条款。您的任何注册、登录、数据下载或使用行为，即被视为<strong>无条件接受本协议约束</strong>。若您不同意任何条款，请立即终止使用本平台服务。</p>
                     
                     <div class="agreement-article">
-                        <div class="article-title">第一条 数据使用范围</div>
+                        <div class="article-title">第一条 数据免责声明</div>
                         <div class="article-content">
-                            本平台提供的环境数据仅供学术研究、科学教育和非商业用途使用。用户在使用数据时必须遵守相关法律法规，不得将数据用于任何违法活动或商业盈利目的。
+                            <strong>1.1 本平台提供的数据（包括但不限于污染物浓度、环境暴露模型输出、专题图等）均基于科研目的收集或计算生成，可能存在不确定性。</strong><br><br>
+                            <strong>1.2 用户须自行承担使用数据的一切风险</strong>。<br>
+                            本平台及所属研究团队对数据准确性、完整性、适用性不作任何明示或暗示保证，亦不承担因数据使用直接或间接导致的科研、法律或经济责任。
                         </div>
                     </div>
                     
                     <div class="agreement-article">
-                        <div class="article-title">第二条 数据质量声明</div>
+                        <div class="article-title">第二条 使用授权范围</div>
                         <div class="article-content">
-                            本平台努力确保数据的准确性和可靠性，但不对数据的完整性、准确性或适用性做出任何明示或暗示的保证。用户使用数据所产生的任何后果由用户自行承担。
+                            <strong>2.1 非商业性使用许可</strong><br>
+                            用户可基于科学研究、教育、政策制定等非营利目的免费使用数据，但必须满足：<br>
+                            • (a) 完整保留数据原始来源标识<br>
+                            • (b) 严格遵守第三条引用要求<br><br>
+                            
+                            <strong>2.2 商业使用禁令</strong><br>
+                            未经本平台<strong>书面授权</strong>，禁止任何商业实体或个人将数据用于：<br>
+                            • 商业产品开发<br>
+                            • 有偿咨询服务<br>
+                            • 营利性分析报告<br>
+                            • 其他直接或间接获取经济利益的行为<br>
+                            <em>(商业授权申请请联系：support@med-platform.org)</em>
                         </div>
                     </div>
                     
                     <div class="agreement-article">
-                        <div class="article-title">第三条 引用要求</div>
+                        <div class="article-title">第三条 学术引用义务</div>
                         <div class="article-content">
-                            用户在发表学术论文、报告或其他公开发布的研究成果时，必须按照本平台提供的引用格式正确引用数据来源，并注明数据获取时间。
+                            <strong>3.1 任何公开发表成果（论文、报告、出版物等）使用本平台数据时，必须按以下规范引用</strong>：<br>
+                            <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; font-family: 'Courier New', monospace; margin: 10px 0;">
+[平台名称] ([发布年份]). [数据集名称], Version [版本号]. [机构名称]. Retrieved [获取日期] from https://yourplatform.domain
+                            </div><br>
+                            <strong>3.2 具体数据对应的核心研究成果引用方法详见平台《数据引用指南》专栏。</strong>
                         </div>
                     </div>
                     
                     <div class="agreement-article">
-                        <div class="article-title">第四条 数据分发限制</div>
+                        <div class="article-title">第四条 数据传播限制</div>
                         <div class="article-content">
-                            未经本平台书面许可，用户不得将下载的数据重新分发、转售或以任何形式提供给第三方。如需共享数据，请引导相关人员直接从本平台获取。
+                            <strong>4.1 禁止数据再分发</strong><br>
+                            用户不得通过任何途径（有偿/无偿）向第三方提供原始数据、衍生数据集及平台专属可视化产品（如专题图）。<br><br>
+                            
+                            <strong>4.2 禁止数据混杂</strong><br>
+                            未经本平台书面许可，不得将本平台数据（无论是否经过修改）整合至其他环境数据产品中。
                         </div>
                     </div>
                     
                     <div class="agreement-article">
-                        <div class="article-title">第五条 协议变更</div>
+                        <div class="article-title">第五条 账号与安全责任</div>
                         <div class="article-content">
-                            本平台保留随时修改本协议的权利。协议修改后，继续使用本平台服务即表示用户接受修改后的协议条款。
+                            <strong>5.1 用户账号仅限本人学习、研究使用，禁止出租、出借、转让</strong>。<br><br>
+                            <strong>5.2 用户需对账号下所有操作行为负责，包括但不限于数据下载、API调用等日志记录。</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="agreement-article">
+                        <div class="article-title">第六条 协议动态性</div>
+                        <div class="article-content">
+                            <strong>6.1 本平台保留对协议的单方修订权，修改后的协议将在平台公告后自动生效。</strong><br><br>
+                            <strong>6.2 若您继续使用服务，即视为接受修订条款。重大变更将提供30天过渡期通知。</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="agreement-article">
+                        <div class="article-title">第七条 违约处理</div>
+                        <div class="article-content">
+                            违反本协议任何条款时，平台有权：<br>
+                            • 立即终止账户权限<br>
+                            • 追溯要求补充引用声明<br>
+                            • 对商业侵权行为主张法律赔偿<br>
+                            • 列入失信名单并通报合作学术机构
                         </div>
                     </div>
                 </div>
@@ -596,7 +698,7 @@
                                 如何正确处理和分析下载的数据？
                             </div>
                             <div class="faq-answer">
-                                我们提供的数据主要为NetCDF和GeoTIFF格式。建议使用Python的xarray、gdal库或R的ncdf4、raster包进行数据处理。具体的处理方法可参考我们提供的技术文档和代码示例。
+                                我们提供的数据主要为HDF格式。具体的处理方法可参考我们提供代码示例，如有更多问题请联系我们的技术支持团队。
                             </div>
                         </div>
                         
@@ -605,7 +707,7 @@
                                 数据的时空分辨率如何？
                             </div>
                             <div class="faq-answer">
-                                不同数据产品的时空分辨率有所差异。中国区域数据空间分辨率通常为1km×1km，时间分辨率包括日均、月均和年均。具体信息请查看各数据产品的详细介绍页面。
+                                不同数据产品的时空分辨率有所差异。中国区域数据空间分辨率通常为1km×1km，时间分辨率包括月均和年均（由日均数据平均得到）。具体信息请查看各数据产品的详细介绍页面。
                             </div>
                         </div>
                     </div>
@@ -617,24 +719,24 @@
                             <div class="faq-question" onclick="toggleFaq(this)">
                                 推荐使用哪些数据读取工具？
                             </div>
-                            <div class="faq-answer">
+                            <!-- <div class="faq-answer">
                                 <strong>Python用户：</strong>推荐使用xarray、netCDF4、gdal、rasterio等库<br>
                                 <strong>R用户：</strong>推荐使用ncdf4、raster、sf、stars等包<br>
                                 <strong>MATLAB用户：</strong>可使用内置的ncread、geotiffread函数<br>
                                 <strong>GIS软件：</strong>ArcGIS、QGIS等均支持NetCDF和GeoTIFF格式
-                            </div>
+                            </div> -->
                         </div>
                         
                         <div class="faq-item">
                             <div class="faq-question" onclick="toggleFaq(this)">
                                 如何进行数据格式转换？
                             </div>
-                            <div class="faq-answer">
+                            <!-- <div class="faq-answer">
                                 可以使用GDAL工具进行格式转换，例如：<br>
                                 <code>gdal_translate -of GTiff input.nc output.tif</code><br>
                                 或使用Python的xarray库：<br>
                                 <code>ds = xarray.open_dataset('data.nc')<br>ds.to_netcdf('output.nc')</code>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -649,7 +751,7 @@
                         <div class="citation-text">Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu. Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203. DOI: 10.1016/j.rse.2021.112203</div>
                     </div>
                     
-                    <div class="citation-item">
+                    <!-- <div class="citation-item">
                         <div class="citation-title">中国多污染物数据</div>
                         <div class="citation-text">Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng. Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624. DOI: 10.1016/j.scitotenv.2022.158624</div>
                     </div>
@@ -663,62 +765,71 @@
                         <div class="citation-title">英国环境数据</div>
                         <div class="citation-text">请根据具体使用的数据产品，参考相应的发表文献进行引用。如有疑问，请联系我们的技术支持团队获取准确的引用格式。</div>
                     </div>
-                    
+                     -->
                     <div class="section-subtitle">引用注意事项</div>
                     <p>1. 请根据您实际使用的数据产品选择对应的引用格式</p>
-                    <p>2. 在引用时请注明数据获取时间和网站地址</p>
-                    <p>3. 如果您的研究成果发表后，欢迎告知我们，我们将在相关页面展示</p>
+                    <p>2. 如果您的研究成果发表后，欢迎告知我们，我们将在相关页面展示</p>
                 </div>
             </section>
             
             <!-- 联系我们 -->
             <section id="contact" class="content-section">
-                <div class="section-title">联系我们</div>
-                <div class="section-content">
-                    <div class="contact-grid">
-                        <div class="contact-card">
-                            <div class="contact-title">技术支持</div>
-                            <div class="contact-info">
-                                如果您在数据下载、使用过程中遇到技术问题，请联系我们的技术支持团队：<br><br>
-                                <strong>邮箱：</strong> <a href="mailto:support@med-platform.org" class="contact-email">support@med-platform.org</a><br>
-                                <strong>响应时间：</strong> 工作日1-2个工作日内回复
-                            </div>
-                        </div>
-                        
-                        <div class="contact-card">
-                            <div class="contact-title">学术合作</div>
-                            <div class="contact-info">
-                                如果您希望与我们开展学术合作或有数据定制需求，请联系：<br><br>
-                                <strong>邮箱：</strong> <a href="mailto:collaboration@med-platform.org" class="contact-email">collaboration@med-platform.org</a><br>
-                                <strong>合作内容：</strong> 数据定制、联合研究、技术开发
-                            </div>
-                        </div>
-                        
-                        <div class="contact-card">
-                            <div class="contact-title">意见反馈</div>
-                            <div class="contact-info">
-                                如果您对平台有任何建议或意见，欢迎反馈给我们：<br><br>
-                                <strong>邮箱：</strong> <a href="mailto:feedback@med-platform.org" class="contact-email">feedback@med-platform.org</a><br>
-                                <strong>反馈内容：</strong> 功能建议、用户体验、bug报告
-                            </div>
-                        </div>
-                        
-                        <div class="contact-card">
-                            <div class="contact-title">媒体咨询</div>
-                            <div class="contact-info">
-                                媒体合作和新闻咨询请联系：<br><br>
-                                <strong>邮箱：</strong> <a href="mailto:media@med-platform.org" class="contact-email">media@med-platform.org</a><br>
-                                <strong>咨询内容：</strong> 平台介绍、研究成果、专家访谈
+                <div class="contact-container">
+                    <!-- 左半边：联系我们 -->
+                    <div class="contact-left">
+                        <div class="section-title">联系我们</div>
+                        <div class="section-content">
+                            <div class="contact-grid">
+                                <div class="contact-card">
+                                    <div class="contact-title">技术支持</div>
+                                    <div class="contact-info">
+                                        如果您在数据下载、使用过程中遇到技术问题，请联系我们的技术支持团队：<br><br>
+                                        <strong>邮箱：</strong> <a href="mailto:support@med-platform.org" class="contact-email">support@med-platform.org</a><br>
+                                        <strong>响应时间：</strong> 工作日1-2个工作日内回复
+                                    </div>
+                                </div>
+                                
+                                <!-- <div class="contact-card">
+                                    <div class="contact-title">学术合作</div>
+                                    <div class="contact-info">
+                                        如果您希望与我们开展学术合作或有数据定制需求，请联系：<br><br>
+                                        <strong>邮箱：</strong> <a href="mailto:collaboration@med-platform.org" class="contact-email">collaboration@med-platform.org</a><br>
+                                        <strong>合作内容：</strong> 数据定制、联合研究、技术开发
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-card">
+                                    <div class="contact-title">意见反馈</div>
+                                    <div class="contact-info">
+                                        如果您对平台有任何建议或意见，欢迎反馈给我们：<br><br>
+                                        <strong>邮箱：</strong> <a href="mailto:feedback@med-platform.org" class="contact-email">feedback@med-platform.org</a><br>
+                                        <strong>反馈内容：</strong> 功能建议、用户体验、bug报告
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-card">
+                                    <div class="contact-title">媒体咨询</div>
+                                    <div class="contact-info">
+                                        媒体合作和新闻咨询请联系：<br><br>
+                                        <strong>邮箱：</strong> <a href="mailto:media@med-platform.org" class="contact-email">media@med-platform.org</a><br>
+                                        <strong>咨询内容：</strong> 平台介绍、研究成果、专家访谈
+                                    </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
                     
-                    <div class="team-intro">
-                        <div class="team-title">团队介绍</div>
-                        <div class="team-description">
-                            MED环境数据平台由复旦大学公共卫生学院环境健康系团队开发和维护。我们致力于为全球研究者提供高质量的环境暴露数据，支持环境健康、气候变化、城市规划等领域的科学研究。团队在环境数据建模、遥感技术应用、公共健康等方面具有丰富的经验，已发表多篇高影响因子的学术论文。
-                            <br><br>
-                            我们秉承开放科学的理念，希望通过数据共享促进环境健康领域的科学发现。如果您在使用过程中有任何问题或建议，欢迎随时与我们联系。
+                    <!-- 右半边：团队介绍 -->
+                    <div class="contact-right">
+                        <div class="section-title">团队介绍</div>
+                        <div class="section-content">
+                            <div class="team-intro">
+                                <div class="team-description">
+                                    OpenEx环境数据平台由数据模拟和平台构建由复旦大学公共卫生学院阚海东教授和孟夏副教授、上海理工大学张宏亮教授和复旦大学大气与海洋科学系王芃副研究员及其研究团队负责。 
+                                    <br><br>
+                                    我们秉承开放科学的理念，希望通过数据共享促进环境健康领域的科学发现。如果您在使用过程中有任何问题或建议，欢迎随时与我们联系。
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -751,7 +862,7 @@ function showSection(sectionId, linkElement) {
     // 更新页面标题
     const contentTitle = document.getElementById('contentTitle');
     const titles = {
-        'agreement': '数据使用协议',
+        'agreement': '用户注册协议',
         'faq': '常见问题',
         'citation': '推荐引用格式',
         'contact': '联系我们'
@@ -785,14 +896,9 @@ document.addEventListener('DOMContentLoaded', function() {
         firstNavLink.classList.add('active');
     }
     
-    // 根据URL hash显示对应内容
-    const hash = window.location.hash.substr(1);
-    if (hash && document.getElementById(hash)) {
-        const targetLink = document.querySelector(`[href="#${hash}"]`);
-        if (targetLink) {
-            showSection(hash, targetLink);
-        }
-    }
+    // 检查是否从外部链接跳转（不自动滚动到hash）
+    // 如果需要显示特定section，用户可以手动点击导航
+    // 这样确保页面始终从顶部开始显示
 });
 </script>
 {% endblock %}

@@ -747,54 +747,270 @@ from datetime import datetime
 @login_required
 @require_http_methods(["POST"])
 def download_data(request):
-    """临时测试版本的数据下载接口"""
+    """数据下载接口 - 根据数据类型和时间范围生成对应数据"""
     try:
         # 获取参数
-        category = request.POST.get('category', '未知类别')
-        pollutant = request.POST.get('pollutant', '未知污染物')
-        time_range = request.POST.get('time_range', '未知时间范围')
-        start_date = request.POST.get('start_date', '未知开始时间')
-        end_date = request.POST.get('end_date', '未知结束时间')
+        category = request.POST.get('category', 'CN environmental data')
+        data_type = request.POST.get('data_type', 'air_pollution')
+        country = request.POST.get('country', 'china')
+        pollutant = request.POST.get('pollutant', 'PM2.5')
+        time_range = request.POST.get('time_range', 'month')
+        start_date = request.POST.get('start_date', '2023-01')
+        end_date = request.POST.get('end_date', '2023-12')
         
-        # 创建测试CSV数据
+        # 生成文件名
+        filename = f"{country}_{data_type}_{pollutant}_{time_range}_{start_date}_to_{end_date}.csv"
+        filename = filename.replace('<sub>', '').replace('</sub>', '').replace('.', '_')
+        
+        # 创建CSV响应
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = f'attachment; filename="test_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
-        # 添加BOM以支持中文
+        # 添加BOM以支持中文显示
         response.write('\ufeff')
-        
         writer = csv.writer(response)
         
-        # 写入表头
-        writer.writerow(['参数名称', '参数值'])
-        writer.writerow(['数据类别', category])
-        writer.writerow(['污染物类型', pollutant])
-        writer.writerow(['时间范围', time_range])
-        writer.writerow(['开始时间', start_date])
-        writer.writerow(['结束时间', end_date])
-        writer.writerow(['用户', request.user.email])
-        writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
-        
-        # 写入一些测试数据
-        writer.writerow([])  # 空行
-        writer.writerow(['测试数据'])
-        writer.writerow(['日期', '城市', 'PM2.5', 'PM10', 'AQI'])
-        
-        # 生成几行示例数据
-        import random
-        cities = ['北京', '上海', '广州', '深圳', '杭州']
-        for i in range(10):
-            date = f'2023-{(i%12)+1:02d}'
-            city = cities[i % len(cities)]
-            pm25 = random.randint(20, 150)
-            pm10 = random.randint(30, 200)
-            aqi = random.randint(50, 300)
-            writer.writerow([date, city, pm25, pm10, aqi])
+        # 根据数据类型生成不同的数据结构
+        if data_type == 'air_pollution':
+            generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date)
+        elif data_type == 'weather':
+            generate_weather_data(writer, pollutant, time_range, start_date, end_date)
+        elif data_type == 'urban':
+            generate_urban_data(writer, pollutant, time_range, start_date, end_date)
+        else:
+            # 默认返回大气污染数据
+            generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date)
         
         return response
         
     except Exception as e:
         return JsonResponse({'error': f'下载失败: {str(e)}'}, status=500)
+
+def generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date):
+    """生成大气污染数据"""
+    import random
+    from datetime import datetime, timedelta
+    
+    # 写入元数据
+    writer.writerow(['数据类型', '大气污染数据'])
+    writer.writerow(['国家/地区', '中国' if country == 'china' else '英国'])
+    writer.writerow(['污染物', pollutant])
+    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
+    writer.writerow(['开始时间', start_date])
+    writer.writerow(['结束时间', end_date])
+    writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow([])  # 空行
+    
+    # 根据国家选择城市
+    if country == 'china':
+        cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+    else:  # 英国
+        cities = ['London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 'Edinburgh', 'Bristol', 'Sheffield', 'Cardiff']
+    
+    # 写入数据表头
+    if time_range == 'month':
+        writer.writerow(['年月', '城市', '经度', '纬度', f'{pollutant}浓度(μg/m³)', 'AQI', '数据质量'])
+    else:
+        writer.writerow(['年份', '城市', '经度', '纬度', f'{pollutant}年均浓度(μg/m³)', 'AQI', '数据质量'])
+    
+    # 生成时间序列
+    dates = []
+    if time_range == 'month':
+        start_year, start_month = map(int, start_date.split('-'))
+        end_year, end_month = map(int, end_date.split('-'))
+        
+        current_year, current_month = start_year, start_month
+        while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+            dates.append(f"{current_year}-{current_month:02d}")
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
+    else:
+        start_year = int(start_date)
+        end_year = int(end_date)
+        dates = [str(year) for year in range(start_year, end_year + 1)]
+    
+    # 生成数据
+    for date in dates:
+        for city in cities:
+            # 根据城市和污染物生成不同的浓度范围
+            if pollutant in ['PM2.5', 'PM<sub>2.5</sub>']:
+                concentration = random.uniform(15, 150)
+                aqi = int(concentration * 2.5 + random.uniform(-20, 20))
+            elif pollutant in ['PM10', 'PM<sub>10</sub>']:
+                concentration = random.uniform(25, 250)
+                aqi = int(concentration * 1.5 + random.uniform(-15, 15))
+            elif pollutant in ['PM2.5-PM10', 'PM<sub>2.5</sub>-PM<sub>10</sub>']:
+                # PM2.5-PM10 表示粗颗粒物
+                concentration = random.uniform(10, 100)
+                aqi = int(concentration * 2.0 + random.uniform(-15, 15))
+            elif pollutant in ['NO2', 'NO<sub>2</sub>']:
+                concentration = random.uniform(10, 80)
+                aqi = int(concentration * 3 + random.uniform(-25, 25))
+            elif pollutant in ['O3', 'O<sub>3</sub>']:
+                concentration = random.uniform(50, 200)
+                aqi = int(concentration * 1.2 + random.uniform(-30, 30))
+            elif pollutant == 'CO':
+                concentration = random.uniform(0.5, 5.0)
+                aqi = int(concentration * 50 + random.uniform(-20, 20))
+            else:
+                concentration = random.uniform(20, 100)
+                aqi = random.randint(50, 200)
+            
+            # 生成坐标（模拟）
+            if country == 'china':
+                longitude = random.uniform(110, 125)
+                latitude = random.uniform(30, 45)
+            else:
+                longitude = random.uniform(-5, 2)
+                latitude = random.uniform(50, 58)
+            
+            quality = random.choice(['优', '良', '优'])
+            
+            writer.writerow([
+                date,
+                city,
+                f"{longitude:.4f}",
+                f"{latitude:.4f}",
+                f"{concentration:.2f}",
+                max(0, min(500, aqi)),
+                quality
+            ])
+
+def generate_weather_data(writer, indicator, time_range, start_date, end_date):
+    """生成气象数据"""
+    import random
+    from datetime import datetime
+    
+    # 写入元数据
+    writer.writerow(['数据类型', '气象数据'])
+    writer.writerow(['国家/地区', '中国'])
+    writer.writerow(['气象指标', indicator])
+    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
+    writer.writerow(['开始时间', start_date])
+    writer.writerow(['结束时间', end_date])
+    writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow([])
+    
+    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+    
+    # 根据指标设置表头和单位
+    if indicator == '温度':
+        writer.writerow(['时间', '城市', '经度', '纬度', '平均温度(°C)', '最高温度(°C)', '最低温度(°C)', '数据质量'])
+    elif indicator == '紫外辐射':
+        writer.writerow(['时间', '城市', '经度', '纬度', 'UV指数', 'UV强度等级', '数据质量'])
+    
+    # 生成时间序列
+    dates = []
+    if time_range == 'month':
+        start_year, start_month = map(int, start_date.split('-'))
+        end_year, end_month = map(int, end_date.split('-'))
+        
+        current_year, current_month = start_year, start_month
+        while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+            dates.append(f"{current_year}-{current_month:02d}")
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
+    else:
+        start_year = int(start_date)
+        end_year = int(end_date)
+        dates = [str(year) for year in range(start_year, end_year + 1)]
+    
+    # 生成数据
+    for date in dates:
+        for city in cities:
+            longitude = random.uniform(110, 125)
+            latitude = random.uniform(30, 45)
+            quality = random.choice(['优', '良', '优'])
+            
+            if indicator == '温度':
+                avg_temp = random.uniform(-5, 35)
+                max_temp = avg_temp + random.uniform(5, 15)
+                min_temp = avg_temp - random.uniform(5, 15)
+                writer.writerow([
+                    date, city, f"{longitude:.4f}", f"{latitude:.4f}",
+                    f"{avg_temp:.1f}", f"{max_temp:.1f}", f"{min_temp:.1f}", quality
+                ])
+            elif indicator == '紫外辐射':
+                uv_index = random.uniform(1, 11)
+                if uv_index <= 2:
+                    uv_level = '低'
+                elif uv_index <= 5:
+                    uv_level = '中等'
+                elif uv_index <= 7:
+                    uv_level = '高'
+                elif uv_index <= 10:
+                    uv_level = '很高'
+                else:
+                    uv_level = '极高'
+                writer.writerow([
+                    date, city, f"{longitude:.4f}", f"{latitude:.4f}",
+                    f"{uv_index:.1f}", uv_level, quality
+                ])
+
+def generate_urban_data(writer, indicator, time_range, start_date, end_date):
+    """生成建成环境数据"""
+    import random
+    from datetime import datetime
+    
+    # 写入元数据
+    writer.writerow(['数据类型', '建成环境数据'])
+    writer.writerow(['国家/地区', '中国'])
+    writer.writerow(['建成指标', indicator])
+    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
+    writer.writerow(['开始时间', start_date])
+    writer.writerow(['结束时间', end_date])
+    writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow([])
+    
+    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+    
+    if indicator == 'NDVI':
+        writer.writerow(['时间', '城市', '经度', '纬度', 'NDVI值', '植被覆盖等级', '数据质量'])
+    
+    # 生成时间序列
+    dates = []
+    if time_range == 'month':
+        start_year, start_month = map(int, start_date.split('-'))
+        end_year, end_month = map(int, end_date.split('-'))
+        
+        current_year, current_month = start_year, start_month
+        while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+            dates.append(f"{current_year}-{current_month:02d}")
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
+    else:
+        start_year = int(start_date)
+        end_year = int(end_date)
+        dates = [str(year) for year in range(start_year, end_year + 1)]
+    
+    # 生成数据
+    for date in dates:
+        for city in cities:
+            longitude = random.uniform(110, 125)
+            latitude = random.uniform(30, 45)
+            quality = random.choice(['优', '良', '优'])
+            
+            if indicator == 'NDVI':
+                ndvi = random.uniform(0.1, 0.8)
+                if ndvi < 0.2:
+                    vegetation_level = '稀疏植被'
+                elif ndvi < 0.4:
+                    vegetation_level = '中等植被'
+                elif ndvi < 0.6:
+                    vegetation_level = '密集植被'
+                else:
+                    vegetation_level = '极密植被'
+                
+                writer.writerow([
+                    date, city, f"{longitude:.4f}", f"{latitude:.4f}",
+                    f"{ndvi:.3f}", vegetation_level, quality
+                ])
 
 @login_required
 @require_http_methods(["POST"]) 

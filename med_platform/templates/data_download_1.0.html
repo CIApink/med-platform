@@ -404,6 +404,7 @@
                             <div class="pollutant-btn">PM<sub>10</sub></div>
                             <div class="pollutant-btn">NO<sub>2</sub></div>
                             <div class="pollutant-btn">O<sub>3</sub></div>
+                            <div class="pollutant-btn">CO</div>
                             <!-- <div class="pollutant-btn">SO<sub>2</sub></div>
                             <div class="pollutant-btn">CO</div> -->
                         </div>
@@ -416,7 +417,7 @@
                             数据使用协议
                         </div>
                         <div class="agreement-text">
-                            请在下载前仔细阅读并同意我们的<a href="#" class="agreement-link">数据使用协议</a>。
+                            请在下载前仔细阅读并同意我们的<a href="{% url 'user_service' %}" class="agreement-link">数据使用协议</a>。
                             下载即表示您同意仅将数据用于学术研究用途，不得用于商业活动。
                         </div>
                         <div class="agreement-text">
@@ -426,9 +427,8 @@
                     
                     <!-- 下载按钮 -->
                     <div class="action-buttons">
-                        <button class="btn btn-primary" id="downloadBtn" 
-                                {% if not user.is_authenticated %}disabled{% endif %}>
-                            {% if user.is_authenticated %}下载数据{% else %}请登录后下载{% endif %}
+                        <button class="btn btn-primary" id="downloadBtn" disabled>
+                            {% if user.is_authenticated %}请先同意协议{% else %}请登录后下载{% endif %}
                         </button>
                     </div>
                 </div>
@@ -626,10 +626,18 @@
                 sectionTitle.textContent = '建成指标';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">NDVI</div>
-                    <div class="pollutant-btn">夜光数据</div>
+                `;
+            } else if (categoryText.includes('英国大气污染')) {
+                // 英国大气污染数据选项 - 移除PM2.5-PM10和CO
+                sectionTitle.textContent = '污染物种类';
+                pollutantSelector.innerHTML = `
+                    <div class="pollutant-btn active">PM<sub>2.5</sub></div>
+                    <div class="pollutant-btn">PM<sub>10</sub></div>
+                    <div class="pollutant-btn">NO<sub>2</sub></div>
+                    <div class="pollutant-btn">O<sub>3</sub></div>
                 `;
             } else {
-                // 大气污染数据选项
+                // 中国大气污染数据选项
                 sectionTitle.textContent = '污染物种类';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">PM<sub>2.5</sub></div>
@@ -637,6 +645,7 @@
                     <div class="pollutant-btn">PM<sub>10</sub></div>
                     <div class="pollutant-btn">NO<sub>2</sub></div>
                     <div class="pollutant-btn">O<sub>3</sub></div>
+                    <div class="pollutant-btn">CO</div>
                 `;
             }
         }
@@ -665,17 +674,34 @@
             const agreementCheck = document.getElementById('agreementCheck');
             const downloadBtn = document.getElementById('downloadBtn');
             
+            // 初始化按钮状态
+            updateDownloadButtonState();
+            
             agreementCheck.addEventListener('change', function() {
-                {% if user.is_authenticated %}
-                    downloadBtn.disabled = !this.checked;
-                    
-                    if (this.checked) {
-                        downloadBtn.textContent = '下载数据';
-                    } else {
-                        downloadBtn.textContent = '请先同意协议';
-                    }
-                {% endif %}
+                updateDownloadButtonState();
             });
+        }
+        
+        // 更新下载按钮状态
+        function updateDownloadButtonState() {
+            const agreementCheck = document.getElementById('agreementCheck');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const isAgreed = agreementCheck.checked;
+            
+            {% if user.is_authenticated %}
+                // 已登录用户
+                if (!isAgreed) {
+                    downloadBtn.disabled = true;
+                    downloadBtn.textContent = '请先同意协议';
+                } else {
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = '下载数据';
+                }
+            {% else %}
+                // 未登录用户
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = '请登录后下载';
+            {% endif %}
         }
 
         // 分类点击事件
@@ -729,6 +755,11 @@
                 return;
             }
             
+            // 检查按钮是否被禁用
+            if (this.disabled) {
+                return;
+            }
+            
             // 收集用户选择的参数
             const downloadParams = collectDownloadParams();
             
@@ -740,11 +771,34 @@
         function collectDownloadParams() {
             // 获取选中的数据类别
             const activeCategory = document.querySelector('.category-item.active');
-            const category = activeCategory ? activeCategory.getAttribute('data-category') : 'CN environmental data';
+            const categoryText = activeCategory ? activeCategory.textContent.trim() : '';
+            const categoryAttr = activeCategory ? activeCategory.getAttribute('data-category') : 'CN environmental data';
+            
+            // 更详细的数据类型识别
+            let dataType, country;
+            if (categoryText.includes('中国大气污染')) {
+                dataType = 'air_pollution';
+                country = 'china';
+            } else if (categoryText.includes('中国气象')) {
+                dataType = 'weather';
+                country = 'china';
+            } else if (categoryText.includes('中国建成')) {
+                dataType = 'urban';
+                country = 'china';
+            } else if (categoryText.includes('英国大气污染')) {
+                dataType = 'air_pollution';
+                country = 'uk';
+            } else {
+                dataType = 'air_pollution';
+                country = 'china';
+            }
             
             // 获取选中的污染物/指标
             const activePollutant = document.querySelector('.pollutant-btn.active');
-            const pollutant = activePollutant ? activePollutant.textContent.trim() : 'PM2.5';
+            let pollutant = activePollutant ? activePollutant.innerHTML.trim() : 'PM2.5';
+            
+            // 清理HTML标签，但保留原始格式用于显示
+            const cleanPollutant = pollutant.replace(/<[^>]*>/g, '');
             
             // 获取时间范围类型
             const activeTimeRange = document.querySelector('.time-range-btn.active');
@@ -765,8 +819,10 @@
             }
             
             return {
-                category: category,
-                pollutant: pollutant,
+                category: categoryAttr,
+                data_type: dataType,
+                country: country,
+                pollutant: cleanPollutant,
                 time_range: timeRange,
                 start_date: startDate,
                 end_date: endDate
@@ -782,6 +838,15 @@
                 downloadBtn.textContent = '正在准备数据...';
                 downloadBtn.disabled = true;
                 
+                // 验证参数
+                if (!params.start_date || !params.end_date) {
+                    throw new Error('请选择有效的时间范围');
+                }
+                
+                if (!params.pollutant) {
+                    throw new Error('请选择要下载的指标');
+                }
+                
                 // 创建表单数据
                 const formData = new FormData();
                 Object.keys(params).forEach(key => {
@@ -790,6 +855,8 @@
                 
                 // 添加CSRF令牌
                 formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                
+                console.log('下载参数:', params); // 调试信息
                 
                 // 发送下载请求
                 const response = await fetch('{% url "download_data" %}', {
@@ -803,13 +870,16 @@
                 if (response.ok) {
                     // 获取文件名
                     const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = 'data.csv';
+                    let filename = `${params.country}_${params.data_type}_${params.pollutant}_${params.time_range}_data.csv`;
                     if (contentDisposition) {
-                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
                         if (filenameMatch) {
-                            filename = filenameMatch[1];
+                            filename = filenameMatch[1].replace(/['"]/g, '');
                         }
                     }
+                    
+                    // 更新下载状态
+                    downloadBtn.textContent = '正在下载文件...';
                     
                     // 下载文件
                     const blob = await response.blob();
@@ -822,18 +892,76 @@
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
                     
-                    alert('数据下载成功！');
+                    // 显示成功消息
+                    showMessage('数据下载成功！文件已保存到您的下载目录。', 'success');
+                    
                 } else {
-                    const errorData = await response.json();
-                    alert('下载失败：' + (errorData.error || '未知错误'));
+                    const errorText = await response.text();
+                    let errorMsg = '下载失败';
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMsg = errorData.error || '未知错误';
+                    } catch (e) {
+                        errorMsg = `服务器错误 (${response.status})`;
+                    }
+                    throw new Error(errorMsg);
                 }
             } catch (error) {
                 console.error('下载错误:', error);
-                alert('下载失败：网络错误');
+                showMessage(`下载失败：${error.message}`, 'error');
             } finally {
                 // 恢复按钮状态
-                downloadBtn.textContent = originalText;
-                downloadBtn.disabled = false;
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.textContent = '下载数据';
+                updateDownloadButtonState(); // 重新检查按钮状态
+            }
+        }
+        
+        // 显示消息提示
+        function showMessage(message, type = 'info') {
+            // 移除现有的消息
+            const existingMsg = document.querySelector('.download-message');
+            if (existingMsg) {
+                existingMsg.remove();
+            }
+            
+            // 创建新消息
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `download-message ${type}`;
+            messageDiv.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: none; border: none; color: inherit; cursor: pointer;">&times;</button>
+            `;
+            
+            // 添加样式
+            const styles = {
+                'success': 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb;',
+                'error': 'background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;',
+                'info': 'background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;'
+            };
+            
+            messageDiv.style.cssText = `
+                ${styles[type]}
+                padding: 10px 15px;
+                border-radius: 4px;
+                margin: 15px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 14px;
+            `;
+            
+            // 插入到下载按钮前面
+            const actionButtons = document.querySelector('.action-buttons');
+            actionButtons.parentNode.insertBefore(messageDiv, actionButtons);
+            
+            // 3秒后自动消失（仅限成功消息）
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 3000);
             }
         }
 
