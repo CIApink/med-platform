@@ -341,7 +341,7 @@
                 <ul class="category-list">
                     <li class="category-item active" data-category="CN environmental data" data-title="中国大气污染数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国大气污染数据">中国大气污染数据</li>
                     <li class="category-item" data-category="CN environmental data" data-title="中国气象数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国气象数据">中国气象数据</li>
-                    <li class="category-item" data-category="CN environmental data" data-title="中国建成数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国建成数据">中国建成数据</li>
+                    <li class="category-item" data-category="CN environmental data" data-title="中国绿度数据下载" data-breadcrumb="数据产品 > 中国环境数据 > 中国绿度数据">中国绿度数据</li>
                 </ul>
             </div>
             
@@ -378,7 +378,7 @@
                         {% if user.is_authenticated %}
                             <button class="login-button" onclick="logout()">注销</button>
                         {% else %}
-                            <button class="login-button" onclick="window.location.href='{% url 'sign_in' %}'">登录</button>
+                            <button class="login-button" onclick="window.location.href='{% url 'sign_in' %}?next={{ request.get_full_path|urlencode }}'">登录</button>
                         {% endif %}
                     </div>
                     

@@ -576,7 +576,7 @@
             <div class="platform-logo">
                 <div class="platform-icon">M</div>
             </div>
-            <h1 class="login-title">登录 MED 平台</h1>
+            <h1 class="login-title">登录 OpenEx 环境数据平台</h1>
             
             {% if messages %}
                 <div class="messages">
@@ -588,6 +588,9 @@
 
             <form method="post" action="{% url 'sign_in' %}">
                 {% csrf_token %}
+                {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
                 <div class="form-group">
                     <label for="email">电子邮箱</label>
                     <input type="email" id="email" name="email" required>
@@ -605,7 +608,7 @@
             <div class="separator">或</div>
 
             <div class="register-link">
-                没有账号? <a href="{% url 'sign_up' %}">创建账户</a>
+                没有账号? <a href="{% url 'sign_up' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">创建账户</a>
             </div>
         </div>
     </div>

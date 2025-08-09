@@ -142,3 +142,8 @@ SERVER_EMAIL = 'admin@med-platform.example.com'
 
 # Site URL for Email verification
 BASE_URL = 'http://localhost:8000'
+
+# Authentication URLs
+LOGIN_URL = '/sign_in/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

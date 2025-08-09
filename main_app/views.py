@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 from .models import UserProfile, UserVerification, AuditLog
 from .utils import send_verification_email, verify_email_code
 import json
@@ -40,8 +41,9 @@ def sign_in(request):
                 profile = user.userprofile
                 if profile.status == 'approved':
                     login(request, user)
-                    # 始终重定向到首页
-                    return redirect('index')
+                    # 获取next参数，如果没有则默认跳转到首页
+                    next_url = request.POST.get('next') or request.GET.get('next') or 'index'
+                    return redirect(next_url)
                 elif profile.status == 'pending':
                     messages.warning(request, '您的账户正在审核中，请稍后再试')
                 elif profile.status == 'rejected':
@@ -50,8 +52,9 @@ def sign_in(request):
                     messages.error(request, '您的账户已被暂停，请联系管理员')
             except UserProfile.DoesNotExist:
                 login(request, user)
-                # 始终重定向到首页
-                return redirect('index')
+                # 获取next参数，如果没有则默认跳转到首页
+                next_url = request.POST.get('next') or request.GET.get('next') or 'index'
+                return redirect(next_url)
         else:
             messages.error(request, '用户名或密码错误')
             
@@ -135,7 +138,12 @@ def sign_up(request):
             else:
                 messages.success(request, '注册成功！非教育邮箱需要人工审核，请前往邮箱验证您的邮箱地址并耐心等待审核结果')
             
-            return redirect('verification_sent')
+            # 获取next参数并传递到verification_sent页面
+            next_url = request.POST.get('next') or request.GET.get('next')
+            if next_url:
+                return redirect(f"{reverse('verification_sent')}?next={next_url}")
+            else:
+                return redirect('verification_sent')
             
         except Exception as e:
             messages.error(request, f'注册失败：{str(e)}')

@@ -471,7 +471,7 @@
             {% if user.is_authenticated %}
                 <div class="user-email" style="display: block;" onclick="logout()">{{ user.email }} (点击注销)</div>
             {% else %}
-                <a href="{% url 'sign_in' %}" class="login-signup">登录/注册</a>
+                <a href="{% url 'sign_in' %}?next={{ request.get_full_path|urlencode }}" class="login-signup">登录/注册</a>
             {% endif %}
         </div>
         <div class="menu-toggle">
