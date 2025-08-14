@@ -598,6 +598,44 @@
             background-color: #efefef;
         }
 
+        .password-requirements {
+            margin-top: 10px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 5px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .requirement.met {
+            color: var(--brand-green);
+        }
+
+        .requirement:before {
+            content: '✗';
+            color: #d1242f;
+            font-weight: bold;
+        }
+
+        .requirement.met:before {
+            content: '✓';
+            color: var(--brand-green);
+        }
+
+        .password-feedback {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
         /* 响应式设计 */
         @media (max-width: 500px) {
             .login-box {
@@ -638,7 +676,7 @@
                     <input type="password" id="password" name="password" required>
                 </div>
                 <div class="forgot-password">
-                    <a href="#" onclick="openForgotPasswordModal()">忘记密码?</a>
+                    <a href="#" onclick="openForgotPasswordModal(); return false;">忘记密码?</a>
                 </div>
                 <button type="submit" class="signin-button">登录</button>
             </form>
@@ -718,28 +756,59 @@
     </div>
 
     <script>
+        // 基础功能测试
+        console.log('JavaScript已加载');
+        
         // 忘记密码相关功能
         function openForgotPasswordModal() {
-            document.getElementById('forgotPasswordModal').style.display = 'block';
-            // 重置到第一步
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('step2').style.display = 'none';
-            // 清空表单
-            clearForms();
+            console.log('打开忘记密码模态框'); // 调试信息
+            try {
+                const modal = document.getElementById('forgotPasswordModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    // 重置到第一步
+                    const step1 = document.getElementById('step1');
+                    const step2 = document.getElementById('step2');
+                    if (step1) step1.style.display = 'block';
+                    if (step2) step2.style.display = 'none';
+                    // 清空表单
+                    clearForms();
+                    console.log('模态框已打开');
+                } else {
+                    console.error('找不到forgotPasswordModal元素');
+                }
+            } catch (error) {
+                console.error('打开模态框时出错:', error);
+            }
         }
 
         function closeForgotPasswordModal() {
-            document.getElementById('forgotPasswordModal').style.display = 'none';
+            try {
+                const modal = document.getElementById('forgotPasswordModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    console.log('模态框已关闭');
+                }
+            } catch (error) {
+                console.error('关闭模态框时出错:', error);
+            }
         }
 
         function clearForms() {
-            document.getElementById('userInfoForm').reset();
-            document.getElementById('resetPasswordForm').reset();
-            const matchDiv = document.getElementById('password-match');
-            if (matchDiv) matchDiv.textContent = '';
+            try {
+                const userForm = document.getElementById('userInfoForm');
+                const resetForm = document.getElementById('resetPasswordForm');
+                if (userForm) userForm.reset();
+                if (resetForm) resetForm.reset();
+                const matchDiv = document.getElementById('password-match');
+                if (matchDiv) matchDiv.textContent = '';
+                console.log('表单已清空');
+            } catch (error) {
+                console.error('清空表单时出错:', error);
+            }
         }
 
-        // 验证用户信息
+        // 验证用户信息并进入重置密码步骤
         function verifyUserInfo() {
             const lastName = document.getElementById('resetLastName').value;
             const firstName = document.getElementById('resetFirstName').value;
@@ -751,10 +820,25 @@
                 return;
             }
 
-            console.log('验证用户信息:', {lastName, firstName, email, organization});
+            // 直接切换到重置密码步骤
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
 
-            // 发送请求到后端验证用户信息
-            fetch('/verify-user-info/', {
+        // 重置密码
+        function resetPassword() {
+            const lastName = document.getElementById('resetLastName').value;
+            const firstName = document.getElementById('resetFirstName').value;
+            const email = document.getElementById('resetEmail').value;
+            const organization = document.getElementById('resetOrganization').value;
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!validatePassword(password, confirmPassword)) {
+                return;
+            }
+
+            fetch('/reset-password/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -764,63 +848,97 @@
                     last_name: lastName,
                     first_name: firstName,
                     email: email,
-                    organization: organization
+                    organization: organization,
+                    password: password
                 })
             })
-            .then(response => {
-                console.log('验证用户信息响应状态:', response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('验证用户信息响应数据:', data);
                 if (data.success) {
-                    // 切换到第二步（重置密码）
-                    document.getElementById('step1').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
+                    showMessage('密码重置成功！请使用新密码登录', 'success');
+                    setTimeout(() => {
+                        closeForgotPasswordModal();
+                        closeMessageModal();
+                    }, 2000);
                 } else {
-                    showMessage(data.message || '用户信息验证失败，请检查输入信息', 'error');
+                    showMessage(data.message || '密码重置失败，请稍后重试', 'error');
                 }
             })
             .catch(error => {
-                console.error('验证用户信息错误:', error);
                 showMessage('网络错误，请稍后重试', 'error');
             });
         }
-            
-            if (!code) {
-                showMessage('请输入验证码', 'error');
-                return;
+
+        // 密码验证
+        function validatePassword(password, confirmPassword) {
+            let isValid = true;
+
+            // 检查密码长度
+            const lengthReq = document.getElementById('length-req');
+            if (password.length >= 8) {
+                lengthReq.classList.add('met');
+            } else {
+                lengthReq.classList.remove('met');
+                isValid = false;
             }
 
-            console.log('验证验证码:', {email: email, code: code}); // 调试信息
+            // 检查大写字母
+            const upperReq = document.getElementById('upper-req');
+            if (/[A-Z]/.test(password)) {
+                upperReq.classList.add('met');
+            } else {
+                upperReq.classList.remove('met');
+                isValid = false;
+            }
 
-            fetch('/verify-reset-code/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify({email: email, code: code})
-            })
-            .then(response => {
-                console.log('验证码验证响应状态:', response.status); // 调试信息
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('验证码验证响应数据:', data); // 调试信息
-                if (data.success) {
-                    // 切换到第三步
-                    document.getElementById('step2').style.display = 'none';
-                    document.getElementById('step3').style.display = 'block';
-                } else {
-                    showMessage(data.message || '验证码错误', 'error');
-                }
-            })
-            .catch(error => {
-        
+            // 检查小写字母
+            const lowerReq = document.getElementById('lower-req');
+            if (/[a-z]/.test(password)) {
+                lowerReq.classList.add('met');
+            } else {
+                lowerReq.classList.remove('met');
+                isValid = false;
+            }
+
+            // 检查数字
+            const numberReq = document.getElementById('number-req');
+            if (/[0-9]/.test(password)) {
+                numberReq.classList.add('met');
+            } else {
+                numberReq.classList.remove('met');
+                isValid = false;
+            }
+
+            // 检查密码确认
+            const matchDiv = document.getElementById('password-match');
+            if (password === confirmPassword && password !== '') {
+                matchDiv.style.color = 'green';
+                matchDiv.textContent = '✓ 密码匹配';
+            } else {
+                matchDiv.style.color = 'red';
+                matchDiv.textContent = '✗ 密码不匹配';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 实时密码验证
+        document.addEventListener('DOMContentLoaded', function() {
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+
+            if (newPasswordInput && confirmPasswordInput) {
+                newPasswordInput.addEventListener('input', function() {
+                    validatePassword(this.value, confirmPasswordInput.value);
+                });
+
+                confirmPasswordInput.addEventListener('input', function() {
+                    validatePassword(newPasswordInput.value, this.value);
+                });
+            }
+        });
+
         // 重置密码
         function resetPassword() {
             const lastName = document.getElementById('resetLastName').value;

@@ -15,7 +15,6 @@ urlpatterns = [
     path('resend-verification/', views.resend_verification, name='resend_verification'),
     
     # 忘记密码功能路由
-    path('verify-user-info/', views.verify_user_info, name='verify_user_info'),
     path('reset-password/', views.reset_password, name='reset_password'),
     
     # 管理员面板路由
