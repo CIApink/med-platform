@@ -98,6 +98,44 @@
             text-decoration: underline;
         }
 
+        /* 消息提示样式 */
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: var(--brand-green);
+            color: #155724;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #4ab6a4;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
         /* 忘记密码模态框样式 */
         .modal-overlay {
             position: fixed;
@@ -618,53 +656,54 @@
         <div class="modal-content">
             <span class="close" onclick="closeForgotPasswordModal()">&times;</span>
             
-            <!-- 步骤1: 输入邮箱 -->
+            <!-- 步骤1: 输入用户信息 -->
             <div id="step1" class="step-content">
                 <h3>忘记密码</h3>
-                <form id="emailForm">
+                <p style="font-size: 14px; color: #666; margin-bottom: 20px;">请输入您的注册信息进行身份验证</p>
+                <form id="userInfoForm">
                     <div class="form-group">
-                        <label for="resetEmail">请输入您的注册邮箱:</label>
-                        <input type="email" id="resetEmail" name="email" required>
+                        <label for="resetLastName">姓 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="text" id="resetLastName" name="last_name" placeholder="请输入您的姓" required>
                     </div>
-                    <button type="button" onclick="sendVerificationCode()" class="btn-primary">发送验证码</button>
+                    <div class="form-group">
+                        <label for="resetFirstName">名 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="text" id="resetFirstName" name="first_name" placeholder="请输入您的名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetEmail">电子邮箱 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="email" id="resetEmail" name="email" placeholder="请输入您的邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetOrganization">机构名称 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="text" id="resetOrganization" name="organization" placeholder="请输入您的机构名称" required>
+                    </div>
+                    <button type="button" onclick="verifyUserInfo()" class="btn-primary">验证身份</button>
                 </form>
             </div>
             
-            <!-- 步骤2: 输入验证码 -->
+            <!-- 步骤2: 重置密码 -->
             <div id="step2" class="step-content" style="display: none;">
-                <h3>验证邮箱</h3>
-                <form id="verificationForm">
-                    <div class="form-group">
-                        <label for="verificationCode">请输入邮箱收到的验证码:</label>
-                        <input type="text" id="verificationCode" name="code" required maxlength="6">
-                    </div>
-                    <button type="button" onclick="verifyCode()" class="btn-primary">验证</button>
-                    <button type="button" onclick="resendCode()" class="btn-secondary">重新发送</button>
-                </form>
-            </div>
-            
-            <!-- 步骤3: 重置密码 -->
-            <div id="step3" class="step-content" style="display: none;">
                 <h3>重置密码</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 20px;">身份验证成功，请设置新密码</p>
                 <form id="resetPasswordForm">
                     <div class="form-group">
-                        <label for="newPassword">新密码:</label>
-                        <input type="password" id="newPassword" name="password" required>
+                        <label for="newPassword">新密码 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="password" id="newPassword" name="new_password" placeholder="请输入新密码" required>
                         <div class="password-requirements">
-                            <ul>
-                                <li id="length-req">至少8个字符</li>
-                                <li id="upper-req">至少包含一个大写字母</li>
-                                <li id="lower-req">至少包含一个小写字母</li>
-                                <li id="number-req">至少包含一个数字</li>
-                            </ul>
+                            <div id="length-req" class="requirement">至少8个字符</div>
+                            <div id="upper-req" class="requirement">至少包含一个大写字母</div>
+                            <div id="lower-req" class="requirement">至少包含一个小写字母</div>
+                            <div id="number-req" class="requirement">至少包含一个数字</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="confirmPassword">确认密码:</label>
-                        <input type="password" id="confirmPassword" name="confirm_password" required>
+                        <label for="confirmPassword">确认新密码 <span style="color: var(--brand-green);">*</span></label>
+                        <input type="password" id="confirmPassword" name="confirm_password" placeholder="请再次输入新密码" required>
                         <div id="password-match" class="password-feedback"></div>
                     </div>
                     <button type="button" onclick="resetPassword()" class="btn-primary">重置密码</button>
+                </form>
+            </div>
                 </form>
             </div>
         </div>
@@ -685,7 +724,6 @@
             // 重置到第一步
             document.getElementById('step1').style.display = 'block';
             document.getElementById('step2').style.display = 'none';
-            document.getElementById('step3').style.display = 'none';
             // 清空表单
             clearForms();
         }
@@ -695,57 +733,59 @@
         }
 
         function clearForms() {
-            document.getElementById('emailForm').reset();
-            document.getElementById('verificationForm').reset();
+            document.getElementById('userInfoForm').reset();
             document.getElementById('resetPasswordForm').reset();
             const matchDiv = document.getElementById('password-match');
             if (matchDiv) matchDiv.textContent = '';
         }
 
-        // 发送验证码
-        function sendVerificationCode() {
+        // 验证用户信息
+        function verifyUserInfo() {
+            const lastName = document.getElementById('resetLastName').value;
+            const firstName = document.getElementById('resetFirstName').value;
             const email = document.getElementById('resetEmail').value;
-            if (!email) {
-                showMessage('请输入邮箱地址', 'error');
+            const organization = document.getElementById('resetOrganization').value;
+            
+            if (!lastName || !firstName || !email || !organization) {
+                showMessage('请填写所有必填字段', 'error');
                 return;
             }
 
-            console.log('发送验证码到:', email); // 调试信息
+            console.log('验证用户信息:', {lastName, firstName, email, organization});
 
-            // 发送请求到后端
-            fetch('/send-reset-code/', {
+            // 发送请求到后端验证用户信息
+            fetch('/verify-user-info/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCSRFToken()
                 },
-                body: JSON.stringify({email: email})
+                body: JSON.stringify({
+                    last_name: lastName,
+                    first_name: firstName,
+                    email: email,
+                    organization: organization
+                })
             })
             .then(response => {
-                console.log('发送验证码响应状态:', response.status); // 调试信息
+                console.log('验证用户信息响应状态:', response.status);
                 return response.json();
             })
             .then(data => {
-                console.log('发送验证码响应数据:', data); // 调试信息
+                console.log('验证用户信息响应数据:', data);
                 if (data.success) {
-                    showMessage('验证码已发送到您的邮箱', 'success');
-                    // 切换到第二步
+                    // 切换到第二步（重置密码）
                     document.getElementById('step1').style.display = 'none';
                     document.getElementById('step2').style.display = 'block';
                 } else {
-                    showMessage(data.message || '发送失败，请稍后重试', 'error');
+                    showMessage(data.message || '用户信息验证失败，请检查输入信息', 'error');
                 }
             })
             .catch(error => {
-                console.error('发送验证码错误:', error); // 调试信息
+                console.error('验证用户信息错误:', error);
                 showMessage('网络错误，请稍后重试', 'error');
             });
         }
-
-        // 验证验证码
-        function verifyCode() {
-            const email = document.getElementById('resetEmail').value;
-            const code = document.getElementById('verificationCode').value;
             
             if (!code) {
                 showMessage('请输入验证码', 'error');
@@ -780,20 +820,13 @@
                 }
             })
             .catch(error => {
-                console.error('验证码验证错误:', error); // 调试信息
-                showMessage('网络错误，请稍后重试', 'error');
-            });
-        }
-
-        // 重新发送验证码
-        function resendCode() {
-            sendVerificationCode();
-        }
-
+        
         // 重置密码
         function resetPassword() {
+            const lastName = document.getElementById('resetLastName').value;
+            const firstName = document.getElementById('resetFirstName').value;
             const email = document.getElementById('resetEmail').value;
-            const code = document.getElementById('verificationCode').value;
+            const organization = document.getElementById('resetOrganization').value;
             const password = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -808,21 +841,23 @@
                     'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify({
+                    last_name: lastName,
+                    first_name: firstName,
                     email: email,
-                    code: code,
+                    organization: organization,
                     password: password
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showMessage('密码重置成功，请使用新密码登录', 'success');
+                    showMessage('密码重置成功！请使用新密码登录', 'success');
                     setTimeout(() => {
                         closeForgotPasswordModal();
                         closeMessageModal();
                     }, 2000);
                 } else {
-                    showMessage(data.message || '重置失败，请重试', 'error');
+                    showMessage(data.message || '密码重置失败，请稍后重试', 'error');
                 }
             })
             .catch(error => {
@@ -944,12 +979,17 @@
         
         // 获取CSRF token的替代方法
         function getCSRFToken() {
-            // 优先从meta标签获取
+            // 优先从表单中的隐藏字段获取
+            const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (tokenInput) {
+                return tokenInput.value;
+            }
+            // 其次从meta标签获取
             const metaToken = document.querySelector('meta[name="csrf-token"]');
             if (metaToken) {
                 return metaToken.getAttribute('content');
             }
-            // 回退到cookie方法
+            // 最后回退到cookie方法
             return getCookie('csrftoken');
         }
 

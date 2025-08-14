@@ -28,7 +28,7 @@ def send_verification_email(user, request=None):
     )
     
     # 构建验证链接
-    verify_url = f"{settings.BASE_URL}/verify-email/?code={verification_code}"
+    verify_url = f"{settings.BASE_URL}/verify-email-new/?code={verification_code}"
     
     # 邮件内容
     context = {

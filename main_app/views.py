@@ -23,6 +23,13 @@ def index(request):
 
 def sign_in(request):
     """登录页面视图"""
+    # 处理注册成功后的状态消息
+    status = request.GET.get('status')
+    if status == 'approved':
+        messages.success(request, '注册成功！检测到教育邮箱，账户已自动通过审核，您现在可以登录使用平台')
+    elif status == 'pending':
+        messages.info(request, '注册成功！您的账户申请已提交，需要人工审核，审核通过后您将收到邮件通知')
+    
     if request.method == 'POST':
         email = request.POST.get('email')  # 改为email
         password = request.POST.get('password')
@@ -67,6 +74,8 @@ def sign_up(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         organization = request.POST.get('organization')
         organization_type = request.POST.get('organization_type')
         country = request.POST.get('country')
@@ -77,7 +86,7 @@ def sign_up(request):
             return render(request, 'sign_up.html')
         
         # 验证必填字段
-        if not all([email, password, organization, organization_type, country]):
+        if not all([email, password, first_name, last_name, organization, organization_type, country]):
             messages.error(request, '请填写所有必填字段')
             return render(request, 'sign_up.html')
         
@@ -117,33 +126,30 @@ def sign_up(request):
                 username=username, 
                 email=email, 
                 password=password,
-                first_name='',  # 可以后续完善
-                last_name=''
+                first_name=first_name,
+                last_name=last_name
             )
+            
+            # 检查是否为教育邮箱
+            is_edu_email = email.lower().endswith('.edu.cn')
             
             # 创建用户配置文件
             profile = UserProfile.objects.create(
                 user=user,
                 organization=organization,
                 organization_type=organization_type,
-                country=country
+                country=country,
+                status='approved' if is_edu_email else 'pending',  # 教育邮箱自动通过
+                is_email_verified=True  # 跳过邮箱验证
             )
             
-            # 发送验证邮件
-            send_verification_email(user)
-            
-            # 根据邮箱类型设置不同的成功消息
-            if profile.is_edu_email:
-                messages.success(request, '注册成功！检测到教育邮箱，账户已自动审核通过，请前往邮箱验证您的邮箱地址')
+            # 根据邮箱类型设置不同的成功消息和跳转逻辑
+            if is_edu_email:
+                # 教育邮箱自动通过审核，跳转到登录页面并显示审核通过信息
+                return redirect('/sign-in/?status=approved')
             else:
-                messages.success(request, '注册成功！非教育邮箱需要人工审核，请前往邮箱验证您的邮箱地址并耐心等待审核结果')
-            
-            # 获取next参数并传递到verification_sent页面
-            next_url = request.POST.get('next') or request.GET.get('next')
-            if next_url:
-                return redirect(f"{reverse('verification_sent')}?next={next_url}")
-            else:
-                return redirect('verification_sent')
+                # 非教育邮箱需要人工审核，跳转到登录页面并显示待审核信息
+                return redirect('/sign-in/?status=pending')
             
         except Exception as e:
             messages.error(request, f'注册失败：{str(e)}')
@@ -163,13 +169,161 @@ def user_logout(request):
     return redirect('index')
 
 
+@csrf_exempt
+def verify_user_info(request):
+    """验证用户信息（用于密码找回）"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            last_name = data.get('last_name')
+            first_name = data.get('first_name')
+            email = data.get('email')
+            organization = data.get('organization')
+            
+            # 查找用户
+            try:
+                user = User.objects.get(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                profile = user.userprofile
+                
+                # 验证机构名称
+                if profile.organization.lower() == organization.lower():
+                    # 将用户信息存储在session中用于后续验证
+                    request.session['reset_user_id'] = user.id
+                    request.session['reset_verified'] = True
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': '用户信息验证成功'
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'message': '机构名称不匹配'
+                    })
+                    
+            except User.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': '未找到匹配的用户信息'
+                })
+            except UserProfile.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': '用户资料不完整'
+                })
+                
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': '数据格式错误'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'验证失败：{str(e)}'
+            })
+    
+    return JsonResponse({'success': False, 'message': '请求方法不允许'})
+
+
+@csrf_exempt
+def reset_password(request):
+    """重置密码"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            password = data.get('password')
+            
+            # 检查session中是否有验证信息
+            if not request.session.get('reset_verified') or not request.session.get('reset_user_id'):
+                return JsonResponse({
+                    'success': False,
+                    'message': '身份验证已过期，请重新验证'
+                })
+            
+            # 验证密码强度
+            if len(password) < 6 or len(password) > 20:
+                return JsonResponse({
+                    'success': False,
+                    'message': '密码长度必须在6-20位之间'
+                })
+            
+            # 检查密码复杂度
+            has_number = bool(re.search(r'\d', password))
+            has_upper = bool(re.search(r'[A-Z]', password))
+            has_lower = bool(re.search(r'[a-z]', password))
+            has_special = bool(re.search(r'[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]', password))
+            
+            conditions_met = sum([has_number, has_upper, has_lower, has_special])
+            if conditions_met < 2:
+                return JsonResponse({
+                    'success': False,
+                    'message': '密码强度不足，至少包含数字、大写字母、小写字母和特殊字符中的两种'
+                })
+            
+            # 获取用户并重置密码
+            try:
+                user = User.objects.get(id=request.session['reset_user_id'])
+                user.set_password(password)
+                user.save()
+                
+                # 清除session信息
+                request.session.pop('reset_user_id', None)
+                request.session.pop('reset_verified', None)
+                
+                # 记录审计日志
+                AuditLog.objects.create(
+                    user=user,
+                    action='password_reset',
+                    description=f'用户通过密码找回功能重置了密码',
+                    ip_address=request.META.get('REMOTE_ADDR', '')
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': '密码重置成功'
+                })
+                
+            except User.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': '用户不存在'
+                })
+                
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': '数据格式错误'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'重置失败：{str(e)}'
+            })
+    
+    return JsonResponse({'success': False, 'message': '请求方法不允许'})
+    """注销视图"""
+    logout(request)
+    
+    # 如果是AJAX请求，返回JSON响应
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True})
+    
+    # 否则重定向到首页
+    return redirect('index')
+
+
 def verification_sent(request):
     """验证发送页面视图"""
     return render(request, 'verification_sent.html')
 
 
-def verify_email(request):
-    """邮箱验证页面视图"""
+def verify_email_new(request):
+    """新版邮箱验证页面视图"""
     code = request.GET.get('code')
     
     if not code:
@@ -191,12 +345,12 @@ def verify_email(request):
             if profile.status == 'approved':
                 return redirect('index')
             else:
-                return render(request, 'verify_email.html', {'verified': True, 'status': profile.status})
+                return render(request, 'verify_email_new.html', {'verified': True, 'status': profile.status})
         except UserProfile.DoesNotExist:
             return redirect('index')
     else:
         messages.error(request, '验证链接无效或已过期，请重新获取验证链接')
-        return render(request, 'verify_email.html', {'verified': False})
+        return render(request, 'verify_email_new.html', {'verified': False})
 
 
 def resend_verification(request):
@@ -442,13 +596,6 @@ def user_service(request):
 #         return render(request, 'data_echart_map_debug.html')
     
 #     return render(request, 'data_echart_map.html')
-
-
-
-
-def verify_email_new(request):
-    """新邮箱验证页面视图"""
-    return render(request, 'verify_email_new.html')
 
 
 # 忘记密码相关视图
@@ -712,33 +859,211 @@ def reset_password(request):
     
     return JsonResponse({'success': False, 'message': '无效的请求方法'})
 
-# 简化测试版本 - 可以立即测试前后端连接
-
-# 将以下代码添加到 main_app/views.py 文件的末尾用于测试
+# 数据下载系统 - 模拟腾讯云对象存储流程
 
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 import csv
 import io
-from datetime import datetime
+import json
+import os
+import tempfile
+import zipfile
+from datetime import datetime, timedelta
+import random
+import string
 
 @login_required
-@require_http_methods(["POST"])
-def download_data(request):
-    """数据下载接口 - 根据数据类型和时间范围生成对应数据"""
+@csrf_exempt
+def get_available_data(request):
+    """获取可用的数据列表 - 模拟腾讯云存储目录结构"""
+    if request.method != 'GET':
+        return JsonResponse({'error': '仅支持GET请求'}, status=405)
+    
     try:
-        # 获取参数
-        category = request.POST.get('category', 'CN environmental data')
-        data_type = request.POST.get('data_type', 'air_pollution')
-        country = request.POST.get('country', 'china')
-        pollutant = request.POST.get('pollutant', 'PM2.5')
-        time_range = request.POST.get('time_range', 'month')
-        start_date = request.POST.get('start_date', '2023-01')
-        end_date = request.POST.get('end_date', '2023-12')
+        # 模拟腾讯云对象存储中的数据结构
+        available_data = {
+            'air_pollution': {
+                'china': {
+                    'PM2.5': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06',
+                                   '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12',
+                                   '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06',
+                                   '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12',
+                                   '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06',
+                                   '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12',
+                                   '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06'],
+                        'yearly': ['2020', '2021', '2022', '2023']
+                    },
+                    'PM10': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06',
+                                   '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12',
+                                   '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06'],
+                        'yearly': ['2020', '2021', '2022']
+                    },
+                    'NO2': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06',
+                                   '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12'],
+                        'yearly': ['2020', '2021']
+                    },
+                    'O3': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06'],
+                        'yearly': ['2020']
+                    }
+                },
+                'uk': {
+                    'PM2.5': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06'],
+                        'yearly': ['2020', '2021']
+                    },
+                    'PM10': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04'],
+                        'yearly': ['2020']
+                    }
+                }
+            },
+            'weather': {
+                'china': {
+                    '温度': {
+                        'monthly': ['2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06'],
+                        'yearly': ['2020', '2021']
+                    },
+                    '紫外辐射': {
+                        'monthly': ['2020-01', '2020-02', '2020-03'],
+                        'yearly': ['2020']
+                    }
+                }
+            },
+            'urban': {
+                'china': {
+                    'NDVI': {
+                        'monthly': ['2020-01', '2020-02', '2020-03'],
+                        'yearly': ['2020']
+                    }
+                }
+            }
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'data': available_data,
+            'message': '数据列表获取成功'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'获取数据列表失败: {str(e)}'}, status=500)
+
+@login_required
+@csrf_exempt  
+def request_data_download(request):
+    """数据下载请求接口 - 模拟腾讯云存储文件生成流程"""
+    if request.method != 'POST':
+        return JsonResponse({'error': '仅支持POST请求'}, status=405)
+    
+    try:
+        # 解析请求参数
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+            
+        category = data.get('category', 'air_pollution')
+        country = data.get('country', 'china')
+        pollutant = data.get('pollutant', 'PM2.5')
+        time_range = data.get('time_range', 'monthly')
+        selected_dates = data.get('selected_dates', [])
+        
+        # 参数验证
+        if not selected_dates:
+            return JsonResponse({'error': '请选择至少一个时间段'}, status=400)
+            
+        # 生成下载任务ID（模拟腾讯云任务系统）
+        task_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+        
+        # 模拟文件生成过程（在真实环境中，这里会调用腾讯云API）
+        file_info = {
+            'task_id': task_id,
+            'status': 'processing',
+            'category': category,
+            'country': country, 
+            'pollutant': pollutant,
+            'time_range': time_range,
+            'selected_dates': selected_dates,
+            'created_at': datetime.now().isoformat(),
+            'estimated_size': len(selected_dates) * 1024 * 50,  # 估计文件大小
+            'download_url': None
+        }
+        
+        # 在实际场景中，这里应该将任务信息保存到数据库
+        # 现在我们模拟立即生成文件
+        try:
+            download_url = generate_data_file(file_info)
+            file_info['status'] = 'completed'
+            file_info['download_url'] = download_url
+            file_info['completed_at'] = datetime.now().isoformat()
+        except Exception as e:
+            file_info['status'] = 'failed'
+            file_info['error'] = str(e)
+        
+        return JsonResponse({
+            'success': True,
+            'task_id': task_id,
+            'status': file_info['status'],
+            'download_url': file_info.get('download_url'),
+            'estimated_size': file_info['estimated_size'],
+            'message': '数据文件生成完成' if file_info['status'] == 'completed' else '数据文件生成失败'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'请求处理失败: {str(e)}'}, status=500)
+
+def generate_data_file(file_info):
+    """生成数据文件 - 模拟腾讯云存储文件生成"""
+    try:
+        category = file_info['category']
+        country = file_info['country']
+        pollutant = file_info['pollutant']
+        time_range = file_info['time_range']
+        selected_dates = file_info['selected_dates']
+        
+        # 创建临时文件（在真实环境中会上传到腾讯云）
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{country}_{category}_{pollutant}_{time_range}_{timestamp}.csv"
+        
+        # 生成CSV数据
+        csv_content = generate_csv_data(category, country, pollutant, time_range, selected_dates)
+        
+        # 在真实环境中，这里会上传到腾讯云对象存储
+        # 现在我们返回一个模拟的下载URL
+        download_url = f"/api/download-file/{file_info['task_id']}/"
+        
+        return download_url
+        
+    except Exception as e:
+        raise Exception(f"文件生成失败: {str(e)}")
+
+@login_required
+@require_http_methods(["GET"])
+def download_file(request, task_id):
+    """文件下载接口 - 模拟从腾讯云存储下载文件"""
+    try:
+        # 在真实环境中，这里会从数据库查询任务信息
+        # 现在我们模拟生成文件内容
+        
+        # 模拟获取任务信息（在真实环境中从数据库获取）
+        file_info = {
+            'category': 'air_pollution',
+            'country': 'china',
+            'pollutant': 'PM2.5',
+            'time_range': 'monthly',
+            'selected_dates': ['2020-01', '2020-02', '2020-03']
+        }
         
         # 生成文件名
-        filename = f"{country}_{data_type}_{pollutant}_{time_range}_{start_date}_to_{end_date}.csv"
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{file_info['country']}_{file_info['category']}_{file_info['pollutant']}_{timestamp}.csv"
         filename = filename.replace('<sub>', '').replace('</sub>', '').replace('.', '_')
         
         # 创建CSV响应
@@ -749,90 +1074,124 @@ def download_data(request):
         response.write('\ufeff')
         writer = csv.writer(response)
         
-        # 根据数据类型生成不同的数据结构
-        if data_type == 'air_pollution':
-            generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date)
-        elif data_type == 'weather':
-            generate_weather_data(writer, pollutant, time_range, start_date, end_date)
-        elif data_type == 'urban':
-            generate_urban_data(writer, pollutant, time_range, start_date, end_date)
-        else:
-            # 默认返回大气污染数据
-            generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date)
+        # 生成数据内容
+        if file_info['category'] == 'air_pollution':
+            generate_air_pollution_data(writer, file_info['country'], file_info['pollutant'], 
+                                      file_info['time_range'], file_info['selected_dates'])
+        elif file_info['category'] == 'weather':
+            generate_weather_data(writer, file_info['pollutant'], file_info['time_range'], file_info['selected_dates'])
+        elif file_info['category'] == 'urban':
+            generate_urban_data(writer, file_info['pollutant'], file_info['time_range'], file_info['selected_dates'])
         
         return response
         
     except Exception as e:
-        return JsonResponse({'error': f'下载失败: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'文件下载失败: {str(e)}'}, status=500)
 
-def generate_air_pollution_data(writer, country, pollutant, time_range, start_date, end_date):
+def generate_csv_data(category, country, pollutant, time_range, selected_dates):
+    """生成CSV数据内容"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    if category == 'air_pollution':
+        generate_air_pollution_data(writer, country, pollutant, time_range, selected_dates)
+    elif category == 'weather':
+        generate_weather_data(writer, pollutant, time_range, selected_dates)
+    elif category == 'urban':
+        generate_urban_data(writer, pollutant, time_range, selected_dates)
+    
+    return output.getvalue()
+
+def generate_air_pollution_data(writer, country, pollutant, time_range, dates_input):
     """生成大气污染数据"""
     import random
     from datetime import datetime, timedelta
+    
+    # 处理不同的输入格式
+    if isinstance(dates_input, list):
+        # 新格式：selected_dates列表
+        dates = dates_input
+        start_date = dates[0] if dates else '2020-01'
+        end_date = dates[-1] if dates else '2020-01'
+    else:
+        # 旧格式：start_date和end_date字符串
+        start_date = dates_input
+        end_date = time_range if isinstance(time_range, str) and '-' in time_range else start_date
+        
+        # 生成时间序列
+        dates = []
+        if 'month' in str(time_range):
+            if '-' in start_date and '-' in end_date:
+                start_year, start_month = map(int, start_date.split('-'))
+                end_year, end_month = map(int, end_date.split('-'))
+                
+                current_year, current_month = start_year, start_month
+                while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+                    dates.append(f"{current_year}-{current_month:02d}")
+                    current_month += 1
+                    if current_month > 12:
+                        current_month = 1
+                        current_year += 1
+            else:
+                dates = [start_date]
+        else:
+            try:
+                start_year = int(start_date)
+                end_year = int(end_date)
+                dates = [str(year) for year in range(start_year, end_year + 1)]
+            except:
+                dates = [start_date]
     
     # 写入元数据
     writer.writerow(['数据类型', '大气污染数据'])
     writer.writerow(['国家/地区', '中国' if country == 'china' else '英国'])
     writer.writerow(['污染物', pollutant])
-    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
-    writer.writerow(['开始时间', start_date])
-    writer.writerow(['结束时间', end_date])
+    writer.writerow(['时间范围', '月均数据' if 'month' in str(time_range) else '年均数据'])
+    writer.writerow(['时间段', f"{start_date} 至 {end_date}"])
+    writer.writerow(['数据点数', len(dates)])
     writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow(['数据来源', '模拟腾讯云对象存储'])
     writer.writerow([])  # 空行
     
     # 根据国家选择城市
     if country == 'china':
-        cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+        cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆',
+                 '天津', '苏州', '郑州', '长沙', '东莞', '青岛', '沈阳', '宁波', '昆明', '大连']
     else:  # 英国
-        cities = ['London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 'Edinburgh', 'Bristol', 'Sheffield', 'Cardiff']
+        cities = ['London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 
+                 'Edinburgh', 'Bristol', 'Sheffield', 'Cardiff', 'Newcastle', 'Nottingham']
     
     # 写入数据表头
-    if time_range == 'month':
-        writer.writerow(['年月', '城市', '经度', '纬度', f'{pollutant}浓度(μg/m³)', 'AQI', '数据质量'])
-    else:
-        writer.writerow(['年份', '城市', '经度', '纬度', f'{pollutant}年均浓度(μg/m³)', 'AQI', '数据质量'])
-    
-    # 生成时间序列
-    dates = []
-    if time_range == 'month':
-        start_year, start_month = map(int, start_date.split('-'))
-        end_year, end_month = map(int, end_date.split('-'))
-        
-        current_year, current_month = start_year, start_month
-        while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
-            dates.append(f"{current_year}-{current_month:02d}")
-            current_month += 1
-            if current_month > 12:
-                current_month = 1
-                current_year += 1
-    else:
-        start_year = int(start_date)
-        end_year = int(end_date)
-        dates = [str(year) for year in range(start_year, end_year + 1)]
+    writer.writerow(['时间', '城市', '经度', '纬度', f'{pollutant}浓度(μg/m³)', 'AQI', '空气质量等级', '数据质量'])
     
     # 生成数据
     for date in dates:
         for city in cities:
             # 根据城市和污染物生成不同的浓度范围
             if pollutant in ['PM2.5', 'PM<sub>2.5</sub>']:
-                concentration = random.uniform(15, 150)
-                aqi = int(concentration * 2.5 + random.uniform(-20, 20))
+                if country == 'china':
+                    concentration = random.uniform(15, 120)
+                else:
+                    concentration = random.uniform(8, 45)
+                aqi = int(concentration * 2.1 + random.uniform(-15, 15))
             elif pollutant in ['PM10', 'PM<sub>10</sub>']:
-                concentration = random.uniform(25, 250)
-                aqi = int(concentration * 1.5 + random.uniform(-15, 15))
+                if country == 'china':
+                    concentration = random.uniform(25, 200)
+                else:
+                    concentration = random.uniform(15, 80)
+                aqi = int(concentration * 1.4 + random.uniform(-10, 10))
             elif pollutant in ['PM2.5-PM10', 'PM<sub>2.5</sub>-PM<sub>10</sub>']:
-                # PM2.5-PM10 表示粗颗粒物
-                concentration = random.uniform(10, 100)
-                aqi = int(concentration * 2.0 + random.uniform(-15, 15))
+                concentration = random.uniform(10, 80)
+                aqi = int(concentration * 1.8 + random.uniform(-12, 12))
             elif pollutant in ['NO2', 'NO<sub>2</sub>']:
                 concentration = random.uniform(10, 80)
-                aqi = int(concentration * 3 + random.uniform(-25, 25))
+                aqi = int(concentration * 2.5 + random.uniform(-20, 20))
             elif pollutant in ['O3', 'O<sub>3</sub>']:
-                concentration = random.uniform(50, 200)
-                aqi = int(concentration * 1.2 + random.uniform(-30, 30))
+                concentration = random.uniform(50, 160)
+                aqi = int(concentration * 1.1 + random.uniform(-25, 25))
             elif pollutant == 'CO':
-                concentration = random.uniform(0.5, 5.0)
-                aqi = int(concentration * 50 + random.uniform(-20, 20))
+                concentration = random.uniform(0.5, 4.0)
+                aqi = int(concentration * 45 + random.uniform(-15, 15))
             else:
                 concentration = random.uniform(20, 100)
                 aqi = random.randint(50, 200)
@@ -845,7 +1204,21 @@ def generate_air_pollution_data(writer, country, pollutant, time_range, start_da
                 longitude = random.uniform(-5, 2)
                 latitude = random.uniform(50, 58)
             
-            quality = random.choice(['优', '良', '优'])
+            # 根据AQI确定空气质量等级
+            if aqi <= 50:
+                quality_level = '优'
+            elif aqi <= 100:
+                quality_level = '良'
+            elif aqi <= 150:
+                quality_level = '轻度污染'
+            elif aqi <= 200:
+                quality_level = '中度污染'
+            elif aqi <= 300:
+                quality_level = '重度污染'
+            else:
+                quality_level = '严重污染'
+            
+            data_quality = random.choice(['优', '良', '优', '优'])  # 大部分数据质量为优
             
             writer.writerow([
                 date,
@@ -854,64 +1227,98 @@ def generate_air_pollution_data(writer, country, pollutant, time_range, start_da
                 f"{latitude:.4f}",
                 f"{concentration:.2f}",
                 max(0, min(500, aqi)),
-                quality
+                quality_level,
+                data_quality
             ])
 
-def generate_weather_data(writer, indicator, time_range, start_date, end_date):
+def generate_weather_data(writer, indicator, time_range, dates_input):
     """生成气象数据"""
     import random
     from datetime import datetime
+    
+    # 处理不同的输入格式
+    if isinstance(dates_input, list):
+        dates = dates_input
+        start_date = dates[0] if dates else '2020-01'
+        end_date = dates[-1] if dates else '2020-01'
+    else:
+        start_date = dates_input
+        end_date = time_range if isinstance(time_range, str) and '-' in time_range else start_date
+        
+        # 生成时间序列
+        dates = []
+        if 'month' in str(time_range):
+            if '-' in start_date and '-' in end_date:
+                start_year, start_month = map(int, start_date.split('-'))
+                end_year, end_month = map(int, end_date.split('-'))
+                
+                current_year, current_month = start_year, start_month
+                while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+                    dates.append(f"{current_year}-{current_month:02d}")
+                    current_month += 1
+                    if current_month > 12:
+                        current_month = 1
+                        current_year += 1
+            else:
+                dates = [start_date]
+        else:
+            try:
+                start_year = int(start_date)
+                end_year = int(end_date)
+                dates = [str(year) for year in range(start_year, end_year + 1)]
+            except:
+                dates = [start_date]
     
     # 写入元数据
     writer.writerow(['数据类型', '气象数据'])
     writer.writerow(['国家/地区', '中国'])
     writer.writerow(['气象指标', indicator])
-    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
-    writer.writerow(['开始时间', start_date])
-    writer.writerow(['结束时间', end_date])
+    writer.writerow(['时间范围', '月均数据' if 'month' in str(time_range) else '年均数据'])
+    writer.writerow(['时间段', f"{start_date} 至 {end_date}"])
+    writer.writerow(['数据点数', len(dates)])
     writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow(['数据来源', '模拟腾讯云对象存储'])
     writer.writerow([])
     
-    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆',
+             '天津', '苏州', '郑州', '长沙', '青岛', '沈阳', '宁波', '昆明', '大连', '哈尔滨']
     
     # 根据指标设置表头和单位
     if indicator == '温度':
-        writer.writerow(['时间', '城市', '经度', '纬度', '平均温度(°C)', '最高温度(°C)', '最低温度(°C)', '数据质量'])
+        writer.writerow(['时间', '城市', '经度', '纬度', '平均温度(°C)', '最高温度(°C)', '最低温度(°C)', '湿度(%)', '数据质量'])
     elif indicator == '紫外辐射':
-        writer.writerow(['时间', '城市', '经度', '纬度', 'UV指数', 'UV强度等级', '数据质量'])
-    
-    # 生成时间序列
-    dates = []
-    if time_range == 'month':
-        start_year, start_month = map(int, start_date.split('-'))
-        end_year, end_month = map(int, end_date.split('-'))
-        
-        current_year, current_month = start_year, start_month
-        while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
-            dates.append(f"{current_year}-{current_month:02d}")
-            current_month += 1
-            if current_month > 12:
-                current_month = 1
-                current_year += 1
-    else:
-        start_year = int(start_date)
-        end_year = int(end_date)
-        dates = [str(year) for year in range(start_year, end_year + 1)]
+        writer.writerow(['时间', '城市', '经度', '纬度', 'UV指数', 'UV强度等级', '云量(%)', '数据质量'])
     
     # 生成数据
     for date in dates:
         for city in cities:
             longitude = random.uniform(110, 125)
             latitude = random.uniform(30, 45)
-            quality = random.choice(['优', '良', '优'])
+            quality = random.choice(['优', '良', '优', '优'])
             
             if indicator == '温度':
-                avg_temp = random.uniform(-5, 35)
-                max_temp = avg_temp + random.uniform(5, 15)
-                min_temp = avg_temp - random.uniform(5, 15)
+                # 根据月份生成合理的温度
+                if '-' in date:
+                    month = int(date.split('-')[1])
+                    if month in [12, 1, 2]:  # 冬季
+                        avg_temp = random.uniform(-10, 10)
+                    elif month in [3, 4, 5]:  # 春季
+                        avg_temp = random.uniform(10, 25)
+                    elif month in [6, 7, 8]:  # 夏季
+                        avg_temp = random.uniform(25, 38)
+                    else:  # 秋季
+                        avg_temp = random.uniform(15, 28)
+                else:
+                    avg_temp = random.uniform(5, 25)
+                
+                max_temp = avg_temp + random.uniform(3, 12)
+                min_temp = avg_temp - random.uniform(3, 12)
+                humidity = random.uniform(30, 80)
+                
                 writer.writerow([
                     date, city, f"{longitude:.4f}", f"{latitude:.4f}",
-                    f"{avg_temp:.1f}", f"{max_temp:.1f}", f"{min_temp:.1f}", quality
+                    f"{avg_temp:.1f}", f"{max_temp:.1f}", f"{min_temp:.1f}", 
+                    f"{humidity:.1f}", quality
                 ])
             elif indicator == '紫外辐射':
                 uv_index = random.uniform(1, 11)
@@ -925,32 +1332,107 @@ def generate_weather_data(writer, indicator, time_range, start_date, end_date):
                     uv_level = '很高'
                 else:
                     uv_level = '极高'
+                
+                cloud_cover = random.uniform(0, 100)
+                
                 writer.writerow([
                     date, city, f"{longitude:.4f}", f"{latitude:.4f}",
-                    f"{uv_index:.1f}", uv_level, quality
+                    f"{uv_index:.1f}", uv_level, f"{cloud_cover:.1f}", quality
                 ])
 
-def generate_urban_data(writer, indicator, time_range, start_date, end_date):
+def generate_urban_data(writer, indicator, time_range, dates_input):
     """生成建成环境数据"""
     import random
     from datetime import datetime
+    
+    # 处理不同的输入格式
+    if isinstance(dates_input, list):
+        dates = dates_input
+        start_date = dates[0] if dates else '2020-01'
+        end_date = dates[-1] if dates else '2020-01'
+    else:
+        start_date = dates_input
+        end_date = time_range if isinstance(time_range, str) and '-' in time_range else start_date
+        
+        # 生成时间序列
+        dates = []
+        if 'month' in str(time_range):
+            if '-' in start_date and '-' in end_date:
+                start_year, start_month = map(int, start_date.split('-'))
+                end_year, end_month = map(int, end_date.split('-'))
+                
+                current_year, current_month = start_year, start_month
+                while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+                    dates.append(f"{current_year}-{current_month:02d}")
+                    current_month += 1
+                    if current_month > 12:
+                        current_month = 1
+                        current_year += 1
+            else:
+                dates = [start_date]
+        else:
+            try:
+                start_year = int(start_date)
+                end_year = int(end_date)
+                dates = [str(year) for year in range(start_year, end_year + 1)]
+            except:
+                dates = [start_date]
     
     # 写入元数据
     writer.writerow(['数据类型', '建成环境数据'])
     writer.writerow(['国家/地区', '中国'])
     writer.writerow(['建成指标', indicator])
-    writer.writerow(['时间范围', '月均' if time_range == 'month' else '年均'])
-    writer.writerow(['开始时间', start_date])
-    writer.writerow(['结束时间', end_date])
+    writer.writerow(['时间范围', '月均数据' if 'month' in str(time_range) else '年均数据'])
+    writer.writerow(['时间段', f"{start_date} 至 {end_date}"])
+    writer.writerow(['数据点数', len(dates)])
     writer.writerow(['下载时间', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+    writer.writerow(['数据来源', '模拟腾讯云对象存储'])
     writer.writerow([])
     
-    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆']
+    cities = ['北京', '上海', '广州', '深圳', '杭州', '南京', '武汉', '成都', '西安', '重庆',
+             '天津', '苏州', '郑州', '长沙', '青岛', '沈阳', '宁波', '昆明', '大连', '福州']
     
     if indicator == 'NDVI':
-        writer.writerow(['时间', '城市', '经度', '纬度', 'NDVI值', '植被覆盖等级', '数据质量'])
+        writer.writerow(['时间', '城市', '经度', '纬度', 'NDVI值', '植被覆盖等级', '绿化率(%)', '数据质量'])
     
-    # 生成时间序列
+    # 生成数据
+    for date in dates:
+        for city in cities:
+            longitude = random.uniform(110, 125)
+            latitude = random.uniform(30, 45)
+            quality = random.choice(['优', '良', '优', '优'])
+            
+            if indicator == 'NDVI':
+                # 根据月份生成季节性NDVI变化
+                if '-' in date:
+                    month = int(date.split('-')[1])
+                    if month in [12, 1, 2]:  # 冬季
+                        ndvi = random.uniform(0.1, 0.4)
+                    elif month in [3, 4, 5]:  # 春季
+                        ndvi = random.uniform(0.3, 0.7)
+                    elif month in [6, 7, 8]:  # 夏季
+                        ndvi = random.uniform(0.5, 0.9)
+                    else:  # 秋季
+                        ndvi = random.uniform(0.2, 0.6)
+                else:
+                    ndvi = random.uniform(0.2, 0.7)
+                
+                if ndvi < 0.2:
+                    vegetation_level = '稀疏植被'
+                elif ndvi < 0.4:
+                    vegetation_level = '中等植被'
+                elif ndvi < 0.6:
+                    vegetation_level = '密集植被'
+                else:
+                    vegetation_level = '极密植被'
+                
+                green_rate = ndvi * 100 + random.uniform(-10, 10)
+                green_rate = max(0, min(100, green_rate))
+                
+                writer.writerow([
+                    date, city, f"{longitude:.4f}", f"{latitude:.4f}",
+                    f"{ndvi:.3f}", vegetation_level, f"{green_rate:.1f}", quality
+                ])
     dates = []
     if time_range == 'month':
         start_year, start_month = map(int, start_date.split('-'))
@@ -988,65 +1470,5 @@ def generate_urban_data(writer, indicator, time_range, start_date, end_date):
                 
                 writer.writerow([
                     date, city, f"{longitude:.4f}", f"{latitude:.4f}",
-                    f"{ndvi:.3f}", vegetation_level, quality
+                    f"{ndvi:.3f}", vegetation_level, f"{green_rate:.1f}", quality
                 ])
-
-@login_required
-@require_http_methods(["POST"]) 
-def export_data(request):
-    """临时测试版本的数据导出接口"""
-    try:
-        category = request.POST.get('category', '未知类别')
-        pollutant = request.POST.get('pollutant', '未知污染物')
-        
-        test_data = {
-            'message': '这是测试导出功能',
-            'parameters': {
-                'category': category,
-                'pollutant': pollutant,
-                'user': request.user.email,
-                'export_time': datetime.now().isoformat()
-            },
-            'sample_data': [
-                {'date': '2023-01', 'city': '北京', 'pm25': 45},
-                {'date': '2023-01', 'city': '上海', 'pm25': 38},
-                {'date': '2023-01', 'city': '广州', 'pm25': 42}
-            ]
-        }
-        
-        import json
-        response = HttpResponse(
-            json.dumps(test_data, ensure_ascii=False, indent=2),
-            content_type='application/json; charset=utf-8'
-        )
-        response['Content-Disposition'] = f'attachment; filename="test_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
-        
-        return response
-        
-    except Exception as e:
-        return JsonResponse({'error': f'导出失败: {str(e)}'}, status=500)
-
-@login_required
-def preview_data(request):
-    """测试版本的数据预览接口"""
-    return JsonResponse({
-        'message': '预览功能测试成功',
-        'preview': [
-            ['2023-01', '北京', 45, 78, 89],
-            ['2023-01', '上海', 38, 65, 76],
-            ['2023-01', '广州', 42, 70, 82]
-        ],
-        'total_count': 100,
-        'columns': ['日期', '城市', 'PM2.5', 'PM10', 'AQI']
-    })
-
-@login_required
-def data_statistics(request):
-    """测试版本的数据统计接口"""
-    return JsonResponse({
-        'message': '统计功能测试成功',
-        'total_records': 12500,
-        'available_data': ['PM2.5', 'PM10', 'NO2', 'O3'],
-        'date_range': ['2015-01-01', '2023-12-31'],
-        'last_updated': datetime.now().isoformat()
-    })

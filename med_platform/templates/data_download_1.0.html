@@ -453,7 +453,7 @@
                     const itemText = item.textContent.trim();
                     if ((category === 'air' && itemText.includes('中国大气污染')) ||
                         (category === 'weather' && itemText.includes('气象')) ||
-                        (category === 'urban' && itemText.includes('建成')) ||
+                        (category === 'urban' && itemText.includes('绿度')) ||
                         (category === 'uk_air' && itemText.includes('英国大气污染'))) {
                         targetItem = item;
                     }
@@ -467,6 +467,11 @@
                     // 更新页面标题和污染物选项
                     updatePageTitle(targetItem);
                     updatePollutantOptions(targetItem.textContent);
+                    
+                    // 延迟更新年份选项，确保污染物选项已更新
+                    setTimeout(() => {
+                        updateYearOptions();
+                    }, 100);
                 }
             } else {
                 // 没有URL参数时使用默认逻辑
@@ -474,11 +479,21 @@
                 if (activeItem) {
                     updatePageTitle(activeItem);
                     updatePollutantOptions(activeItem.textContent);
+                    
+                    // 延迟更新年份选项，确保污染物选项已更新
+                    setTimeout(() => {
+                        updateYearOptions();
+                    }, 100);
                 }
             }
             
-            // 初始化日期控件 - 默认为月均
-            updateDateControls('month');
+            // 初始化日期控件 - 根据数据类型设置默认时间范围
+            const activeItem = document.querySelector('.category-item.active');
+            let defaultTimeRange = 'month';
+            if (activeItem && activeItem.textContent.includes('绿度')) {
+                defaultTimeRange = 'year'; // NDVI默认为年均
+            }
+            updateDateControls(defaultTimeRange);
             
             // 更新协议状态
             updateAgreementState();
@@ -487,19 +502,17 @@
         // 更新日期控件根据选择的时间范围
         function updateDateControls(rangeType) {
             const timeControls = document.getElementById('timeControls');
-            const currentYear = 2025;
             
             // 清空现有内容
             timeControls.innerHTML = '';
             
-            if (rangeType === 'year') {
-                // 年均选择 - 只需要选择年份
+            if (rangeType === 'year' || rangeType === 'year-max') {
+                // 年均或年最大选择 - 只需要选择年份
                 const startYearGroup = document.createElement('div');
                 startYearGroup.className = 'date-group';
                 startYearGroup.innerHTML = `
                     <label>开始年份:</label>
                     <select class="date-select" id="startYear" onchange="validateYearRange()">
-                        ${generateYearOptions(2015, currentYear, 2020)}
                     </select>
                 `;
                 
@@ -507,42 +520,108 @@
                 endYearGroup.className = 'date-group';
                 endYearGroup.innerHTML = `
                     <label>结束年份:</label>
-                    <select class="date-select" id="endYear">
-                        ${generateYearOptions(2015, currentYear, 2023)}
+                    <select class="date-select" id="endYear" onchange="validateYearRange()">
                     </select>
                 `;
                 
                 timeControls.appendChild(startYearGroup);
                 timeControls.appendChild(endYearGroup);
+                
+                // 初始化年份选项
+                updateYearOptions();
             } else if (rangeType === 'month') {
-                // 月均选择 - 年份和月份
-                const startMonthGroup = document.createElement('div');
-                startMonthGroup.className = 'date-group';
-                startMonthGroup.innerHTML = `
-                    <label>开始时间:</label>
-                    <select class="date-select" id="startYear" onchange="validateMonthRange()">
-                        ${generateYearOptions(2015, currentYear, 2023)}
-                    </select>
-                    <select class="date-select" id="startMonth" onchange="validateMonthRange()">
-                        ${generateMonthOptions(1)}
+                // 月均选择 - 只选择年份范围，系统会下载这些年份内的所有月份数据
+                const startYearGroup = document.createElement('div');
+                startYearGroup.className = 'date-group';
+                startYearGroup.innerHTML = `
+                    <label>开始年份:</label>
+                    <select class="date-select" id="startYear" onchange="validateYearRange()">
                     </select>
                 `;
                 
-                const endMonthGroup = document.createElement('div');
-                endMonthGroup.className = 'date-group';
-                endMonthGroup.innerHTML = `
-                    <label>结束时间:</label>
-                    <select class="date-select" id="endYear" onchange="validateMonthRange()">
-                        ${generateYearOptions(2015, currentYear, 2023)}
-                    </select>
-                    <select class="date-select" id="endMonth">
-                        ${generateMonthOptions(12)}
+                const endYearGroup = document.createElement('div');
+                endYearGroup.className = 'date-group';
+                endYearGroup.innerHTML = `
+                    <label>结束年份:</label>
+                    <select class="date-select" id="endYear" onchange="validateYearRange()">
                     </select>
                 `;
                 
-                timeControls.appendChild(startMonthGroup);
-                timeControls.appendChild(endMonthGroup);
+                timeControls.appendChild(startYearGroup);
+                timeControls.appendChild(endYearGroup);
+                
+                // 添加提示信息，放在年份选择器下方
+                const note = document.createElement('div');
+                note.style.cssText = 'color: var(--brand-green); font-size: 12px; margin-top: 8px; width: 100%;';
+                note.innerHTML = '选择月均下载时，系统将提供所选年份范围内的所有月份数据';
+                timeControls.appendChild(note);
+                
+                // 初始化年份选项
+                updateYearOptions();
             }
+        }
+        
+        // 根据当前选择的数据类型和污染物更新年份选项
+        function updateYearOptions() {
+            const startYearSelect = document.getElementById('startYear');
+            const endYearSelect = document.getElementById('endYear');
+            
+            if (!startYearSelect || !endYearSelect) return;
+            
+            // 获取当前选择的数据类型和污染物
+            const activeCategory = document.querySelector('.category-item.active');
+            const activePollutant = document.querySelector('.pollutant-btn.active');
+            
+            let startYear = 2005;
+            let endYear = 2024;
+            let defaultStart = 2020;
+            let defaultEnd = 2023;
+            
+            if (activeCategory && activePollutant) {
+                const categoryText = activeCategory.textContent.trim();
+                const pollutantText = activePollutant.innerHTML.replace(/<[^>]*>/g, '').trim(); // 清理HTML标签
+                
+                // 根据数据类型和污染物设置时间范围
+                if (categoryText.includes('中国')) {
+                    if (pollutantText === 'CO') {
+                        startYear = 2013;
+                        endYear = 2020;
+                        defaultStart = 2015;
+                        defaultEnd = 2020;
+                    } else if (pollutantText === '紫外辐射') {
+                        startYear = 2005;
+                        endYear = 2023;
+                        defaultStart = 2015;
+                        defaultEnd = 2023;
+                    } else if (categoryText.includes('气象')) {
+                        startYear = 2011;
+                        endYear = 2020;
+                        defaultStart = 2015;
+                        defaultEnd = 2020;
+                    } else if (categoryText.includes('绿度')) {
+                        startYear = 2005;
+                        endYear = 2024;
+                        defaultStart = 2015;
+                        defaultEnd = 2024;
+                    } else {
+                        // PM2.5, PM10-2.5, PM10, O3, NO2
+                        startYear = 2005;
+                        endYear = 2024;
+                        defaultStart = 2015;
+                        defaultEnd = 2024;
+                    }
+                } else if (categoryText.includes('英国')) {
+                    // 英国数据统一为 2006-2021
+                    startYear = 2006;
+                    endYear = 2021;
+                    defaultStart = 2015;
+                    defaultEnd = 2021;
+                }
+            }
+            
+            // 生成年份选项
+            startYearSelect.innerHTML = generateYearOptions(startYear, endYear, defaultStart);
+            endYearSelect.innerHTML = generateYearOptions(startYear, endYear, defaultEnd);
         }
         
         // 生成年份选项
@@ -621,12 +700,16 @@
                     <div class="pollutant-btn active">温度</div>
                     <div class="pollutant-btn">紫外辐射</div>
                 `;
-            } else if (categoryText.includes('建成')) {
-                // 建成数据选项
-                sectionTitle.textContent = '建成指标';
+                // 气象数据使用常规时间范围
+                updateTimeRangeOptions('normal');
+            } else if (categoryText.includes('绿度')) {
+                // 绿度数据选项
+                sectionTitle.textContent = '绿度指标';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">NDVI</div>
                 `;
+                // NDVI数据使用特殊时间范围（年均和年最大）
+                updateTimeRangeOptions('ndvi');
             } else if (categoryText.includes('英国大气污染')) {
                 // 英国大气污染数据选项 - 移除PM2.5-PM10和CO
                 sectionTitle.textContent = '污染物种类';
@@ -636,6 +719,8 @@
                     <div class="pollutant-btn">NO<sub>2</sub></div>
                     <div class="pollutant-btn">O<sub>3</sub></div>
                 `;
+                // 英国数据使用常规时间范围
+                updateTimeRangeOptions('normal');
             } else {
                 // 中国大气污染数据选项
                 sectionTitle.textContent = '污染物种类';
@@ -647,6 +732,33 @@
                     <div class="pollutant-btn">O<sub>3</sub></div>
                     <div class="pollutant-btn">CO</div>
                 `;
+                // 中国大气污染数据使用常规时间范围
+                updateTimeRangeOptions('normal');
+            }
+        }
+        
+        // 更新时间范围选择器选项
+        function updateTimeRangeOptions(type) {
+            const timeRangeSelector = document.querySelector('.time-range-selector');
+            
+            if (type === 'ndvi') {
+                // NDVI数据：年均和年最大
+                timeRangeSelector.innerHTML = `
+                    <div class="time-range-btn active" data-range="year">年均</div>
+                    <div class="time-range-btn" data-range="year-max">年最大</div>
+                `;
+            } else {
+                // 常规数据：月均和年均
+                timeRangeSelector.innerHTML = `
+                    <div class="time-range-btn active" data-range="month">月均</div>
+                    <div class="time-range-btn" data-range="year">年均</div>
+                `;
+            }
+            
+            // 更新日期控件
+            const activeBtn = timeRangeSelector.querySelector('.time-range-btn.active');
+            if (activeBtn) {
+                updateDateControls(activeBtn.getAttribute('data-range'));
             }
         }
         
@@ -719,6 +831,11 @@
                 
                 // 更新污染物/气象指标选项
                 updatePollutantOptions(e.target.textContent);
+                
+                // 更新年份选项以反映新的数据类型
+                setTimeout(() => {
+                    updateYearOptions();
+                }, 100); // 延迟确保污染物选项已更新
             }
             
             // 时间范围按钮
@@ -740,6 +857,9 @@
                 });
                 // 只激活当前点击的按钮
                 e.target.classList.add('active');
+                
+                // 更新年份选项以反映新的污染物类型
+                updateYearOptions();
             }
         });
 
@@ -763,7 +883,7 @@
             // 收集用户选择的参数
             const downloadParams = collectDownloadParams();
             
-            // 调用下载接口
+            // 使用新的腾讯云模拟流程
             downloadData(downloadParams);
         });
         
@@ -782,8 +902,8 @@
             } else if (categoryText.includes('中国气象')) {
                 dataType = 'weather';
                 country = 'china';
-            } else if (categoryText.includes('中国建成')) {
-                dataType = 'urban';
+            } else if (categoryText.includes('中国绿度')) {
+                dataType = 'ndvi';
                 country = 'china';
             } else if (categoryText.includes('英国大气污染')) {
                 dataType = 'air_pollution';
@@ -806,16 +926,15 @@
             
             // 获取具体时间
             let startDate, endDate;
-            if (timeRange === 'year') {
+            if (timeRange === 'year' || timeRange === 'year-max') {
                 startDate = document.getElementById('startYear')?.value || '2020';
                 endDate = document.getElementById('endYear')?.value || '2023';
             } else if (timeRange === 'month') {
+                // 月均下载：只使用年份，后端会处理所有月份
                 const startYear = document.getElementById('startYear')?.value || '2023';
-                const startMonth = document.getElementById('startMonth')?.value || '1';
                 const endYear = document.getElementById('endYear')?.value || '2023';
-                const endMonth = document.getElementById('endMonth')?.value || '12';
-                startDate = `${startYear}-${startMonth.padStart(2, '0')}`;
-                endDate = `${endYear}-${endMonth.padStart(2, '0')}`;
+                startDate = startYear;
+                endDate = endYear;
             }
             
             return {
@@ -829,7 +948,7 @@
             };
         }
         
-        // 实际下载数据的函数
+        // 实际下载数据的函数 - 新版本，模拟腾讯云流程
         async function downloadData(params) {
             try {
                 // 显示下载进度
@@ -847,65 +966,105 @@
                     throw new Error('请选择要下载的指标');
                 }
                 
-                // 创建表单数据
-                const formData = new FormData();
-                Object.keys(params).forEach(key => {
-                    formData.append(key, params[key]);
-                });
-                
-                // 添加CSRF令牌
-                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-                
-                console.log('下载参数:', params); // 调试信息
-                
-                // 发送下载请求
-                const response = await fetch('{% url "download_data" %}', {
-                    method: 'POST',
-                    body: formData,
+                // 步骤1: 获取可用数据列表
+                downloadBtn.textContent = '检查数据可用性...';
+                const availableDataResponse = await fetch('{% url "get_available_data" %}', {
+                    method: 'GET',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken')
                     }
                 });
                 
-                if (response.ok) {
-                    // 获取文件名
-                    const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = `${params.country}_${params.data_type}_${params.pollutant}_${params.time_range}_data.csv`;
-                    if (contentDisposition) {
-                        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                        if (filenameMatch) {
-                            filename = filenameMatch[1].replace(/['"]/g, '');
-                        }
-                    }
-                    
-                    // 更新下载状态
-                    downloadBtn.textContent = '正在下载文件...';
-                    
-                    // 下载文件
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    
-                    // 显示成功消息
-                    showMessage('数据下载成功！文件已保存到您的下载目录。', 'success');
-                    
-                } else {
-                    const errorText = await response.text();
-                    let errorMsg = '下载失败';
-                    try {
-                        const errorData = JSON.parse(errorText);
-                        errorMsg = errorData.error || '未知错误';
-                    } catch (e) {
-                        errorMsg = `服务器错误 (${response.status})`;
-                    }
-                    throw new Error(errorMsg);
+                if (!availableDataResponse.ok) {
+                    throw new Error('无法获取数据列表');
                 }
+                
+                const availableData = await availableDataResponse.json();
+                console.log('可用数据:', availableData);
+                
+                // 验证请求的数据是否可用
+                const dataExists = validateDataAvailability(params, availableData.data);
+                if (!dataExists.valid) {
+                    throw new Error(dataExists.message);
+                }
+                
+                // 步骤2: 请求数据文件生成
+                downloadBtn.textContent = '生成数据文件...';
+                const downloadRequest = {
+                    category: params.data_type,
+                    country: params.country,
+                    pollutant: params.pollutant,
+                    time_range: 'monthly', // 默认使用月度数据
+                    selected_dates: generateDateList(params)
+                };
+                
+                console.log('下载请求参数:', downloadRequest);
+                
+                const requestResponse = await fetch('{% url "request_data_download" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(downloadRequest)
+                });
+                
+                if (!requestResponse.ok) {
+                    const errorData = await requestResponse.json();
+                    throw new Error(errorData.error || '数据请求失败');
+                }
+                
+                const requestResult = await requestResponse.json();
+                console.log('下载请求结果:', requestResult);
+                
+                if (!requestResult.success) {
+                    throw new Error(requestResult.message || '数据文件生成失败');
+                }
+                
+                // 步骤3: 检查文件状态并下载
+                if (requestResult.status === 'completed' && requestResult.download_url) {
+                    downloadBtn.textContent = '下载文件中...';
+                    
+                    // 直接下载文件
+                    const downloadResponse = await fetch(requestResult.download_url, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    
+                    if (downloadResponse.ok) {
+                        // 获取文件名
+                        const contentDisposition = downloadResponse.headers.get('Content-Disposition');
+                        let filename = `${params.country}_${params.data_type}_${params.pollutant}_data.csv`;
+                        if (contentDisposition) {
+                            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                            if (filenameMatch) {
+                                filename = filenameMatch[1].replace(/['"]/g, '');
+                            }
+                        }
+                        
+                        // 下载文件
+                        const blob = await downloadResponse.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        // 显示成功消息
+                        const fileSize = (requestResult.estimated_size / 1024).toFixed(1);
+                        showMessage(`数据下载成功！文件大小约 ${fileSize} KB，已保存到您的下载目录。`, 'success');
+                    } else {
+                        throw new Error('文件下载失败');
+                    }
+                } else {
+                    throw new Error('数据文件生成失败，请稍后重试');
+                }
+                
             } catch (error) {
                 console.error('下载错误:', error);
                 showMessage(`下载失败：${error.message}`, 'error');
@@ -915,6 +1074,69 @@
                 downloadBtn.textContent = '下载数据';
                 updateDownloadButtonState(); // 重新检查按钮状态
             }
+        }
+        
+        // 验证数据可用性
+        function validateDataAvailability(params, availableData) {
+            try {
+                const category = params.data_type;
+                const country = params.country;
+                const pollutant = params.pollutant;
+                
+                // 检查数据类别是否存在
+                if (!availableData[category]) {
+                    return { 
+                        valid: false, 
+                        message: `数据类别 "${category}" 不可用` 
+                    };
+                }
+                
+                // 检查国家/地区是否存在
+                if (!availableData[category][country]) {
+                    return { 
+                        valid: false, 
+                        message: `${country === 'china' ? '中国' : '英国'}的${category}数据不可用` 
+                    };
+                }
+                
+                // 检查污染物/指标是否存在
+                if (!availableData[category][country][pollutant]) {
+                    return { 
+                        valid: false, 
+                        message: `指标 "${pollutant}" 的数据不可用` 
+                    };
+                }
+                
+                return { valid: true, message: '数据可用' };
+            } catch (error) {
+                return { 
+                    valid: false, 
+                    message: '数据可用性检查失败' 
+                };
+            }
+        }
+        
+        // 根据参数生成日期列表
+        function generateDateList(params) {
+            const dates = [];
+            const startYear = parseInt(params.start_date);
+            const endYear = parseInt(params.end_date);
+            
+            if (params.time_range === 'year' || params.time_range === 'year-max') {
+                // 年度数据
+                for (let year = startYear; year <= endYear; year++) {
+                    dates.push(year.toString());
+                }
+            } else {
+                // 月度数据 - 生成所有月份
+                for (let year = startYear; year <= endYear; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        dates.push(`${year}-${month.toString().padStart(2, '0')}`);
+                    }
+                }
+            }
+            
+            return dates;
         }
         
         // 显示消息提示

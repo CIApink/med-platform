@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>注册 - MED环境数据平台</title>
   <style>
     :root {
@@ -156,15 +157,15 @@
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       position: relative;
     }
 
     .form-group label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       color: #24292f;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       font-weight: 500;
     }
 
@@ -187,13 +188,26 @@
 
     .form-group input, .form-group select {
       width: 100%;
-      padding: 10px 14px;
-      font-size: 15px;
+      padding: 8px 12px;
+      font-size: 14px;
       border: 1px solid #d1d9e0;
       border-radius: 6px;
       background: #ffffff;
       transition: border-color 0.2s;
       color: #24292f;
+    }
+
+    .name-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .name-field {
+      flex: 1;
+    }
+
+    .name-field input {
+      width: 100%;
     }
 
     .form-group select {
@@ -223,9 +237,9 @@
     }
 
     .hint-text {
-      margin-top: 4px;
-      font-size: 12px;
-      line-height: 1.4;
+      margin-top: 3px;
+      font-size: 11px;
+      line-height: 1.3;
     }
 
     .hint-text.default {
@@ -277,8 +291,8 @@
     .checkbox-group {
       display: flex;
       align-items: flex-start;
-      margin-bottom: 16px;
-      margin-top: 20px;
+      margin-bottom: 12px;
+      margin-top: 16px;
     }
 
     .custom-checkbox {
@@ -331,9 +345,9 @@
     }
 
     .checkbox-label {
-      font-size: 13px;
+      font-size: 12px;
       color: #656d76;
-      line-height: 1.4;
+      line-height: 1.3;
       cursor: pointer;
       flex: 1;
     }
@@ -484,10 +498,25 @@
         {% endif %}
         
         <div class="form-group">
+          <label>姓名 <span style="color: var(--brand-green);">*</span></label>
+          <div class="name-row">
+            <div class="name-field">
+              <input type="text" id="last_name" name="last_name" placeholder="姓" required>
+            </div>
+            <div class="name-field">
+              <input type="text" id="first_name" name="first_name" placeholder="名" required>
+            </div>
+          </div>
+          <div class="hint-text default">
+            <span>姓名信息用于密码找回</span>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label for="email">电子邮箱 <span style="color: var(--brand-green);">*</span></label>
           <input type="email" id="email" name="email" placeholder="您的邮箱地址" required>
           <div id="eduHint" class="hint-text default">
-            <span>教育邮箱(@xxx.edu.cn)将自动通过审核</span>
+            <span>教育邮箱(@xxx.edu.cn)自动通过审核，其他邮箱需人工审核</span>
           </div>
         </div>
         
@@ -578,13 +607,13 @@
       
       // 检测中国教育域名格式：@xxx.edu.cn
       if (email.match(/@\w+\.edu\.cn$/i)) {
-        hint.innerHTML = '<span>检测到教育邮箱，验证后自动通过审核</span>';
+        hint.innerHTML = '<span>检测到教育邮箱，自动通过审核</span>';
         hint.className = 'hint-text success';
       } else if (email.includes('@') && email.includes('.')) {
-        hint.innerHTML = '<span>非教育邮箱，验证后需人工审核</span>';
+        hint.innerHTML = '<span>非教育邮箱，需人工审核</span>';
         hint.className = 'hint-text warning';
       } else {
-        hint.innerHTML = '<span>教育邮箱(@xxx.edu.cn)验证后自动通过审核</span>';
+        hint.innerHTML = '<span>教育邮箱(@xxx.edu.cn)自动通过审核，其他邮箱需人工审核</span>';
         hint.className = 'hint-text default';
       }
     });
@@ -664,6 +693,8 @@
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirm_password').value;
       const email = document.getElementById('email').value;
+      const firstName = document.getElementById('first_name').value;
+      const lastName = document.getElementById('last_name').value;
       const organization = document.getElementById('organization').value;
       const organizationType = document.getElementById('organization_type').value;
       const country = document.getElementById('country').value;
@@ -702,7 +733,7 @@
       }
       
       // 验证必填字段
-      if (!email || !organization || !organizationType || !country) {
+      if (!email || !firstName || !lastName || !organization || !organizationType || !country) {
         e.preventDefault();
         alert('请填写所有必填字段');
         return;
