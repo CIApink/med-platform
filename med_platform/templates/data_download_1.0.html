@@ -384,7 +384,7 @@
                     
                     <!-- 时间范围选择 -->
                     <div class="control-section">
-                        <div class="section-title">时间范围</div>
+                        <div class="section-title">时间选择</div>
                         <div class="time-range-selector">
                             <!-- <div class="time-range-btn active" data-range="day">日均</div> -->
                             <div class="time-range-btn active" data-range="month">月均</div>
@@ -397,7 +397,7 @@
                     
                     <!-- 污染物选择 -->
                     <div class="control-section">
-                        <div class="section-title">污染物种类</div>
+                        <div class="section-title">数据选择</div>
                         <div class="pollutant-selector" id="pollutantSelector">
                             <div class="pollutant-btn active">PM<sub>2.5</sub></div>
                             <div class="pollutant-btn">PM<sub>2.5</sub>-PM<sub>10</sub></div>
@@ -691,11 +691,11 @@
         // 更新污染物选择选项
         function updatePollutantOptions(categoryText) {
             const pollutantSelector = document.getElementById('pollutantSelector');
-            const sectionTitle = document.querySelector('.control-section .section-title');
+            const sectionTitle = pollutantSelector.parentElement.querySelector('.section-title');
             
             if (categoryText.includes('气象')) {
                 // 气象数据选项
-                sectionTitle.textContent = '气象指标';
+                sectionTitle.textContent = '数据选择';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">温度</div>
                     <div class="pollutant-btn">紫外辐射</div>
@@ -704,7 +704,7 @@
                 updateTimeRangeOptions('normal');
             } else if (categoryText.includes('绿度')) {
                 // 绿度数据选项
-                sectionTitle.textContent = '绿度指标';
+                sectionTitle.textContent = '数据选择';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">NDVI</div>
                 `;
@@ -712,7 +712,7 @@
                 updateTimeRangeOptions('ndvi');
             } else if (categoryText.includes('英国大气污染')) {
                 // 英国大气污染数据选项 - 移除PM2.5-PM10和CO
-                sectionTitle.textContent = '污染物种类';
+                sectionTitle.textContent = '数据选择';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">PM<sub>2.5</sub></div>
                     <div class="pollutant-btn">PM<sub>10</sub></div>
@@ -723,7 +723,7 @@
                 updateTimeRangeOptions('normal');
             } else {
                 // 中国大气污染数据选项
-                sectionTitle.textContent = '污染物种类';
+                sectionTitle.textContent = '数据选择';
                 pollutantSelector.innerHTML = `
                     <div class="pollutant-btn active">PM<sub>2.5</sub></div>
                     <div class="pollutant-btn">PM<sub>10-2.5</sub></div>

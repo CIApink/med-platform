@@ -444,6 +444,90 @@
         margin: 0 auto;
         display: block;
         object-fit: contain;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .product-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* 图片查看器模态框 */
+    .image-viewer-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .image-viewer-content {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        padding: 20px;
+    }
+
+    .image-viewer-img {
+        max-width: 95%;
+        max-height: 95%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .image-viewer-close {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 2001;
+        transition: color 0.3s ease;
+    }
+
+    .image-viewer-close:hover {
+        color: #ccc;
+    }
+
+    .image-viewer-caption {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background: rgba(0,0,0,0.7);
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        text-align: center;
+        max-width: 80%;
+    }
+
+    .image-zoom-hint {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        background: rgba(0,0,0,0.7);
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 
     .product-image-legend {
@@ -849,7 +933,7 @@
                     <!-- 温度模型 -->
                     <div class="model-card" onclick="openModal('temperature')">
                         <div class="model-image">
-                            <div class="model-title-in-image">地表温度模型</div>
+                            <div class="model-title-in-image">地表温度模拟数据集</div>
                         </div>
                         <div class="model-info">
                             <!-- <p class="model-description">
@@ -948,6 +1032,8 @@
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
+                                <span class="model-tag">月均数据</span>
+                                <span class="model-tag">年均数据</span>
                                 <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
@@ -965,6 +1051,8 @@
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
+                                <span class="model-tag">月均数据</span>
+                                <span class="model-tag">年均数据</span>
                                 <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
@@ -982,6 +1070,8 @@
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
+                                <span class="model-tag">月均数据</span>
+                                <span class="model-tag">年均数据</span>
                                 <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
@@ -999,6 +1089,8 @@
                             <div class="model-tags">
                                 <span class="model-tag">1km分辨率</span>
                                 <span class="model-tag">日均数据</span>
+                                <span class="model-tag">月均数据</span>
+                                <span class="model-tag">年均数据</span>
                                 <span class="model-tag">2006-2021年</span>
                             </div>
                         </div>
@@ -1467,7 +1559,7 @@
                     { label: '数据格式', value: 'HDF' }
                 ],
                 productImage: '/static/我国PM2.5年均浓度图.png',
-                imageLegend: '图 1: 中国大陆PM<sub>2.5</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                imageLegend: '图 1: 中国大陆PM<sub>2.5</sub>年均浓度空间分布图（2005-2024年平均，单位：μg/m³）',
                 references: [
                     'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM<sub>2.5</sub> concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
                     'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM<sub>2.5</sub> concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
@@ -1485,14 +1577,14 @@
                     { label: '数据格式', value: 'HDF' }
                 ],
                 productImage: '/static/我国PM10年均浓度图.png',
-                imageLegend: '图 1: 中国大陆PM<sub>10</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                imageLegend: '图 1: 中国大陆PM<sub>10</sub>年均浓度空间分布图（2005-2024年平均，单位：μg/m³）',
                 references: [
                     'Shi, S., Chen, R., Wang, P., Zhang, H., Kan, H., and Meng, X. (2024). An Ensemble Machine Learning Model to Enhance Extrapolation Ability of Predicting Coarse Particulate Matter with High Resolutions in China. Environ Sci Technol 58, 19325-19337.'
                 ],
                 downloadCategory: 'air'
             },
             pm1025: {
-                title: 'PM<sub>10</sub> 浓度模拟数据集',
+                title: 'PM<sub>10-2.5</sub> 浓度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1516,7 +1608,7 @@
                     { label: '数据格式', value: 'HDF' }
                 ],
                 productImage: '/static/我国O3年均浓度图.png',
-                imageLegend: '图 1: 中国大陆O<sub>3</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                imageLegend: '图 1: 中国大陆O<sub>3</sub>年均浓度空间分布图（2005-2024年平均，单位：μg/m³）',
                 references: [
                     'Xia Meng, Weidong Wang, Su Shi, Shengqiang Zhu, Peng Wang, Renjie Chen, Qingyang Xiao, Tao Xue, Guannan Geng, Qiang Zhang, Haidong Kan, Hongliang Zhang. Evaluating the spatiotemporal ozone characteristics with high-resolution predictions in mainland China, 2013–2019. Environmental Pollution 2022, 299, 118865.'
                 ],
@@ -1532,7 +1624,7 @@
                     { label: '数据格式', value: 'HDF' }
                 ],
                 productImage: '/static/我国NO2年均浓度图.png',
-                imageLegend: '图 1: 中国大陆NO<sub>2</sub>年均浓度空间分布图（2013-2020年平均，单位：μg/m³）',
+                imageLegend: '图 1: 中国大陆NO<sub>2</sub>年均浓度空间分布图（2005-2024年平均，单位：μg/m³）',
                 references: [
                     'Xinyue Li, Peng Wang, Weidong Wang, Hongliang Zhang, Su Shi, Tao Xue, Jintai Lin, Yuhang Zhang, Mengyao Liu, Renjie Chen, Haidong Kan, Xia Meng, Mortality burden due to ambient nitrogen dioxide pollution in China: Application of high-resolution models. Environment International 2023, 176, 107967.'
                 ],
@@ -1548,7 +1640,7 @@
                     { label: '时间范围', value: '2013-2020年' },
                     { label: '数据格式', value: 'HDF' }
                 ],
-                productImage: '/static/indeximage4.jpg',
+                productImage: '/static/我国CO年均浓度图.jpg',
                 references: [
                     'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
                     'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
@@ -1558,7 +1650,7 @@
             },
             // 投稿中
             temperature: {
-                title: '地表温度浓度模拟数据集',
+                title: '地表温度模拟数据集',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1566,11 +1658,11 @@
                     { label: '时间范围', value: '2000-2020' },
                     { label: '数据格式', value: 'NetCDF, GeoTIFF' }
                 ],
-                productImage: '/static/indeximage.jpg',
+                productImage: '/static/',
                 references: [
-                    'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
-                    'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
-                    'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
+                    // 'Xia Meng, Cong Liu, Lina Zhang, Weidong Wang, Jennifer Stowell, Haidong Kan, Yang Liu, Estimating PM2.5 concentrations in Northeastern China with full spatiotemporal coverage, 2005–2016. Remote Sensing of Environment 2021, 253, 112203.',
+                    // 'Su Shi, Weidong Wang, Xinyue Li, Yun Hang, Jian Lei, Haidong Kan, Xia Meng, Optimizing modeling windows to better capture the long-term variation of PM2.5 concentrations in China during 2005–2019. Science of The Total Environment 2022, 158624.',
+                    // 'Shi, S., Wang, W., Li, X., Xu, C., Lei, J., Jiang, Y., Zhang, L., He, C., Xue, T., Chen, R., Kan, H., Meng, X.*. Evolution in disparity of PM2.5 pollution in China. Eco-Environment & Health, 2023, 2, (4), 257-263.'
                 ],
                 downloadCategory: 'weather'
             },
@@ -1626,7 +1718,7 @@
             // },
             // 英国模型数据
             uk_pm25: {
-                title: '英国PM<sub>2.5</sub> 预测模型',
+                title: 'PM<sub>2.5</sub> 预测模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1634,14 +1726,14 @@
                     { label: '时间范围', value: '2006-2021年' },
                     { label: '数据格式', value: 'HDF' }
                 ],
-                productImage: '/static/英国大气PM25、PM10、NO2和O3年均浓度的空间分布图.png',
+                productImage: '/static/英国PM25年均浓度图.png',
                 references: [
                     'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
                 ],
                 downloadCategory: 'uk_air'
             },
             uk_pm10: {
-                title: '英国PM<sub>10</sub> 预测模型',
+                title: 'PM<sub>10</sub> 预测模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1649,14 +1741,14 @@
                     { label: '时间范围', value: '2006-2021年' },
                     { label: '数据格式', value: 'HDF' }
                 ],
-                productImage: '/static/indeximage.jpg',
+                productImage: '/static/英国PM10年均浓度图.png',
                 references: [
                     'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
                 ],
                 downloadCategory: 'uk_air'
             },
             uk_o3: {
-                title: '英国臭氧浓度模型',
+                title: 'O<sub>3</sub>浓度模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1664,14 +1756,14 @@
                     { label: '时间范围', value: '2006-2021年' },
                     { label: '数据格式', value: 'HDF' }
                 ],
-                productImage: '/static/indeximage1.jpg',
+                productImage: '/static/英国O3年均浓度图.png',
                 references: [
                     'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
                 ],
                 downloadCategory: 'uk_air'
             },
             uk_no2: {
-                title: '英国NO<sub>2</sub> 浓度模型',
+                title: 'NO<sub>2</sub> 浓度模型',
                 specs: [
                     { label: '空间分辨率', value: '1km × 1km' },
                     { label: '时间分辨率', value: '日均' },
@@ -1679,7 +1771,7 @@
                     { label: '时间范围', value: '2006-2021年' },
                     { label: '数据格式', value: 'HDF' }
                 ],
-                productImage: '/static/indeximage2.jpg',
+                productImage: '/static/英国NO2年均浓度图.png',
                 references: [
                     'Chen, J., Zhu, S., Wang, P., Zheng, Z., Shi, S., Li, X., Xu, C., Yu, K., Chen, R., Kan, H., et al. (2024). Predicting particulate matter, nitrogen dioxide, and ozone across Great Britain with high spatiotemporal resolution based on random forest models. Sci Total Environ 926, 171831.'
                 ],
@@ -1735,23 +1827,26 @@
                             data.productImage.map((img, index) => `
                                 <div class="product-image-item">
                                     <img src="${img}" alt="${data.title} 产品输出图 ${index + 1}" class="product-image" 
+                                         onclick="openImageViewer('${img}', '${data.imageLegends && data.imageLegends[index] ? data.imageLegends[index] : `图 ${index + 1}: ${data.title}产品输出图`}')"
                                          onerror="this.style.display='none';">
                                     <div class="product-image-legend">
                                         ${data.imageLegends && data.imageLegends[index] ? data.imageLegends[index] : `图 ${index + 1}: ${data.title}产品输出图`}
+                                        <br><small style="color: #999;">点击查看原图</small>
                                     </div>
                                 </div>
                                 ${index < data.productImage.length - 1 ? '<div style="margin-bottom: 20px;"></div>' : ''}
                             `).join('') :
                             `<div class="product-image-item">
                                 <img src="${data.productImage}" alt="${data.title} 产品输出图" class="product-image" 
+                                     onclick="openImageViewer('${data.productImage}', '${data.imageLegend ? data.imageLegend : `图 1: ${data.title}产品输出图`}')"
                                      onerror="this.style.display='none'; this.parentElement.nextElementSibling.style.display='block';">
                                 <div class="product-image-legend">
                                     ${data.imageLegend ? data.imageLegend : `图 1: ${data.title}产品输出图`}
+                                    <br><small style="color: #999;">点击查看原图</small>
                                 </div>
                             </div>`
                         }
                         <div class="product-image-placeholder" style="display: none;">
-                            <div class="placeholder-icon">📊</div>
                             <p class="placeholder-text">产品输出图加载中...</p>
                         </div>
                     </div>
@@ -1798,10 +1893,54 @@
             document.body.style.overflow = 'auto';
         }
 
+        // 图片查看器功能
+        function openImageViewer(imageSrc, caption) {
+            // 创建图片查看器模态框
+            let imageViewer = document.getElementById('imageViewer');
+            if (!imageViewer) {
+                imageViewer = document.createElement('div');
+                imageViewer.id = 'imageViewer';
+                imageViewer.className = 'image-viewer-modal';
+                imageViewer.innerHTML = `
+                    <div class="image-viewer-content">
+                        <span class="image-viewer-close" onclick="closeImageViewer()">&times;</span>
+                        <div class="image-zoom-hint">点击图片或按ESC键关闭</div>
+                        <img class="image-viewer-img" id="viewerImage" onclick="closeImageViewer()">
+                        <div class="image-viewer-caption" id="viewerCaption"></div>
+                    </div>
+                `;
+                document.body.appendChild(imageViewer);
+            }
+            
+            // 设置图片和说明
+            document.getElementById('viewerImage').src = imageSrc;
+            document.getElementById('viewerCaption').textContent = caption.replace(/<[^>]*>/g, ''); // 移除HTML标签
+            
+            // 显示模态框
+            imageViewer.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // 添加点击背景关闭功能
+            imageViewer.onclick = function(e) {
+                if (e.target === imageViewer) {
+                    closeImageViewer();
+                }
+            }
+        }
+
+        function closeImageViewer() {
+            const imageViewer = document.getElementById('imageViewer');
+            if (imageViewer) {
+                imageViewer.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
         // 点击ESC键关闭模态框
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
+                closeImageViewer();
             }
         });
 </script>
